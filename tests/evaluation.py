@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import Mock, call
 
-from holland import run_evaluation
+from holland.evolve.evaluation import run_evaluation
 
 
 class RunEvaluationTest(unittest.TestCase):
