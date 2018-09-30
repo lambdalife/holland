@@ -32,7 +32,7 @@ def select_breeding_pool(fitness_results, top=0, mid=0, bottom=0, random=0):
     return selection_pool
 
 
-def select_parents(fitness_results, weighting_function, number=2):
+def select_parents(fitness_results, weighting_function=lambda x: 1, number=2):
     if number < 1:
         raise ValueError("Number of parents must be at least 1")
 
