@@ -148,10 +148,18 @@ class SelectParentsTest(unittest.TestCase):
     def test_asserts_number_of_parents_is_at_least_1(self):
         """select_parents throws a ValueError if the given number is less than 1"""
         with self.assertRaises(ValueError):
-            select_parents(self.fitness_results, self.weighting_function, number=0)
+            select_parents(
+                self.fitness_results,
+                weighting_function=self.weighting_function,
+                number=0,
+            )
 
         with self.assertRaises(ValueError):
-            select_parents(self.fitness_results, self.weighting_function, number=-1)
+            select_parents(
+                self.fitness_results,
+                weighting_function=self.weighting_function,
+                number=-1,
+            )
 
     @patch("numpy.random.choice")
     def test_selects_correct_number_of_parents_according_to_weighted_fitness_scores(
@@ -159,7 +167,9 @@ class SelectParentsTest(unittest.TestCase):
     ):
         """select_parents weights fitness_scores by the given weighting_function and samples the correct number of genomes according to these weighted fitness_scores"""
         select_parents(
-            self.fitness_results, self.weighting_function, number=self.n_parents
+            self.fitness_results,
+            weighting_function=self.weighting_function,
+            number=self.n_parents,
         )
 
         weighted_scores = [
@@ -177,7 +187,9 @@ class SelectParentsTest(unittest.TestCase):
     def test_returns_selected_parents(self, mock_choice):
         """select_parents returns the genomes it selects"""
         parents = select_parents(
-            self.fitness_results, self.weighting_function, number=self.n_parents
+            self.fitness_results,
+            weighting_function=self.weighting_function,
+            number=self.n_parents,
         )
 
         expected_parents = mock_choice.return_value
