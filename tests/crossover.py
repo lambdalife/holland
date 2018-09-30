@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import Mock, call
 
-from holland.evolve.crossover import cross
+from holland.evolution.crossover import cross
 
 
 class CrossTest(unittest.TestCase):

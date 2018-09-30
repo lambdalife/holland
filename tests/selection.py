@@ -3,7 +3,7 @@ import numpy as np
 import unittest
 from unittest.mock import patch
 
-from holland.evolve.selection import select_breeding_pool, select_parents
+from holland.evolution.selection import select_breeding_pool, select_parents
 
 
 class NarrowSelectionPoolTest(unittest.TestCase):
