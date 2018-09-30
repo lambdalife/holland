@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch, Mock, call
 
-from holland.evolve.mutation import (
+from holland.evolution.mutation import (
     mutate_genome,
     mutate_gene,
     probabilistically_mutate_value,
@@ -21,7 +21,7 @@ class MutateGenomeTest(unittest.TestCase):
             "gene3": {"param1": 1, "param2": 2},
         }
 
-    @patch("holland.evolve.mutation.mutate_gene")
+    @patch("holland.evolution.mutation.mutate_gene")
     def test_calls_mutate_gene_on_each_gene_in_genome(self, mock_mutate_gene):
         """mutate_genome calls mutate_gene on each of the genes in genome"""
         mutate_genome(self.genome, self.genome_params)
@@ -32,7 +32,7 @@ class MutateGenomeTest(unittest.TestCase):
         ]
         mock_mutate_gene.assert_has_calls(expected_calls)
 
-    @patch("holland.evolve.mutation.mutate_gene")
+    @patch("holland.evolution.mutation.mutate_gene")
     def test_returns_mutated_genome(self, mock_mutate_gene):
         """mutate_genome returns a genome in the same structure as the given genome, but containing the mutated genes"""
         mutated_genes = [
@@ -56,7 +56,7 @@ class MutateGeneTest(unittest.TestCase):
     def setUp(self):
         self.gene_params = {"mutation_function": Mock(), "mutation_rate": 0.01}
 
-    @patch("holland.evolve.mutation.probabilistically_mutate_value")
+    @patch("holland.evolution.mutation.probabilistically_mutate_value")
     def test_calls_probabilitistically_mutate_value_for_each_element_of_gene_with_correct_args(
         self, mock_mutate_value
     ):
@@ -75,7 +75,7 @@ class MutateGeneTest(unittest.TestCase):
         ]
         mock_mutate_value.assert_has_calls(expected_calls)
 
-    @patch("holland.evolve.mutation.probabilistically_mutate_value")
+    @patch("holland.evolution.mutation.probabilistically_mutate_value")
     def test_returns_mutated_gene(self, mock_mutate_value):
         """mutate_gene returns a new gene composed of the outputs of calling probabilistically_mutate_value on each value of the given gene"""
         gene = [1, 2, 3, 4, 5, 6]
