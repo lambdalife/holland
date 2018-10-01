@@ -313,22 +313,22 @@ class GenerateRandomIndividualsTest(unittest.TestCase):
     def test_calls_bound_value_on_each_value_generated_if_type_is_float(
         self, mock_bound_value
     ):
-        """generate_random_genomes calls bound_value on each value if the gene's type is float using -np.inf and np.inf as default bounds"""
+        """generate_random_genomes calls bound_value on each value if the gene's type is float using the gene_params max and min"""
         number = 1
         generate_random_genomes(self.genome_params, number)
 
         expected_calls = [
             call(
                 self.genome_params["gene2"]["initial_distribution"].return_value,
-                -np.inf,
-                np.inf,
+                minimum=None,
+                maximum=None,
             )
             for _ in range(self.genome_params["gene2"]["size"])
         ] + [
             call(
                 self.genome_params["gene3"]["initial_distribution"].return_value,
-                self.genome_params["gene3"]["min"],
-                self.genome_params["gene3"]["max"],
+                minimum=self.genome_params["gene3"]["min"],
+                maximum=self.genome_params["gene3"]["max"],
             )
             for _ in range(self.genome_params["gene3"]["size"])
         ]
