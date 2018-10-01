@@ -55,15 +55,11 @@ def generate_random_genomes(genome_params, number):
         genome = {}
         for gene_name, gene_params in genome_params.items():
             if gene_params["type"] == "float":
-                min_bound = (
-                    gene_params.get("min") if "min" in gene_params.keys() else -np.inf
-                )
-                max_bound = (
-                    gene_params.get("max") if "max" in gene_params.keys() else np.inf
-                )
                 genome[gene_name] = [
                     bound_value(
-                        gene_params["initial_distribution"](), min_bound, max_bound
+                        gene_params["initial_distribution"](),
+                        minimum=gene_params.get("min"),
+                        maximum=gene_params.get("max"),
                     )
                     for _ in range(gene_params["size"])
                 ]

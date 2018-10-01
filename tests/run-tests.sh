@@ -1,4 +1,4 @@
-for file in tests/test-*.py
+for file in tests/**/test-*.py
 do
 	echo ''
 	echo $file:
