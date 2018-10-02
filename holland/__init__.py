@@ -1,1 +1,3 @@
-from .evaluation import run_evaluation
+name = "holland"
+
+from .evolution.evolution import evolve
