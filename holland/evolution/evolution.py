@@ -66,17 +66,16 @@ def evolve(
     if population is None:
         population = generate_random_genomes(genome_params, population_size)
 
-    fitness_results = evaluate_fitness(population, fitness_function)
-
     for gen_num in range(1, num_generations):
-        population = generate_next_generation(
-            fitness_results,
-            genome_params,
-            selection_strategy,
-            population_size=population_size,
-            random_per_generation=random_per_generation,
-        )
-
         fitness_results = evaluate_fitness(population, fitness_function)
+
+        if gen_num < num_generations - 1:
+            population = generate_next_generation(
+                fitness_results,
+                genome_params,
+                selection_strategy,
+                population_size=population_size,
+                random_per_generation=random_per_generation,
+            )
 
     return fitness_results
