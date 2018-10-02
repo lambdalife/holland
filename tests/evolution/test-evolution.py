@@ -93,7 +93,7 @@ class EvolveTest(unittest.TestCase):
         initial_population = ["A", "B", "C"]
         generated_populations = [
             [chr(i), chr(i + 1), chr(i + 2)]
-            for i in range(66, 66 + num_generations - 1)
+            for i in range(66, 66 + num_generations - 2)
         ]
         all_populations = [initial_population] + generated_populations
         results = [list(zip([10, 20, 30], pop)) for pop in all_populations]
@@ -128,9 +128,13 @@ class EvolveTest(unittest.TestCase):
         ]
 
         mock_evaluate_fitness.assert_has_calls(expected_evaluate_fitness_calls)
-        self.assertEqual(mock_evaluate_fitness.call_count, num_generations)
+        self.assertEqual(
+            mock_evaluate_fitness.call_count, len(expected_evaluate_fitness_calls)
+        )
         mock_generate_next_gen.assert_has_calls(expected_generate_next_gen_calls)
-        self.assertEqual(mock_generate_next_gen.call_count, num_generations - 1)
+        self.assertEqual(
+            mock_generate_next_gen.call_count, len(expected_generate_next_gen_calls)
+        )
 
     @patch("holland.evolution.evolution.generate_random_genomes")
     @patch("holland.evolution.evolution.evaluate_fitness")
@@ -143,7 +147,7 @@ class EvolveTest(unittest.TestCase):
         initial_population = ["A", "B", "C"]
         generated_populations = [
             [chr(i), chr(i + 1), chr(i + 2)]
-            for i in range(66, 66 + num_generations - 1)
+            for i in range(66, 66 + num_generations - 2)
         ]
         all_populations = [initial_population] + generated_populations
         results = [list(zip([10, 20, 30], pop)) for pop in all_populations]
