@@ -93,7 +93,7 @@ class EvolveTest(unittest.TestCase):
         initial_population = ["A", "B", "C"]
         generated_populations = [
             [chr(i), chr(i + 1), chr(i + 2)]
-            for i in range(66, 66 + num_generations - 2)
+            for i in range(66, 66 + num_generations - 1)
         ]
         all_populations = [initial_population] + generated_populations
         results = [list(zip([10, 20, 30], pop)) for pop in all_populations]
@@ -122,9 +122,8 @@ class EvolveTest(unittest.TestCase):
                 population_size=population_size,
                 random_per_generation=random_per_generation,
             )
-            for res in results[
-                :-1
-            ]  # no population is generated for the last go of evaluating fitness
+            for res in results[:-1]
+            # no population is generated for the last go of evaluating fitness
         ]
 
         mock_evaluate_fitness.assert_has_calls(expected_evaluate_fitness_calls)
@@ -138,6 +137,80 @@ class EvolveTest(unittest.TestCase):
 
     @patch("holland.evolution.evolution.generate_random_genomes")
     @patch("holland.evolution.evolution.evaluate_fitness")
+    @patch("holland.evolution.evolution.record_fitness")
+    @patch("holland.evolution.evolution.generate_next_generation")
+    def test_calls_record_fitness_with_correct_args_should_record_fitness(
+        self,
+        mock_generate_next_gen,
+        mock_record_fitness,
+        mock_evaluate_fitness,
+        mock_generate_random,
+    ):
+        """evolve calls record_fitness in each generation with the generation_num, fitness_scores, and fitness_storage_options if fitness_storage_options['should_record_fitness'] is True"""
+        num_generations = 10
+        fitness_storage_options = {
+            "file_name": "test.csv",
+            "path": "test/test",
+            "should_record_fitness": True,
+            "format": "csv",
+        }
+        fitness_results = [
+            [(i + j, chr(65 + i + j)) for j in range(4)] for i in range(num_generations)
+        ]
+        mock_evaluate_fitness.side_effect = fitness_results
+
+        evolve(
+            self.fitness_function,
+            self.genome_params,
+            self.selection_strategy,
+            num_generations=num_generations,
+            fitness_storage_options=fitness_storage_options,
+        )
+
+        fitness_scores = [
+            [s for s, g in fitness_result] for fitness_result in fitness_results
+        ]
+        expected_calls = [
+            call(i, fitness_scores[i], **fitness_storage_options)
+            for i in range(num_generations)
+        ]
+        mock_record_fitness.assert_has_calls(expected_calls)
+        self.assertEqual(mock_record_fitness.call_count, len(expected_calls))
+
+    @patch("holland.evolution.evolution.generate_random_genomes")
+    @patch("holland.evolution.evolution.evaluate_fitness")
+    @patch("holland.evolution.evolution.record_fitness")
+    @patch("holland.evolution.evolution.generate_next_generation")
+    def test_stores_and_returns_fitness_statistics_if_storage_format_is_memory(
+        self,
+        mock_generate_next_gen,
+        mock_record_fitness,
+        mock_evaluate_fitness,
+        mock_generate_random,
+    ):
+        """evolve appends the returned fitness_statistics from record_fitness to fitness_history and returns fitness_history if storage format is 'memory'"""
+        num_generations = 10
+        fitness_storage_options = {"should_record_fitness": True, "format": "memory"}
+        fitness_results = [
+            [(i + j, chr(65 + i + j)) for j in range(4)] for i in range(num_generations)
+        ]
+        mock_evaluate_fitness.side_effect = fitness_results
+
+        all_fitness_stats = [{"gen": i, "max": i} for i in range(num_generations)]
+        mock_record_fitness.side_effect = all_fitness_stats
+
+        _, fitness_history = evolve(
+            self.fitness_function,
+            self.genome_params,
+            self.selection_strategy,
+            num_generations=num_generations,
+            fitness_storage_options=fitness_storage_options,
+        )
+
+        self.assertListEqual(fitness_history, all_fitness_stats)
+
+    @patch("holland.evolution.evolution.generate_random_genomes")
+    @patch("holland.evolution.evolution.evaluate_fitness")
     @patch("holland.evolution.evolution.generate_next_generation")
     def test_returns_fitness_results_from_last_generation(
         self, mock_generate_next_gen, mock_evaluate_fitness, mock_generate_random
@@ -147,7 +220,7 @@ class EvolveTest(unittest.TestCase):
         initial_population = ["A", "B", "C"]
         generated_populations = [
             [chr(i), chr(i + 1), chr(i + 2)]
-            for i in range(66, 66 + num_generations - 2)
+            for i in range(66, 66 + num_generations - 1)
         ]
         all_populations = [initial_population] + generated_populations
         results = [list(zip([10, 20, 30], pop)) for pop in all_populations]
