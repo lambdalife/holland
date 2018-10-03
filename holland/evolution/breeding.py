@@ -13,6 +13,32 @@ def generate_next_generation(
     random_per_generation=0,
     population_size=None,
 ):
+    """
+    testing generate next generation
+
+    :param fitness_results: a list of fitness scores from the previous generation
+    :type fitness_results: list
+
+    :param genome_params: a dictionary specifying genome parameters
+    :type genome_params: dict
+    
+    :param selection_strategy: a dictionary specifying selection parameters
+    :type selection_strategy: dict
+    
+    :param random_per_generation: the number of random genomes to introduce per generation
+    :type random_per_generation: int
+    
+    :param population_size: the size of the population
+    :type population_size: int or None
+
+
+    :returns: a list of genomes
+
+
+    Dependencies:
+        * :func:`~holland.evolution.breed_next_generation`
+        * :func:`~holland.evolution.generate_random_genomes`
+    """
     if population_size is None:
         population_size = len(fitness_results)
 
