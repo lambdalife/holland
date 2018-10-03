@@ -1,5 +1,6 @@
 from .evaluation import evaluate_fitness
 from .breeding import generate_next_generation, generate_random_genomes
+from ..storage import record_fitness
 
 
 def evolve(
@@ -10,6 +11,7 @@ def evolve(
     random_per_generation=0,
     initial_population=None,
     num_generations=100,
+    fitness_storage_options={},
 ):
     """ The heart of Holland.
 
@@ -66,10 +68,19 @@ def evolve(
     if population is None:
         population = generate_random_genomes(genome_params, population_size)
 
-    for gen_num in range(1, num_generations):
+    fitness_history = []
+    for generation_num in range(num_generations):
         fitness_results = evaluate_fitness(population, fitness_function)
 
-        if gen_num < num_generations - 1:
+        if fitness_storage_options.get("should_record_fitness", False):
+            fitness_scores = [score for score, genome in fitness_results]
+            fitness_statistics = record_fitness(
+                generation_num, fitness_scores, **fitness_storage_options
+            )
+            if fitness_storage_options.get("format") == "memory":
+                fitness_history.append(fitness_statistics)
+
+        if generation_num < num_generations - 1:
             population = generate_next_generation(
                 fitness_results,
                 genome_params,
@@ -78,4 +89,9 @@ def evolve(
                 random_per_generation=random_per_generation,
             )
 
+    if (
+        fitness_storage_options.get("should_record_fitness", False)
+        and fitness_storage_options.get("format") == "memory"
+    ):
+        return fitness_results, fitness_history
     return fitness_results
