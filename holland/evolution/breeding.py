@@ -14,7 +14,7 @@ def generate_next_generation(
     population_size=None,
 ):
     """
-    testing generate next generation
+    Generates the next generation
 
     :param fitness_results: a list of fitness scores from the previous generation
     :type fitness_results: list
@@ -35,6 +35,9 @@ def generate_next_generation(
     :returns: a list of genomes
 
 
+    .. todo:: Write an example for usage
+
+
     Dependencies:
         * :func:`~holland.evolution.breed_next_generation`
         * :func:`~holland.evolution.generate_random_genomes`
@@ -53,6 +56,37 @@ def generate_next_generation(
 
 
 def breed_next_generation(fitness_results, genome_params, selection_strategy, number):
+    """
+    Generates a given number of genomes based only on crossover and mutation
+
+    :param fitness_results: a list of fitness scores from the previous generation
+    :type fitness_results: list
+
+    :param genome_params: a dictionary specifying genome parameters
+    :type genome_params: dict
+
+    :param selection_strategy: a dictionary specifying selection parameters
+    :type selection_strategy: dict
+
+    :param number: the number of genomes to produce
+    :type number: int
+
+
+    :returns: a list of bred genomes
+
+
+    :raises ValueError: if number < 0
+
+
+    .. todo:: Write an example for usage
+
+
+    Dependencies:
+        * :func:`~holland.evolution.select_breeding_pool`
+        * :func:`~holland.evolution.select_parents`
+        * :func:`~holland.evolution.cross`
+        * :func:`~holland.evolution.mutate_genome`
+    """
     if number < 0:
         raise ValueError("Number of bred genomes per generation cannot be negative")
 
@@ -72,6 +106,26 @@ def breed_next_generation(fitness_results, genome_params, selection_strategy, nu
 
 
 def generate_random_genomes(genome_params, number):
+    """
+    Generates a given number of genomes based on genome parameters
+
+    :param genome_params: a dictionary specifying genome parameters
+    :type genome_params: dict
+
+    :param number: the number of genomes to produce
+    :type number: int
+
+
+    :returns: a list of randomly generated genomes
+
+
+    :raises ValueError: if number < 0
+
+    .. todo:: Write an example for usage
+
+    Dependencies:
+        * :func:`holland.utils.bound_value`
+    """
     if number < 0:
         raise ValueError("Number of random genomes per generation cannot be negative")
 
