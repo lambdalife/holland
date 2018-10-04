@@ -1,7 +1,38 @@
 import os
+import json
 import unittest
+from unittest.mock import patch
 
-from holland.storage.utils import record_to_csv
+from holland.storage.utils import record, record_to_csv, record_to_json
+
+
+class RecordTest(unittest.TestCase):
+    def setUp(self):
+        self.data = {"a": 1, "b": 2, "c": 3}
+        self.storage_options = {
+            "file_name": "test.csv",
+            "path": os.path.dirname(os.path.realpath(__file__)),
+        }
+
+    @patch("holland.storage.utils.record_to_csv")
+    def test_calls_record_to_csv_with_correct_args_if_format_is_csv(self, mock_to_csv):
+        """record passes the given data and storage options to record_to_csv if format is 'csv'"""
+        storage_options = {**self.storage_options, "format": "csv"}
+
+        record(self.data, **storage_options)
+
+        mock_to_csv.assert_called_with(self.data, **storage_options)
+
+    @patch("holland.storage.utils.record_to_json")
+    def test_calls_record_to_json_with_correct_args_if_format_is_json(
+        self, mock_to_json
+    ):
+        """record passes the given data and storage options to record_to_json if format is 'json'"""
+        storage_options = {**self.storage_options, "format": "json"}
+
+        record(self.data, **storage_options)
+
+        mock_to_json.assert_called_with(self.data, **storage_options)
 
 
 class RecordToCsvTest(unittest.TestCase):
@@ -11,7 +42,7 @@ class RecordToCsvTest(unittest.TestCase):
         self.path = os.path.dirname(os.path.realpath(__file__))
         self.full_path = os.path.join(self.path, self.file_name)
 
-    def test_file_name_and_path_are_specified(self):
+    def test_asserts_file_name_and_path_are_specified(self):
         """record_to_csv throws an AssertionError if the file_name or path is not specified"""
         with self.assertRaises(AssertionError):
             record_to_csv(self.data, file_name=self.file_name)
@@ -92,6 +123,48 @@ class RecordToCsvTest(unittest.TestCase):
             + "\n"
         )
         self.assertEqual(lines[2], third_line)
+
+    def tearDown(self):
+        if os.path.exists(self.full_path):
+            os.remove(self.full_path)
+
+
+class RecordToJsonTest(unittest.TestCase):
+    def setUp(self):
+        self.data = [
+            {"a": [1, 2, 3], "b": [True, False]},
+            {"a": [10, 20, 30], "b": [False, False]},
+        ]
+        self.file_name = "test.json"
+        self.path = os.path.dirname(os.path.realpath(__file__))
+        self.full_path = os.path.join(self.path, self.file_name)
+
+    def test_asserts_file_name_and_path_are_specified(self):
+        """record_to_json throws an AssertionError if the file_name or path is not specified"""
+        with self.assertRaises(AssertionError):
+            record_to_json(self.data, file_name=self.file_name)
+
+        with self.assertRaises(AssertionError):
+            record_to_json(self.data, path=self.path)
+
+        with self.assertRaises(AssertionError):
+            record_to_json(self.data)
+
+    def test_creates_file_with_correct_name_in_correct_path_if_none_exists(self):
+        """record_to_json creates a file with the correct name in the correct path if no file exists yet"""
+        record_to_json(self.data, file_name=self.file_name, path=self.path)
+
+        self.assertTrue(os.path.exists(self.full_path))
+
+    def test_writes_correct_content_to_file(self):
+        """record_to_json writes the given data to the specified file"""
+        record_to_json(self.data, file_name=self.file_name, path=self.path)
+
+        with open(self.full_path, "r") as f:
+            content = f.readlines()[0]
+        expected_content = json.dumps(self.data)
+
+        self.assertEqual(content, expected_content)
 
     def tearDown(self):
         if os.path.exists(self.full_path):
