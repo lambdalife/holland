@@ -6,7 +6,7 @@ from unittest.mock import patch
 from holland.evolution.selection import select_breeding_pool, select_parents
 
 
-class NarrowSelectionPoolTest(unittest.TestCase):
+class SelectBreedingPoolTest(unittest.TestCase):
     def setUp(self):
         self.fitness_scores = (100, 90, 85, 50, 45, 44, 30, 10, 9, 8, 7)
         self.genomes = ("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k")
