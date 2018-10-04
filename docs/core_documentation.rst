@@ -62,12 +62,34 @@ mutation functions
 
 
 
+Storage
+-------
+
+fitness
+~~~~~~~
+.. autofunction:: holland.storage.record_fitness
+.. autofunction:: holland.storage.format_fitness_statistics
+
+genomes and fitnesses
+~~~~~~~~~~~~~~~~~~~~~
+.. autofunction:: holland.storage.record_genomes_and_fitnesses
+.. autofunction:: holland.storage.format_genomes_and_fitnesses_for_storage
+
+utils
+~~~~~
+.. autofunction:: holland.storage.record
+.. autofunction:: holland.storage.record_to_csv
+.. autofunction:: holland.storage.record_to_json
+
+
+
 Utils
 -----
 
 utility functions
 ~~~~~~~~~~~~~~~~~
 .. autofunction:: holland.utils.bound_value
+.. autofunction:: holland.utils.select_from
 
 
 
