@@ -13,8 +13,8 @@ Holland is modular enough to allow users to pick and choose submodules to meet s
    :maxdepth: 2
 
    basic_usage
-   api_reference
    core_documentation
+   contributing
 
 
 
