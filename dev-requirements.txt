@@ -1,0 +1,4 @@
+black
+Sphinx
+sphinx-autobuild
+sphinx_rtd_theme
