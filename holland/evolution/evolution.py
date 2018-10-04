@@ -34,6 +34,7 @@ def evolve(
         :param num_generations: the number of generations to evolve the population       
         :type num_generations: int    
 
+
         :returns: a list of fitness scores
 
 
@@ -49,6 +50,10 @@ def evolve(
             * :func:`~holland.evolution.generate_next_generation`
             * :func:`~holland.evolution.evaluate_fitness`
 
+        Example:
+            .. literalinclude:: examples/basic_example.py
+                :linenos:
+                :emphasize-lines: 23-26
     """
     if random_per_generation < 0:
         raise ValueError("Number of random genomes per generation cannot be negative")
