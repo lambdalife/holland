@@ -3,6 +3,27 @@ import json
 
 
 def record(data, **storage_options):
+    """ Records data to a file
+
+        :param data: the data to write to the file
+        :type data: list/dict
+
+        :param storage_options: options for writing the data to a file; see below
+        :type storage_options: dict
+        
+        :\*\*storage_options:
+            * **file_name** (*str*) -- name of the file to write to
+            * **format** (*str*) -- file format (options: ``'json'``, ``'csv'``)
+            * **path** (*str*) -- location of the file to write
+
+
+        :returns: ``None``
+
+
+        Dependencies:
+            * :func:`~holland.storage.record_to_csv`
+            * :func:`~holland.storage.record_to_json`
+    """
     storage_format = storage_options.get("format")
     if storage_format == "csv":
         record_to_csv(data, **storage_options)
@@ -11,6 +32,26 @@ def record(data, **storage_options):
 
 
 def record_to_csv(data, **storage_options):
+    """ Writes data to a file CSV format; appends a row to an existing file; a file is created if none exists yet
+
+        :param data: the data to write to the file (with column names as keys)
+        :type data: dict
+
+        :param storage_options: options for writing the data to a file; see below
+        :type storage_options: dict
+
+        :\*\*storage_options:
+            * **file_name** (*str*) -- name of the file to write to
+            * **path** (*str*) -- location of the file to write
+
+
+        :returns: ``None``
+
+
+        :raises AssertionError: if storage_options["file_name"] is not specified
+        :raises AssertionError: if storage_options["path"] is not specified
+        :raises ValueError: if not all values are of type int or float
+    """
     assert (
         storage_options.get("file_name") is not None
         and storage_options.get("path") is not None
@@ -36,6 +77,25 @@ def record_to_csv(data, **storage_options):
 
 
 def record_to_json(data, **storage_options):
+    """ Writes data to a file JSON format; overwrites contents if the file already exists
+
+        :param data: the data to write to the file (must be valid JSON format)
+        :type data: list/dict
+
+        :param storage_options: options for writing the data to a file; see below
+        :type storage_options: dict
+
+        :\*\*storage_options:
+            * **file_name** (*str*) -- name of the file to write to
+            * **path** (*str*) -- location of the file to write
+
+
+        :returns: ``None``
+
+
+        :raises AssertionError: if storage_options["file_name"] is not specified
+        :raises AssertionError: if storage_options["path"] is not specified
+    """
     assert (
         storage_options.get("file_name") is not None
         and storage_options.get("path") is not None
