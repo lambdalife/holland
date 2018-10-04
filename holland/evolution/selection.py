@@ -1,33 +1,20 @@
 import math
 import numpy as np
+from ..utils import select_from
 
 
 def select_breeding_pool(fitness_results, top=0, mid=0, bottom=0, random=0):
     if top + mid + bottom + random > len(fitness_results):
         raise ValueError(
-            "Select Pool Narrowing strategy numbers cannot exceed population size"
+            "Select Breeding Pool strategy numbers cannot exceed population size"
         )
     if any(value < 0 for value in (top, mid, bottom, random)):
-        raise ValueError("Select Pool Narrowing strategy numbers cannot be negative")
+        raise ValueError("Select Bredding Pool strategy numbers cannot be negative")
 
     sorted_results = sorted(fitness_results, key=lambda x: x[0])
-    selection_pool = []
-
-    if len(sorted_results) % 2 == 0:
-        middle_start_index = math.ceil(len(sorted_results) / 2) - math.floor(mid / 2)
-    else:
-        middle_start_index = math.ceil(len(sorted_results) / 2) - math.ceil(mid / 2)
-    selection_pool += sorted_results[-top:]
-    selection_pool += sorted_results[middle_start_index : middle_start_index + mid]
-    selection_pool += sorted_results[:bottom]
-
-    # use ids because np.random.choice argument must be 1 dimensional
-    all_ids = list(range(len(sorted_results)))
-    remaining_ids = (
-        all_ids[bottom:middle_start_index] + all_ids[middle_start_index + mid : -top]
+    selection_pool = select_from(
+        sorted_results, top=top, mid=mid, bottom=bottom, random=random
     )
-    random_ids = np.random.choice(remaining_ids, size=random)
-    selection_pool += [sorted_results[i] for i in random_ids]
 
     return selection_pool
 
