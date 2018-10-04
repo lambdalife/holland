@@ -35,10 +35,36 @@ def evolve(
         :type initial_population: list
 
         :param num_generations: the number of generations to evolve the population       
-        :type num_generations: int    
+        :type num_generations: int
+
+        :param fitness_storage_options: configuration options for storing fitness score statistics over time; see below
+        :type fitness_storage_options: dict
+
+        :param genome_storage_options: configuration options for storing genomes; see below
+        :type genome_storage_options: dict
+
+        :fitness_storage_options:
+            * **should_record_fitness** (*bool*) -- determines whether or not to record fitness
+            * **file_name** (*str*) -- name of the file to write to
+            * **format** (*str*) -- file format (options: ``'csv'``, ``'memory'``); if ``'memory'``, stats are returned as second element of tuple
+            * **path** (*str*) -- location of the file to write
+
+        :genome_storage_options:
+            * **should_record_genomes** (*bool*) -- determines wether or not to record genomes at all
+            * **record_every_n_generations** (*int*) -- recording frequency
+            * **should_record_on_interrupt** (*bool*) -- determines wether or not to record genomes if an unhandled exception (including ``KeyboardInterrupt``) is raised
+            * **should_add_generation_suffix** (*bool*) -- determines whether or not to append ``'-generation_{n}'`` to the end of ``file_name``
+            * **file_name** (*str*) -- name of the file to write to
+            * **format** (*str*) -- file format (options: ``'json'``)
+            * **path** (*str*) -- location of the file to write
+            * **top** (*int*) -- how many genomes and scores to select from the top of the pack
+            * **mid** (*int*) -- how many genomes and scores to select from the middle of the pack
+            * **bottom** (*int*) -- how many genomes and scores to select from the bottom of the pack
 
 
-        :returns: a list of fitness scores
+        :returns:
+            * a list of fitness scores and genomes ``[(fitness, genome), ...]`` (fitness results); or
+            * a tuple of fitness results (previous bullet) and list of historical fitness statistics ``(fitness_results, fitness_history)``,  if ``fitness_storage_options`` has ``'should_record_fitness': True`` and ``'format': 'memory'``
 
 
         :raises ValueError: if random_per_generation < 0
@@ -50,8 +76,12 @@ def evolve(
         .. todo:: If an initial population is given and some genomes are missing parameters, a warning is given unless a flag is set to fill those values randomly
 
         Dependencies:
-            * :func:`~holland.evolution.generate_next_generation`
             * :func:`~holland.evolution.evaluate_fitness`
+            * :func:`~holland.evolution.generate_next_generation`
+            * :func:`~holland.storage.record_fitness`
+            * :func:`~holland.storage.record_genomes_and_fitnesses`
+
+
 
         Example:
             .. literalinclude:: examples/basic_example.py
