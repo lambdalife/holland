@@ -18,7 +18,7 @@ class GenerateNextGenerationTest(unittest.TestCase):
         self.genome_params = {"a": {"type": "float"}}
         self.selection_strategy = {
             "pool": {"top": 2, "bottom": 1, "random": 2},
-            "parents": {"weighting_function": lambda x: x * x, "number": 2},
+            "parents": {"weighting_function": lambda x: x * x, "n_parents": 2},
         }
         self.population_size = 50
         self.random_per_generation = 2
@@ -113,7 +113,7 @@ class BreedNextGenerationTest(unittest.TestCase):
         self.genome_params = {"a": {"type": "float"}}
         self.selection_strategy = {
             "pool": {"top": 2, "bottom": 1, "random": 2},
-            "parents": {"weighting_function": lambda x: x * x, "number": 2},
+            "parents": {"weighting_function": lambda x: x * x, "n_parents": 2},
         }
         self.number = 10
 
