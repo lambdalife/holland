@@ -5,20 +5,16 @@ from ..utils import bound_value
 
 def mutate_genome(genome, genome_params):
     """
-    mutates a given genome
+    Mutates a genome
 
-    :param genome:
-    :type genome:
+    :param genome: the genome to mutate
+    :type genome: dict
 
-    :parame genome_params:
-    :type genome_params:
+    :param genome_params: a dictionary specifying genome parameters; see :ref:`genome-params`
+    :type genome_params: dict
 
 
     :returns: a mutated genome
-
-
-    .. todo:: fill in param information
-    .. todo:: write an example
 
 
     Dependencies:
@@ -34,18 +30,14 @@ def mutate_gene(gene, gene_params):
     """
     Mutates a single gene
 
-    :param gene: The gene to mutate
-    :type gene: one of gene types
+    :param gene: the gene to mutate
+    :type gene: a valid gene type
 
-    :param gene_params:
+    :param gene_params: parameters for a single gene; see :ref:`genome-params`
     :type gene_params: dict
 
     
     :returns: a mutated gene
-
-    .. todo:: fill in param information
-    .. todo:: add a link to the avilable gene types
-    .. todo:: write an example
 
 
     Dependencies:
@@ -79,36 +71,32 @@ def probabilistically_mutate_value(
     maximum=None,
 ):
 
-    """ 
-    Randomly changes a given value based on a mutation function
+    """
+    Either applies a mutation function to a value of a gene or does not, probabilistically according to the ``mutation_rate``
 
-    :param value:
-    :type value:
+    :param value: the gene value to mutate
+    :type value: a valid, non-list, gene type
 
-    :param mutation_function:
-    :type mutation_function:
+    :param mutation_function: a function that mutates the value; see :ref:`mutation-functions`
+    :type mutation_function: func
 
-    :param mutation_rate:
-    :type mutation_rate:
+    :param mutation_rate: the probability with which to apply ``mutation_function`` to the value (between 0 and 1)
+    :type mutation_rate: float
 
-    :param should_bound:
-    :type should_bound:
+    :param should_bound: specifies whether or not to bound the mutated value between a maximum and/or minimum
+    :type should_bound: bool
 
-    :param minimum:
-    :type minimum:
+    :param minimum: minimum value to bound the mutated value
+    :type minimum: int/float
 
-    :param maximum:
-    :type maximum:
-
-
-    :returns: the altered value
+    :param maximum: minimum value to bound the mutated value
+    :type maximum: int/float
 
 
-    .. todo:: write an example
+    :returns: either the mutated value or the original value
 
 
     Dependencies:
-        * :ref:`mutation-functions`
         * :func:`holland.utils.bound_value`
     """
     if random.random() < mutation_rate:
