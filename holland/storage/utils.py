@@ -8,13 +8,8 @@ def record(data, **storage_options):
         :param data: the data to write to the file
         :type data: list/dict
 
-        :param storage_options: options for writing the data to a file; see below
+        :param storage_options: options for writing the data to a file, specifically ``format`` (options: ``'json'``, ``'csv'``), ``file_name``, and ``path`` are relevant; see :ref:`fitness-storage-options` and :ref:`genome-storage-options`
         :type storage_options: dict
-        
-        :\*\*storage_options:
-            * **file_name** (*str*) -- name of the file to write to
-            * **format** (*str*) -- file format (options: ``'json'``, ``'csv'``)
-            * **path** (*str*) -- location of the file to write
 
 
         :returns: ``None``
@@ -37,12 +32,8 @@ def record_to_csv(data, **storage_options):
         :param data: the data to write to the file (with column names as keys)
         :type data: dict
 
-        :param storage_options: options for writing the data to a file; see below
+        :param storage_options: options for writing the data to a file, specifically ``file_name`` and ``path`` are relevant; see :ref:`fitness-storage-options` and :ref:`genome-storage-options`
         :type storage_options: dict
-
-        :\*\*storage_options:
-            * **file_name** (*str*) -- name of the file to write to
-            * **path** (*str*) -- location of the file to write
 
 
         :returns: ``None``
@@ -82,12 +73,8 @@ def record_to_json(data, **storage_options):
         :param data: the data to write to the file (must be valid JSON format)
         :type data: list/dict
 
-        :param storage_options: options for writing the data to a file; see below
+        :param storage_options: options for writing the data to a file, specifically ``file_name`` and ``path`` are relevant; see :ref:`fitness-storage-options` and :ref:`genome-storage-options`
         :type storage_options: dict
-
-        :\*\*storage_options:
-            * **file_name** (*str*) -- name of the file to write to
-            * **path** (*str*) -- location of the file to write
 
 
         :returns: ``None``
