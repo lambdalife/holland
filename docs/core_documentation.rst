@@ -135,7 +135,7 @@ This is an example of ``genome_params``::
             "max": 100000,
             "min": -100000,
             "initial_distribution": lambda: random.uniform(-100000, 100000),
-            "crossover_function": get_point_crossover_function(num_crossover_points=3),
+            "crossover_function": get_point_crossover_function(n_crossover_points=3),
             "mutation_function": get_gaussian_mutation_function(100),
             "mutation_rate": 0.01
         },
