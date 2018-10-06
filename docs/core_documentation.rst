@@ -62,10 +62,10 @@ crossover functions
 
 mutation functions
 ~~~~~~~~~~~~~~~~~~
-.. autofunction:: holland.library.get_flip_mutator
-.. autofunction:: holland.library.get_boundary_mutator
-.. autofunction:: holland.library.get_uniform_mutator
-.. autofunction:: holland.library.get_gaussian_mutator
+.. autofunction:: holland.library.get_flip_mutation_function
+.. autofunction:: holland.library.get_boundary_mutation_function
+.. autofunction:: holland.library.get_uniform_mutation_function
+.. autofunction:: holland.library.get_gaussian_mutation_function
 
 
 
