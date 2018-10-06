@@ -11,17 +11,8 @@ def record_genomes_and_fitnesses(generation_num, fitness_results, **storage_opti
         :param fitness_results: the results of a round of evaluation (returned by evaluate_fitness)
         :type fitness_results: list
 
-        :param storage_options: options for selecting which results to store and how to store them; see below
+        :param storage_options: options for selecting which results to store and how to store them, specifically ``should_add_generation_suffix``, ``format``, ``file_name``, ``path``, ``top``, ``mid``, ``bottom`` are relevant; see :ref:`genome-storage-options`
         :type storage_options: dict
-
-        :\*\*storage_options:
-            * **should_add_generation_suffix** (*bool*) -- determines whether or not to append ``'-generation_{n}'`` to the end of ``file_name``
-            * **file_name** (*str*) -- name of the file to write to
-            * **format** (*str*) -- file format (options: ``'json'``)
-            * **path** (*str*) -- location of the file to write
-            * **top** (*int*) -- how many genomes and scores to select from the top of the pack
-            * **mid** (*int*) -- how many genomes and scores to select from the middle of the pack
-            * **bottom** (*int*) -- how many genomes and scores to select from the bottom of the pack
 
 
         :returns: ``None``
@@ -55,13 +46,8 @@ def format_genomes_and_fitnesses_for_storage(
         :param fitness_results: the results of a round of evaluation (returned by evaluate_fitness)
         :type fitness_results: list
 
-        :param storage_options: options for selecting which results to store; see below
+        :param storage_options: options for selecting which results to store, specifically ``top``, ``mid``, ``bottom`` are relevant; see :ref:`genome-storage-options`
         :type storage_options: dict
-
-        :\*\*storage_options:
-            * **top** (*int*) -- how many genomes and scores to select from the top of the pack
-            * **mid** (*int*) -- how many genomes and scores to select from the middle of the pack
-            * **bottom** (*int*) -- how many genomes and scores to select from the bottom of the pack
 
 
         :returns: a dictionary of the form ``{"generation": generation_num, "results": selected_results}``
