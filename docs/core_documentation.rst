@@ -14,6 +14,12 @@ evolution
 ~~~~~~~~~
 .. autofunction:: holland.evolution.evolve
 
+
+evaluation
+~~~~~~~~~~
+.. autofunction:: holland.evolution.evaluate_fitness
+
+
 breeding
 ~~~~~~~~
 .. autofunction:: holland.evolution.generate_next_generation
@@ -24,11 +30,6 @@ breeding
 crossover
 ~~~~~~~~~
 .. autofunction:: holland.evolution.cross_genomes
-
-
-evaluation
-~~~~~~~~~~
-.. autofunction:: holland.evolution.evaluate_fitness
 
 
 mutation
