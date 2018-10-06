@@ -1,109 +1,11 @@
-Core Documentation
-==================
+Configuration
+=============
 
-Here is the core documentation for Holland
+This page provides information on configuring Holland, specifically the use of :func:`~holland.evolution.evolve`.
 
 .. contents::
     :local:
     :depth: 2
-
-Evolution
----------
-
-evolution
-~~~~~~~~~
-.. autofunction:: holland.evolution.evolve
-
-
-evaluation
-~~~~~~~~~~
-.. autofunction:: holland.evolution.evaluate_fitness
-
-
-breeding
-~~~~~~~~
-.. autofunction:: holland.evolution.generate_next_generation
-.. autofunction:: holland.evolution.breed_next_generation
-.. autofunction:: holland.evolution.generate_random_genomes
-
-
-crossover
-~~~~~~~~~
-.. autofunction:: holland.evolution.cross_genomes
-
-
-mutation
-~~~~~~~~
-.. autofunction:: holland.evolution.mutate_genome
-.. autofunction:: holland.evolution.mutate_gene
-.. autofunction:: holland.evolution.probabilistically_mutate_value
-
-
-selection
-~~~~~~~~~
-.. autofunction:: holland.evolution.select_breeding_pool
-.. autofunction:: holland.evolution.select_parents
-
-
-
-.. _library:
-
-Library
--------
-
-.. _library-crossover-functions:
-
-crossover functions
-~~~~~~~~~~~~~~~~~~~
-.. autofunction:: holland.library.get_uniform_crossover_function
-.. autofunction:: holland.library.get_point_crossover_function
-
-.. _library-mutation-functions:
-
-mutation functions
-~~~~~~~~~~~~~~~~~~
-.. autofunction:: holland.library.get_flip_mutation_function
-.. autofunction:: holland.library.get_boundary_mutation_function
-.. autofunction:: holland.library.get_uniform_mutation_function
-.. autofunction:: holland.library.get_gaussian_mutation_function
-
-
-
-.. _storage:
-
-Storage
--------
-
-.. _storage-fitness:
-
-fitness
-~~~~~~~
-.. autofunction:: holland.storage.record_fitness
-.. autofunction:: holland.storage.format_fitness_statistics
-
-.. _storage-genomes-and-fitnesses:
-
-genomes and fitnesses
-~~~~~~~~~~~~~~~~~~~~~
-.. autofunction:: holland.storage.record_genomes_and_fitnesses
-.. autofunction:: holland.storage.format_genomes_and_fitnesses_for_storage
-
-utils
-~~~~~
-.. autofunction:: holland.storage.record
-.. autofunction:: holland.storage.record_to_csv
-.. autofunction:: holland.storage.record_to_json
-
-
-
-Utils
------
-
-utility functions
-~~~~~~~~~~~~~~~~~
-.. autofunction:: holland.utils.bound_value
-.. autofunction:: holland.utils.select_from
-
 
 
 .. _fitness-function:
@@ -117,6 +19,7 @@ Holland is designed to be application-agnostic, so a fitness function can evalua
 
 Example:
     .. literalinclude:: examples/fitness_function_example.py
+
 
 
 .. _genome-params:
@@ -161,6 +64,35 @@ The significance of these values is as follows:
     * **mutation_rate** (*int/float*) -- probability (``0`` to ``1``) that each value of the gene gets mutated (by applying the ``mutation_function``)
 
 Note that each gene may contain values of only one type.
+
+
+
+.. _crossover-functions:
+
+Crossover Functions
+-------------------
+
+Crossover functions are used to splice parent genes together to form a gene for an offspring. Crossover functions can be custom made, but Holland offers a few common crossover functions built in, these are described in the :ref:`library-crossover-functions` subsection of :ref:`library`. If you write or find a novel crossover function that you find useful, consider contributing it to the Holland library!
+
+Crossover functions act on, and are specified for, individual genes, rather than entire genomes. Since Holland supports reproduction between an arbitrary number of individuals (parents) crossover functions must accept a single argument: a list containing parent gene(s). The length of this list is determined by the number of parents as specified in the ``selection_strategy`` (see :ref:`selection-strategy`). Crossover functions must return a single gene.
+
+Example:
+    .. literalinclude:: examples/crossover_function_example.py
+
+
+
+.. _mutation-functions:
+
+Mutation Functions
+------------------
+
+Mutation functions are used to modify gene values. Like :ref:`crossover-functions`, mutation functions can be custom made, but Holland offers a few common mutation functions built in, these are described in the :ref:`library-mutation-functions` subsection of :ref:`library`. If you write or find a novel mutation function that you find useful, consider contributing it to the Holland library!
+
+Mutation functions act on individual values of a gene, rather than entire genes or genomes. Mutation functions are specified for each gene. A mutation function is applied probabilistically (by :func:`~holland.evolution.probabilistically_mutate_value`), and, therefore, need not consider the ``mutation_rate`` for the gene. Mutation functions must return the mutated value.
+
+Example:
+    .. literalinclude:: examples/mutation_function_example.py
+
 
 
 .. _selection-strategy:
@@ -238,29 +170,3 @@ The following options are available:
     * **bottom** (*int*) – number of genomes and scores to select from the bottom of the pack (by fitness)
 
 See the :ref:`storage-genomes-and-fitnesses` subsection of :ref:`storage` for more on how these values are used.
-
-
-.. _crossover-functions:
-
-Crossover Functions
--------------------
-
-Crossover functions are used to splice parent genes together to form a gene for an offspring. Crossover functions can be custom made, but Holland offers a few common crossover functions built in, these are described in the :ref:`library-crossover-functions` subsection of :ref:`library`. If you write or find a novel crossover function that you find useful, consider contributing it to the Holland library!
-
-Crossover functions act on, and are specified for, individual genes, rather than entire genomes. Since Holland supports reproduction between an arbitrary number of individuals (parents) crossover functions must accept a single argument: a list containing parent gene(s). The length of this list is determined by the number of parents as specified in the ``selection_strategy`` (see :ref:`selection-strategy`). Crossover functions must return a single gene.
-
-Example:
-    .. literalinclude:: examples/crossover_function_example.py
-
-
-.. _mutation-functions:
-
-Mutation Functions
-------------------
-
-Mutation functions are used to modify gene values. Like :ref:`crossover-functions`, mutation functions can be custom made, but Holland offers a few common mutation functions built in, these are described in the :ref:`library-mutation-functions` subsection of :ref:`library`. If you write or find a novel mutation function that you find useful, consider contributing it to the Holland library!
-
-Mutation functions act on individual values of a gene, rather than entire genes or genomes. Mutation functions are specified for each gene. A mutation function is applied probabilistically (by :func:`~holland.evolution.probabilistically_mutate_value`), and, therefore, need not consider the ``mutation_rate`` for the gene. Mutation functions must return the mutated value.
-
-Example:
-    .. literalinclude:: examples/mutation_function_example.py
