@@ -16,13 +16,13 @@ def evolve(
 ):
     """ The heart of Holland.
 
-        :param fitness_function: the fitness function used to evaluate individuals
+        :param fitness_function: the fitness function used to evaluate individuals; see :ref:`fitness-function`
         :type fitness_function: function
         
-        :param genome_params: a dictionary specifying genome parameters
+        :param genome_params: a dictionary specifying genome parameters; see :ref:`genome-params`
         :type genome_params: dict
 
-        :param selection_strategy: a dictionary specifying selection parameters
+        :param selection_strategy: a dictionary specifying selection parameters; see :ref:`selection-strategy`
         :type selection_strategy: dict
 
         :param population_size: the size of the population
@@ -34,32 +34,14 @@ def evolve(
         :param initial_population: an initial population
         :type initial_population: list
 
-        :param num_generations: the number of generations to evolve the population       
+        :param num_generations: the number of generations to run evolution over
         :type num_generations: int
 
-        :param fitness_storage_options: configuration options for storing fitness score statistics over time; see below
+        :param fitness_storage_options: configuration options for storing fitness score statistics over time; see :ref:`fitness-storage-options`
         :type fitness_storage_options: dict
 
-        :param genome_storage_options: configuration options for storing genomes; see below
+        :param genome_storage_options: configuration options for storing genomes; see :ref:`genome-storage-options`
         :type genome_storage_options: dict
-
-        :fitness_storage_options:
-            * **should_record_fitness** (*bool*) -- determines whether or not to record fitness
-            * **file_name** (*str*) -- name of the file to write to
-            * **format** (*str*) -- file format (options: ``'csv'``, ``'memory'``); if ``'memory'``, stats are returned as second element of tuple
-            * **path** (*str*) -- location of the file to write
-
-        :genome_storage_options:
-            * **should_record_genomes** (*bool*) -- determines wether or not to record genomes at all
-            * **record_every_n_generations** (*int*) -- recording frequency
-            * **should_record_on_interrupt** (*bool*) -- determines wether or not to record genomes if an unhandled exception (including ``KeyboardInterrupt``) is raised
-            * **should_add_generation_suffix** (*bool*) -- determines whether or not to append ``'-generation_{n}'`` to the end of ``file_name``
-            * **file_name** (*str*) -- name of the file to write to
-            * **format** (*str*) -- file format (options: ``'json'``)
-            * **path** (*str*) -- location of the file to write
-            * **top** (*int*) -- how many genomes and scores to select from the top of the pack
-            * **mid** (*int*) -- how many genomes and scores to select from the middle of the pack
-            * **bottom** (*int*) -- how many genomes and scores to select from the bottom of the pack
 
 
         :returns:
