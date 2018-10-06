@@ -146,19 +146,19 @@ class SelectParentsTest(unittest.TestCase):
         self.n_parents = 3
 
     def test_asserts_number_of_parents_is_at_least_1(self):
-        """select_parents throws a ValueError if the given number is less than 1"""
+        """select_parents throws a ValueError if the given n_parents is less than 1"""
         with self.assertRaises(ValueError):
             select_parents(
                 self.fitness_results,
                 weighting_function=self.weighting_function,
-                number=0,
+                n_parents=0,
             )
 
         with self.assertRaises(ValueError):
             select_parents(
                 self.fitness_results,
                 weighting_function=self.weighting_function,
-                number=-1,
+                n_parents=-1,
             )
 
     @patch("numpy.random.choice")
@@ -169,7 +169,7 @@ class SelectParentsTest(unittest.TestCase):
         select_parents(
             self.fitness_results,
             weighting_function=self.weighting_function,
-            number=self.n_parents,
+            n_parents=self.n_parents,
         )
 
         weighted_scores = [
@@ -189,7 +189,7 @@ class SelectParentsTest(unittest.TestCase):
         parents = select_parents(
             self.fitness_results,
             weighting_function=self.weighting_function,
-            number=self.n_parents,
+            n_parents=self.n_parents,
         )
 
         expected_parents = mock_choice.return_value

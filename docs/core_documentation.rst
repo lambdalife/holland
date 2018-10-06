@@ -181,7 +181,7 @@ The dictionary ``selection_strategy`` should have the below form. The example va
         },
         "parents": {
             "weighting_function": lambda x: 1,
-            "number": 2
+            "n_parents": 2
         }
     }
 
@@ -194,7 +194,7 @@ The significance of these values is as follows:
         * **random** (*int*) -- number of genomes to select at random
     * **parents**
         * **weighting_function** (*func*) -- function for converting a fitness score into a probability for selecting an individual as a parent (default is even weighting)
-        * **number** (*int*) -- number of parents to select for each offspring
+        * **n_parents** (*int*) -- number of parents to select for each offspring
 
 
 
