@@ -23,7 +23,7 @@ breeding
 
 crossover
 ~~~~~~~~~
-.. autofunction:: holland.evolution.cross
+.. autofunction:: holland.evolution.cross_genomes
 
 
 evaluation
