@@ -135,7 +135,7 @@ class BreedNextGenerationTest(unittest.TestCase):
 
     @patch("holland.evolution.breeding.select_breeding_pool")
     @patch("holland.evolution.breeding.select_parents")
-    @patch("holland.evolution.breeding.cross")
+    @patch("holland.evolution.breeding.cross_genomes")
     @patch("holland.evolution.breeding.mutate_genome")
     def test_calls_select_breeding_pool_correctly(
         self, mock_mutate, mock_cross, mock_select_parents, mock_select_pool
@@ -157,7 +157,7 @@ class BreedNextGenerationTest(unittest.TestCase):
         return_value=[(100, "a"), (90, "b")],
     )
     @patch("holland.evolution.breeding.select_parents")
-    @patch("holland.evolution.breeding.cross")
+    @patch("holland.evolution.breeding.cross_genomes")
     @patch("holland.evolution.breeding.mutate_genome")
     def test_calls_select_parents_correctly_with_given_number(
         self, mock_mutate, mock_cross, mock_select_parents, mock_select_pool
@@ -183,7 +183,7 @@ class BreedNextGenerationTest(unittest.TestCase):
         return_value=[(100, "a"), (90, "b")],
     )
     @patch("holland.evolution.breeding.select_parents", return_value=["a", "b"])
-    @patch("holland.evolution.breeding.cross")
+    @patch("holland.evolution.breeding.cross_genomes")
     @patch("holland.evolution.breeding.mutate_genome")
     def test_calls_cross_correctly(
         self, mock_mutate, mock_cross, mock_select_parents, mock_select_pool
@@ -207,7 +207,7 @@ class BreedNextGenerationTest(unittest.TestCase):
         return_value=[(100, "a"), (90, "b")],
     )
     @patch("holland.evolution.breeding.select_parents", return_value=["a", "b"])
-    @patch("holland.evolution.breeding.cross", return_value="a")
+    @patch("holland.evolution.breeding.cross_genomes", return_value="a")
     @patch("holland.evolution.breeding.mutate_genome")
     def test_calls_mutate_genome_on_offspring(
         self, mock_mutate, mock_cross, mock_select_parents, mock_select_pool
@@ -231,7 +231,7 @@ class BreedNextGenerationTest(unittest.TestCase):
         return_value=[(100, "a"), (90, "b")],
     )
     @patch("holland.evolution.breeding.select_parents", return_value=["a", "b"])
-    @patch("holland.evolution.breeding.cross", return_value="a")
+    @patch("holland.evolution.breeding.cross_genomes", return_value="a")
     @patch("holland.evolution.breeding.mutate_genome")
     def test_returns_the_next_population(
         self, mock_mutate, mock_cross, mock_select_parents, mock_select_pool

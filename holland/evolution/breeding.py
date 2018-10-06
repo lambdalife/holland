@@ -1,7 +1,7 @@
 import numpy as np
 
 from .selection import select_breeding_pool, select_parents
-from .crossover import cross
+from .crossover import cross_genomes
 from .mutation import mutate_genome
 from ..utils import bound_value
 
@@ -84,7 +84,7 @@ def breed_next_generation(fitness_results, genome_params, selection_strategy, n_
     Dependencies:
         * :func:`~holland.evolution.select_breeding_pool`
         * :func:`~holland.evolution.select_parents`
-        * :func:`~holland.evolution.cross`
+        * :func:`~holland.evolution.cross_genomes`
         * :func:`~holland.evolution.mutate_genome`
     """
     if n_genomes < 0:
@@ -98,7 +98,7 @@ def breed_next_generation(fitness_results, genome_params, selection_strategy, n_
 
     for _ in range(n_genomes):
         parents = select_parents(breeding_pool, **selection_strategy.get("parents"))
-        offspring = cross(parents, genome_params)
+        offspring = cross_genomes(parents, genome_params)
         mutated_offspring = mutate_genome(offspring, genome_params)
         next_generation.append(mutated_offspring)
 
