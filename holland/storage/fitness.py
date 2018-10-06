@@ -12,13 +12,8 @@ def record_fitness(generation_num, fitness_scores, **storage_options):
         :param fitness_scores: the fitness scores of the generation
         :type fitness_scores: list
 
-        :param storage_options: options for storing statistics; see below
+        :param storage_options: options for storing statistics, specifically ``file_name``, ``format``, and ``path`` are relevant; see :ref:`fitness-storage-options`
         :type storage_options: dict
-
-        :\*\*storage_options:
-            * **file_name** (*str*) -- name of the file to write to
-            * **format** (*str*) -- file format (options: ``'csv'``, ``'memory'``); if ``'memory'``, stats are not written to a file
-            * **path** (*str*) -- location of the file to write
 
 
         :returns: a dictionary of statistics for the fitness scores
