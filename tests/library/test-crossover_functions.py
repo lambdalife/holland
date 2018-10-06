@@ -53,14 +53,20 @@ class GetUniformCrossoverFunctionTest(unittest.TestCase):
 
 
 class GetPointCrossoverFunction(unittest.TestCase):
+    def test_asserts_number_of_crossover_points_is_nonnegative(self):
+        '''get_point_crossover_function raises a ValueError if n_crossover_points is negative'''
+        n_crossover_points = -1
+        with self.assertRaises(ValueError):
+            get_point_crossover_function(n_crossover_points=n_crossover_points)
+
     @patch("numpy.random.choice")
     def test_selects_correct_number_of_crossover_points_from_correct_options(
         self, mock_random_choice
     ):
         """get_point_crossover_function selects the correct number of crossover points from all indices of elements of parent_genes"""
-        num_crossover_points = 3
+        n_crossover_points = 3
         point_crossover = get_point_crossover_function(
-            num_crossover_points=num_crossover_points
+            n_crossover_points=n_crossover_points
         )
         parent_genes = [list(range(1, 10)), list(range(10, 100, 10))]
 
@@ -68,7 +74,7 @@ class GetPointCrossoverFunction(unittest.TestCase):
 
         expected_point_options = range(1, len(parent_genes[0]))
         mock_random_choice.assert_called_with(
-            expected_point_options, size=num_crossover_points
+            expected_point_options, size=n_crossover_points
         )
 
     @patch("numpy.random.choice", return_value=[5])
@@ -76,7 +82,7 @@ class GetPointCrossoverFunction(unittest.TestCase):
         self, mock_random_choice
     ):
         """get_point_crossover_function returns a function that picks crossover points and then slices each parent genome according to those points"""
-        point_crossover = get_point_crossover_function(num_crossover_points=1)
+        point_crossover = get_point_crossover_function(n_crossover_points=1)
         parent_genes = [list(range(1, 10)), list(range(10, 100, 10))]
 
         output = point_crossover(parent_genes)
@@ -93,7 +99,7 @@ class GetPointCrossoverFunction(unittest.TestCase):
         self, mock_random_choice
     ):
         """get_point_crossover_function returns a function that picks crossover points and then slices each parent genome according to those points"""
-        point_crossover = get_point_crossover_function(num_crossover_points=1)
+        point_crossover = get_point_crossover_function(n_crossover_points=1)
         parent_genes = [list(range(1, 10)), list(range(10, 100, 10))]
 
         output = point_crossover(parent_genes)
@@ -113,7 +119,7 @@ class GetPointCrossoverFunction(unittest.TestCase):
         self, mock_random_choice
     ):
         """get_point_crossover_function returns a function that picks crossover points and then slices each parent according to those points"""
-        point_crossover = get_point_crossover_function(num_crossover_points=1)
+        point_crossover = get_point_crossover_function(n_crossover_points=1)
         parent_genes = [
             list(range(1, 10)),
             list(range(10, 100, 10)),
