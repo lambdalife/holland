@@ -16,19 +16,19 @@ def generate_next_generation(
     """
     Generates the next generation
 
-    :param fitness_results: a list of fitness scores from the previous generation
+    :param fitness_results: a list of tuples containing a fitness score in the first position and a genome in the second (returned by :func:`~holland.evolution.evaluate_fitness`)
     :type fitness_results: list
 
-    :param genome_params: a dictionary specifying genome parameters
+    :param genome_params: a dictionary specifying genome parameters; see :ref:`genome-params`
     :type genome_params: dict
     
-    :param selection_strategy: a dictionary specifying selection parameters
+    :param selection_strategy: a dictionary specifying selection parameters; see :ref:`selection-strategy`
     :type selection_strategy: dict
     
-    :param random_per_generation: the number of random genomes to introduce per generation
+    :param random_per_generation: the number of random genomes to introduce
     :type random_per_generation: int
     
-    :param population_size: the size of the population
+    :param population_size: the size of the population (defaults to length of ``fitness_results``)
     :type population_size: int or None
 
 
@@ -55,27 +55,27 @@ def generate_next_generation(
     ]
 
 
-def breed_next_generation(fitness_results, genome_params, selection_strategy, number):
+def breed_next_generation(fitness_results, genome_params, selection_strategy, n_genomes):
     """
-    Generates a given number of genomes based only on crossover and mutation
+    Generates a given number of genomes by breeding, through crossover and mutation, existing genomes
 
-    :param fitness_results: a list of fitness scores from the previous generation
+    :param fitness_results: a list of tuples containing a fitness score in the first position and a genome in the second (returned by :func:`~holland.evolution.evaluate_fitness`)
     :type fitness_results: list
 
-    :param genome_params: a dictionary specifying genome parameters
+    :param genome_params: a dictionary specifying genome parameters; see :ref:`genome-params`
     :type genome_params: dict
 
-    :param selection_strategy: a dictionary specifying selection parameters
+    :param selection_strategy: a dictionary specifying selection parameters; see :ref:`selection-strategy`
     :type selection_strategy: dict
 
-    :param number: the number of genomes to produce
-    :type number: int
+    :param n_genomes: the number of genomes to produce
+    :type n_genomes: int
 
 
     :returns: a list of bred genomes
 
 
-    :raises ValueError: if number < 0
+    :raises ValueError: if n_genomes < 0
 
 
     .. todo:: Write an example for usage
@@ -87,7 +87,7 @@ def breed_next_generation(fitness_results, genome_params, selection_strategy, nu
         * :func:`~holland.evolution.cross`
         * :func:`~holland.evolution.mutate_genome`
     """
-    if number < 0:
+    if n_genomes < 0:
         raise ValueError("Number of bred genomes per generation cannot be negative")
 
     breeding_pool = select_breeding_pool(
@@ -96,7 +96,7 @@ def breed_next_generation(fitness_results, genome_params, selection_strategy, nu
 
     next_generation = []
 
-    for _ in range(number):
+    for _ in range(n_genomes):
         parents = select_parents(breeding_pool, **selection_strategy.get("parents"))
         offspring = cross(parents, genome_params)
         mutated_offspring = mutate_genome(offspring, genome_params)
@@ -105,33 +105,33 @@ def breed_next_generation(fitness_results, genome_params, selection_strategy, nu
     return next_generation
 
 
-def generate_random_genomes(genome_params, number):
+def generate_random_genomes(genome_params, n_genomes):
     """
     Generates a given number of genomes based on genome parameters
 
-    :param genome_params: a dictionary specifying genome parameters
+    :param genome_params: a dictionary specifying genome parameters; see :ref:`genome-params`
     :type genome_params: dict
 
-    :param number: the number of genomes to produce
-    :type number: int
+    :param n_genomes: the number of genomes to produce
+    :type n_genomes: int
 
 
     :returns: a list of randomly generated genomes
 
 
-    :raises ValueError: if number < 0
+    :raises ValueError: if n_genomes < 0
 
     .. todo:: Write an example for usage
 
     Dependencies:
         * :func:`holland.utils.bound_value`
     """
-    if number < 0:
+    if n_genomes < 0:
         raise ValueError("Number of random genomes per generation cannot be negative")
 
     genomes = []
 
-    for _ in range(number):
+    for _ in range(n_genomes):
         genome = {}
         for gene_name, gene_params in genome_params.items():
             if gene_params["type"] == "float":
