@@ -3,7 +3,7 @@ import random
 import unittest
 from unittest.mock import patch
 
-from holland.utils.utils import bound_value, select_from
+from holland.utils.utils import *
 
 
 class BoundValueTest(unittest.TestCase):
@@ -169,3 +169,19 @@ class SelectFromTest(unittest.TestCase):
         ]
 
         self.assertListEqual(sorted(selection_pool), sorted(expected_selected_values))
+
+
+class IsListTypeTest(unittest.TestCase):
+    def test_returns_False_if_is_not_list_type(self):
+        """is_list_type returns False if the type is not wrapped in brackets"""
+        self.assertFalse(is_list_type({"type": "bool"}))
+        self.assertFalse(is_list_type({"type": "float"}))
+        self.assertFalse(is_list_type({"type": "int"}))
+        self.assertFalse(is_list_type({"type": "str"}))
+
+    def test_returns_True_if_is_list_type(self):
+        """is_list_type returns True if the type is wrapped in brackets"""
+        self.assertTrue(is_list_type({"type": "[bool]"}))
+        self.assertTrue(is_list_type({"type": "[float]"}))
+        self.assertTrue(is_list_type({"type": "[int]"}))
+        self.assertTrue(is_list_type({"type": "[str]"}))
