@@ -103,3 +103,4 @@ utility functions
 ~~~~~~~~~~~~~~~~~
 .. autofunction:: holland.utils.bound_value
 .. autofunction:: holland.utils.select_from
+.. autofunction:: holland.utils.is_list_type
