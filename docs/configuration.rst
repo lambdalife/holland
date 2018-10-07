@@ -32,8 +32,17 @@ In order to generate initial and random genomes, perform crossover on genomes, a
 This is an example of ``genome_params``::
 
     {
-        "gene1": {
+        "float_gene": {
             "type": "float",
+            "max": 100000,
+            "min": -100000,
+            "initial_distribution": lambda: random.uniform(-100000, 100000),
+            "crossover_function": get_point_crossover_function(n_crossover_points=3), #aaaaa
+            "mutation_function": get_gaussian_mutation_function(100),
+            "mutation_rate": 0.01
+        },
+        "list_of_floats_gene": {
+            "type": "[float]",
             "size": 100,
             "max": 100000,
             "min": -100000,
@@ -42,8 +51,15 @@ This is an example of ``genome_params``::
             "mutation_function": get_gaussian_mutation_function(100),
             "mutation_rate": 0.01
         },
-        "gene2": {
+        "bool_gene": {
             "type": "bool",
+            "initial_distribution": lambda: random.random() < 0.5,
+            "crossover_function": get_uniform_crossover_function(),
+            "mutation_function": get_flip_mutation_function(), #aaaa
+            "mutation_rate": 0.05
+        },
+        "list_of_bools_gene": {
+            "type": "[bool]",
             "size": 5,
             "initial_distribution": lambda: random.random() < 0.5,
             "crossover_function": get_uniform_crossover_function(),
@@ -54,7 +70,7 @@ This is an example of ``genome_params``::
 
 The significance of these values is as follows:
 
-    * **type** (*str*) -- specifies the type of the gene (options: ``"float"``, ``"bool"``)
+    * **type** (*str*) -- specifies the type of the gene; if the gene is just a single value, use the plain type, but if the gene is a list of values, use the type in brackets  (options: ``"float"``, ``"[float]"``, ``"bool"``, ``"[bool]"``)
     * **size** (*int*) -- specifies the length of the gene
     * **max** (*int/float*) -- specifies the maximum allowed value for any element of the gene
     * **min** (*int/float*) -- specifies the minimum allowed value for any element of the gene

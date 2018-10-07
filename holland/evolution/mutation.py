@@ -1,6 +1,6 @@
 import random
 
-from ..utils import bound_value
+from ..utils import bound_value, is_numeric_type, is_list_type
 
 
 def mutate_genome(genome, genome_params):
@@ -22,7 +22,7 @@ def mutate_genome(genome, genome_params):
     """
     return {
         gene_name: mutate_gene(genome[gene_name], genome_params[gene_name])
-        for gene_name in genome.keys()
+        for gene_name in genome_params.keys()
     }
 
 
@@ -45,21 +45,31 @@ def mutate_gene(gene, gene_params):
     """
     mutation_function = gene_params["mutation_function"]
     mutation_rate = gene_params["mutation_rate"]
-    should_bound = gene_params.get("type") == "float"
+    should_bound = is_numeric_type(gene_params)
     minimum = gene_params.get("min")
     maximum = gene_params.get("max")
 
-    return [
-        probabilistically_mutate_value(
-            value,
-            mutation_function,
-            mutation_rate=mutation_rate,
-            should_bound=should_bound,
-            minimum=minimum,
-            maximum=maximum,
-        )
-        for value in gene
-    ]
+    if is_list_type(gene_params):
+        return [
+            probabilistically_mutate_value(
+                value,
+                mutation_function,
+                mutation_rate=mutation_rate,
+                should_bound=should_bound,
+                minimum=minimum,
+                maximum=maximum,
+            )
+            for value in gene
+        ]
+
+    return probabilistically_mutate_value(
+        gene,
+        mutation_function,
+        mutation_rate=mutation_rate,
+        should_bound=should_bound,
+        minimum=minimum,
+        maximum=maximum,
+    )
 
 
 def probabilistically_mutate_value(

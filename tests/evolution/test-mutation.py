@@ -16,9 +16,9 @@ class MutateGenomeTest(unittest.TestCase):
             "gene3": [True, False],
         }
         self.genome_params = {
-            "gene1": {"param1": 1, "param2": 2},
-            "gene2": {"param1": 1, "param2": 2},
-            "gene3": {"param1": 1, "param2": 2},
+            "gene1": {"type": "[float]", "param2": 2},
+            "gene2": {"type": "[float]", "param2": 2},
+            "gene3": {"type": "[bool]", "param2": 2},
         }
 
     @patch("holland.evolution.mutation.mutate_gene")
@@ -57,12 +57,37 @@ class MutateGeneTest(unittest.TestCase):
         self.gene_params = {"mutation_function": Mock(), "mutation_rate": 0.01}
 
     @patch("holland.evolution.mutation.probabilistically_mutate_value")
-    def test_calls_probabilitistically_mutate_value_for_each_element_of_gene_with_correct_args_for_type_float(
+    def test_calls_probabilistically_mutation_value_on_the_gene_for_numeric_type(
+        self, mock_mutate_value
+    ):
+        """mutate_gene calls probabilistically_mutate_value once on the gene, passing the gene value, the mutation function, the mutation_rate, and bounds info"""
+        gene = 100.5
+        gene_params = {**self.gene_params, "type": "float", "min": 0, "max": 100}
+
+        mutate_gene(gene, gene_params)
+
+        expected_mutation_function = gene_params["mutation_function"]
+        expected_mutation_rate = gene_params["mutation_rate"]
+        expected_should_bound = True
+        expected_min = gene_params["min"]
+        expected_max = gene_params["max"]
+
+        mock_mutate_value.assert_called_once_with(
+            gene,
+            expected_mutation_function,
+            mutation_rate=expected_mutation_rate,
+            should_bound=expected_should_bound,
+            minimum=expected_min,
+            maximum=expected_max,
+        )
+
+    @patch("holland.evolution.mutation.probabilistically_mutate_value")
+    def test_calls_probabilitistically_mutate_value_for_each_element_of_gene_with_correct_args_for_numeric_list_type(
         self, mock_mutate_value
     ):
         """mutate_gene calls probabilistically_mutate_value many times, passing each value of the gene, the mutation function, the mutation_rate, and bounds info each time"""
         gene = [1, 2, 3, 4, 5, 6]
-        gene_params = {**self.gene_params, "type": "float", "min": 0, "max": 100}
+        gene_params = {**self.gene_params, "type": "[float]", "min": 0, "max": 100}
 
         mutate_gene(gene, gene_params)
 
@@ -86,12 +111,37 @@ class MutateGeneTest(unittest.TestCase):
         self.assertEqual(mock_mutate_value.call_count, len(expected_calls))
 
     @patch("holland.evolution.mutation.probabilistically_mutate_value")
-    def test_calls_probabilitistically_mutate_value_for_each_element_of_gene_with_correct_args_for_type_bool(
+    def test_calls_probabilistically_mutation_value_on_the_gene_for_nonnumeric_type(
+        self, mock_mutate_value
+    ):
+        """mutate_gene calls probabilistically_mutate_value once on the gene, passing the gene value, the mutation function, the mutation_rate, and bounds info"""
+        gene = True
+        gene_params = {**self.gene_params, "type": "bool"}
+
+        mutate_gene(gene, gene_params)
+
+        expected_mutation_function = gene_params["mutation_function"]
+        expected_mutation_rate = gene_params["mutation_rate"]
+        expected_should_bound = False
+        expected_min = None
+        expected_max = None
+
+        mock_mutate_value.assert_called_once_with(
+            gene,
+            expected_mutation_function,
+            mutation_rate=expected_mutation_rate,
+            should_bound=expected_should_bound,
+            minimum=expected_min,
+            maximum=expected_max,
+        )
+
+    @patch("holland.evolution.mutation.probabilistically_mutate_value")
+    def test_calls_probabilitistically_mutate_value_for_each_element_of_gene_with_correct_args_for_nonnumeric_list_type(
         self, mock_mutate_value
     ):
         """mutate_gene calls probabilistically_mutate_value many times, passing each value of the gene, the mutation function, the mutation_rate, and bounds info each time"""
-        gene = [1, 2, 3, 4, 5, 6]
-        gene_params = {**self.gene_params, "type": "bool"}
+        gene = [True, True, True, False, True, False]
+        gene_params = {**self.gene_params, "type": "[bool]"}
 
         mutate_gene(gene, gene_params)
 
@@ -120,8 +170,9 @@ class MutateGeneTest(unittest.TestCase):
         gene = [1, 2, 3, 4, 5, 6]
         mutated_values = [2, 2, 5, 4, 9, 6]
         mock_mutate_value.side_effect = mutated_values
+        gene_params = {**self.gene_params, "type": "[float]"}
 
-        mutated_gene = mutate_gene(gene, self.gene_params)
+        mutated_gene = mutate_gene(gene, gene_params)
 
         expected_mutated_gene = mutated_values
         self.assertListEqual(mutated_gene, expected_mutated_gene)
