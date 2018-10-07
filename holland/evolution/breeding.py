@@ -3,7 +3,7 @@ import numpy as np
 from .selection import select_breeding_pool, select_parents
 from .crossover import cross_genomes
 from .mutation import mutate_genome
-from ..utils import bound_value
+from ..utils import bound_value, is_numeric_type, is_list_type
 
 
 def generate_next_generation(
@@ -158,20 +158,30 @@ def generate_random_genomes(genome_params, n_genomes):
     for _ in range(n_genomes):
         genome = {}
         for gene_name, gene_params in genome_params.items():
-            if gene_params["type"] == "float":
-                genome[gene_name] = [
-                    bound_value(
-                        gene_params["initial_distribution"](),
+            initial_distribution = gene_params["initial_distribution"]
+            if is_list_type(gene_params):
+                if is_numeric_type(gene_params):
+                    genome[gene_name] = [
+                        bound_value(
+                            initial_distribution(),
+                            minimum=gene_params.get("min"),
+                            maximum=gene_params.get("max"),
+                        )
+                        for _ in range(gene_params["size"])
+                    ]
+                else:
+                    genome[gene_name] = [
+                        initial_distribution() for _ in range(gene_params["size"])
+                    ]
+            else:
+                if gene_params["type"] == "float":
+                    genome[gene_name] = bound_value(
+                        initial_distribution(),
                         minimum=gene_params.get("min"),
                         maximum=gene_params.get("max"),
                     )
-                    for _ in range(gene_params["size"])
-                ]
-            else:
-                genome[gene_name] = [
-                    gene_params["initial_distribution"]()
-                    for _ in range(gene_params["size"])
-                ]
+                else:
+                    genome[gene_name] = initial_distribution()
         genomes.append(genome)
 
     return genomes
