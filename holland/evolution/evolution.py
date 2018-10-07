@@ -8,9 +8,10 @@ def evolve(
     genome_params,
     selection_strategy,
     population_size=1000,
-    random_per_generation=0,
+    n_random_per_generation=0,
+    n_elite_per_generation=0,
     initial_population=None,
-    num_generations=100,
+    n_generations=100,
     fitness_storage_options={},
     genome_storage_options={},
 ):
@@ -28,14 +29,17 @@ def evolve(
         :param population_size: the size of the population
         :type population_size: int
 
-        :param random_per_generation: the number of random genomes to introduce per generation
-        :type random_per_generation: int
+        :param n_random_per_generation: the number of random genomes to introduce per generation
+        :type n_random_per_generation: int
+
+        :param n_elite_per_generation: the number of genomes from the current generation to preserve for the next generation unchanged (starting with the most fit genome)
+        :type n_elite_per_generation: int
 
         :param initial_population: an initial population
         :type initial_population: list
 
-        :param num_generations: the number of generations to run evolution over
-        :type num_generations: int
+        :param n_generations: the number of generations to run evolution over
+        :type n_generations: int
 
         :param fitness_storage_options: configuration options for storing fitness score statistics over time; see :ref:`fitness-storage-options`
         :type fitness_storage_options: dict
@@ -49,9 +53,9 @@ def evolve(
             * a tuple of fitness results (previous bullet) and list of historical fitness statistics ``(fitness_results, fitness_history)``,  if ``fitness_storage_options`` has ``'should_record_fitness': True`` and ``'format': 'memory'``
 
 
-        :raises ValueError: if random_per_generation < 0
-        :raises ValueError: if population_size < 1
-        :raises ValueError: if num_generation < 1
+        :raises ValueError: if ``n_random_per_generation < 0`` or ``n_elite_per_generation < 0``
+        :raises ValueError: if ``population_size < 1``
+        :raises ValueError: if ``num_generation < 1``
 
 
         .. todo:: If an initial population is given but does not match the given genome parameters, some kind of error should be raised
@@ -70,11 +74,13 @@ def evolve(
                 :linenos:
                 :emphasize-lines: 23-26
     """
-    if random_per_generation < 0:
-        raise ValueError("Number of random genomes per generation cannot be negative")
+    if n_random_per_generation < 0 or n_elite_per_generation < 0:
+        raise ValueError(
+            "Number of random and elite genomes per generation cannot be negative"
+        )
     if population_size < 1:
         raise ValueError("Population size must be at least 1")
-    if num_generations < 1:
+    if n_generations < 1:
         raise ValueError("Number of generations must be at least 1")
 
     population = initial_population
@@ -82,7 +88,7 @@ def evolve(
         population = generate_random_genomes(genome_params, population_size)
 
     fitness_history = []
-    for generation_num in range(num_generations):
+    for generation_num in range(n_generations):
         try:
             fitness_results = evaluate_fitness(population, fitness_function)
 
@@ -107,13 +113,14 @@ def evolve(
                     generation_num, fitness_results, **genome_storage_options
                 )
 
-            if generation_num < num_generations - 1:
+            if generation_num < n_generations - 1:
                 population = generate_next_generation(
                     fitness_results,
                     genome_params,
                     selection_strategy,
                     population_size=population_size,
-                    random_per_generation=random_per_generation,
+                    n_random=n_random_per_generation,
+                    n_elite=n_elite_per_generation,
                 )
         except:
             if genome_storage_options.get("should_record_on_interrupt", False):

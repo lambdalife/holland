@@ -16,18 +16,26 @@ class EvolveTest(unittest.TestCase):
             "parents": {"weighting_function": lambda x: 1, "number": 2},
         }
 
-    def test_asserts_random_per_generation_is_nonnegative(self):
-        """evolve raises a ValueError if random_per_generation is negative"""
+    def test_asserts_n_random_and_n_elites_per_generation_are_nonnegative(self):
+        """evolve raises a ValueError if n_random_per_generation or n_elite_per_generation is negative"""
         with self.assertRaises(ValueError):
             evolve(
                 self.fitness_function,
                 self.genome_params,
                 self.selection_strategy,
-                random_per_generation=-1,
+                n_random_per_generation=-1,
             )
 
-    def test_asserts_population_size_and_num_generations_are_at_least_one(self):
-        """evolve raises a ValueError if population_size or num_generations is less than 1"""
+        with self.assertRaises(ValueError):
+            evolve(
+                self.fitness_function,
+                self.genome_params,
+                self.selection_strategy,
+                n_elite_per_generation=-1,
+            )
+
+    def test_asserts_population_size_and_n_generations_are_at_least_one(self):
+        """evolve raises a ValueError if population_size or n_generations is less than 1"""
         with self.assertRaises(ValueError):
             evolve(
                 self.fitness_function,
@@ -41,7 +49,7 @@ class EvolveTest(unittest.TestCase):
                 self.fitness_function,
                 self.genome_params,
                 self.selection_strategy,
-                num_generations=0,
+                n_generations=0,
             )
 
     @patch("holland.evolution.evolution.generate_random_genomes")
@@ -88,12 +96,12 @@ class EvolveTest(unittest.TestCase):
     ):
         """evolve calls evaluate_fitness on the current population with the given fitness_function in each generation then passes the results to generate_next_generation and so on"""
         population_size = 3
-        random_per_generation = 1
-        num_generations = 10
+        n_random_per_generation = 1
+        n_elite_per_generation = 1
+        n_generations = 10
         initial_population = ["A", "B", "C"]
         generated_populations = [
-            [chr(i), chr(i + 1), chr(i + 2)]
-            for i in range(66, 66 + num_generations - 1)
+            [chr(i), chr(i + 1), chr(i + 2)] for i in range(66, 66 + n_generations - 1)
         ]
         all_populations = [initial_population] + generated_populations
         results = [list(zip([10, 20, 30], pop)) for pop in all_populations]
@@ -106,9 +114,10 @@ class EvolveTest(unittest.TestCase):
             self.genome_params,
             self.selection_strategy,
             initial_population=initial_population,
-            num_generations=num_generations,
+            n_generations=n_generations,
             population_size=population_size,
-            random_per_generation=random_per_generation,
+            n_random_per_generation=n_random_per_generation,
+            n_elite_per_generation=n_elite_per_generation,
         )
 
         expected_evaluate_fitness_calls = [
@@ -120,7 +129,8 @@ class EvolveTest(unittest.TestCase):
                 self.genome_params,
                 self.selection_strategy,
                 population_size=population_size,
-                random_per_generation=random_per_generation,
+                n_random=n_random_per_generation,
+                n_elite=n_elite_per_generation,
             )
             for res in results[:-1]
             # no population is generated for the last go of evaluating fitness
@@ -147,7 +157,7 @@ class EvolveTest(unittest.TestCase):
         mock_generate_random,
     ):
         """evolve calls record_fitness in each generation with the generation_num, fitness_scores, and fitness_storage_options if fitness_storage_options['should_record_fitness'] is True"""
-        num_generations = 10
+        n_generations = 10
         fitness_storage_options = {
             "file_name": "test.csv",
             "path": "test/test",
@@ -155,7 +165,7 @@ class EvolveTest(unittest.TestCase):
             "format": "csv",
         }
         fitness_results = [
-            [(i + j, chr(65 + i + j)) for j in range(4)] for i in range(num_generations)
+            [(i + j, chr(65 + i + j)) for j in range(4)] for i in range(n_generations)
         ]
         mock_evaluate_fitness.side_effect = fitness_results
 
@@ -163,7 +173,7 @@ class EvolveTest(unittest.TestCase):
             self.fitness_function,
             self.genome_params,
             self.selection_strategy,
-            num_generations=num_generations,
+            n_generations=n_generations,
             fitness_storage_options=fitness_storage_options,
         )
 
@@ -172,7 +182,7 @@ class EvolveTest(unittest.TestCase):
         ]
         expected_calls = [
             call(i, fitness_scores[i], **fitness_storage_options)
-            for i in range(num_generations)
+            for i in range(n_generations)
         ]
         mock_record_fitness.assert_has_calls(expected_calls)
         self.assertEqual(mock_record_fitness.call_count, len(expected_calls))
@@ -189,7 +199,7 @@ class EvolveTest(unittest.TestCase):
         mock_generate_random,
     ):
         """evolve does not call record_fitness if fitness_storage_options['should_record_fitness'] is False or not specified"""
-        num_generations = 10
+        n_generations = 10
         fitness_storage_options_options = [{"should_record_fitness": False}, {}]
 
         for fitness_storage_options in fitness_storage_options_options:
@@ -197,7 +207,7 @@ class EvolveTest(unittest.TestCase):
                 self.fitness_function,
                 self.genome_params,
                 self.selection_strategy,
-                num_generations=num_generations,
+                n_generations=n_generations,
                 fitness_storage_options=fitness_storage_options,
             )
 
@@ -215,7 +225,7 @@ class EvolveTest(unittest.TestCase):
         mock_generate_random,
     ):
         """evolve calls record_genomes_and_fitnesses in each generation with the generation_num, fitness_scores, and genome_storage_options if genome_storage_options['should_record_genomes'] is True"""
-        num_generations = 10
+        n_generations = 10
         genome_storage_options = {
             "file_name": "test.json",
             "path": "test/test",
@@ -224,7 +234,7 @@ class EvolveTest(unittest.TestCase):
             "format": "json",
         }
         fitness_results = [
-            [(i + j, chr(65 + i + j)) for j in range(4)] for i in range(num_generations)
+            [(i + j, chr(65 + i + j)) for j in range(4)] for i in range(n_generations)
         ]
         mock_evaluate_fitness.side_effect = fitness_results
 
@@ -232,13 +242,13 @@ class EvolveTest(unittest.TestCase):
             self.fitness_function,
             self.genome_params,
             self.selection_strategy,
-            num_generations=num_generations,
+            n_generations=n_generations,
             genome_storage_options=genome_storage_options,
         )
 
         expected_calls = [
             call(i, fitness_results[i], **genome_storage_options)
-            for i in range(num_generations)
+            for i in range(n_generations)
         ]
         mock_record_genomes_and_fitnesses.assert_has_calls(expected_calls)
         self.assertEqual(
@@ -257,7 +267,7 @@ class EvolveTest(unittest.TestCase):
         mock_generate_random,
     ):
         """evolve does not call record_genomes_and_fitnesses if genome_storage_options['should_record_genomes'] is False or not specified or generation_num is not right"""
-        num_generations = 10
+        n_generations = 10
         genome_storage_options_options = [{"should_record_genomes": False}, {}]
 
         for genome_storage_options in genome_storage_options_options:
@@ -265,7 +275,7 @@ class EvolveTest(unittest.TestCase):
                 self.fitness_function,
                 self.genome_params,
                 self.selection_strategy,
-                num_generations=num_generations,
+                n_generations=n_generations,
                 genome_storage_options=genome_storage_options,
             )
 
@@ -283,7 +293,7 @@ class EvolveTest(unittest.TestCase):
         mock_generate_random,
     ):
         """evolve does not call record_genomes_and_fitnesses if generation_number % genome_storage_options['record_every_n_generations'] != 0"""
-        num_generations = 10
+        n_generations = 10
         record_every = 2
         genome_storage_options = {
             "should_record_genomes": True,
@@ -294,13 +304,13 @@ class EvolveTest(unittest.TestCase):
             self.fitness_function,
             self.genome_params,
             self.selection_strategy,
-            num_generations=num_generations,
+            n_generations=n_generations,
             genome_storage_options=genome_storage_options,
         )
 
         expected_calls = [
             call(i, mock_evaluate_fitness.return_value, **genome_storage_options)
-            for i in range(0, num_generations, record_every)
+            for i in range(0, n_generations, record_every)
         ]
 
     @patch("holland.evolution.evolution.generate_random_genomes")
@@ -315,7 +325,7 @@ class EvolveTest(unittest.TestCase):
         mock_generate_random,
     ):
         """evolve calls record_genomes_and_fitnesses if there is an unhandled interruption before re-raising the Exception"""
-        num_generations = 10
+        n_generations = 10
         genome_storage_options = {
             "should_record_on_interrupt": True,
             "file_name": "test.json",
@@ -331,7 +341,7 @@ class EvolveTest(unittest.TestCase):
                 self.fitness_function,
                 self.genome_params,
                 self.selection_strategy,
-                num_generations=num_generations,
+                n_generations=n_generations,
                 genome_storage_options=genome_storage_options,
             )
 
@@ -356,7 +366,7 @@ class EvolveTest(unittest.TestCase):
         mock_generate_random,
     ):
         """evolve does not call record_genomes_and_fitnesses if should_record_on_interrupt is False or not specified"""
-        num_generations = 10
+        n_generations = 10
         genome_storage_options_options = [
             {
                 "should_record_on_interrupt": False,
@@ -377,7 +387,7 @@ class EvolveTest(unittest.TestCase):
                     self.fitness_function,
                     self.genome_params,
                     self.selection_strategy,
-                    num_generations=num_generations,
+                    n_generations=n_generations,
                     genome_storage_options=genome_storage_options,
                 )
 
@@ -395,21 +405,21 @@ class EvolveTest(unittest.TestCase):
         mock_generate_random,
     ):
         """evolve appends the returned fitness_statistics from record_fitness to fitness_history and returns fitness_history if storage format is 'memory'"""
-        num_generations = 10
+        n_generations = 10
         fitness_storage_options = {"should_record_fitness": True, "format": "memory"}
         fitness_results = [
-            [(i + j, chr(65 + i + j)) for j in range(4)] for i in range(num_generations)
+            [(i + j, chr(65 + i + j)) for j in range(4)] for i in range(n_generations)
         ]
         mock_evaluate_fitness.side_effect = fitness_results
 
-        all_fitness_stats = [{"gen": i, "max": i} for i in range(num_generations)]
+        all_fitness_stats = [{"gen": i, "max": i} for i in range(n_generations)]
         mock_record_fitness.side_effect = all_fitness_stats
 
         _, fitness_history = evolve(
             self.fitness_function,
             self.genome_params,
             self.selection_strategy,
-            num_generations=num_generations,
+            n_generations=n_generations,
             fitness_storage_options=fitness_storage_options,
         )
 
@@ -422,11 +432,10 @@ class EvolveTest(unittest.TestCase):
         self, mock_generate_next_gen, mock_evaluate_fitness, mock_generate_random
     ):
         """evolve returns the fitness_results from the last generation"""
-        num_generations = 10
+        n_generations = 10
         initial_population = ["A", "B", "C"]
         generated_populations = [
-            [chr(i), chr(i + 1), chr(i + 2)]
-            for i in range(66, 66 + num_generations - 1)
+            [chr(i), chr(i + 1), chr(i + 2)] for i in range(66, 66 + n_generations - 1)
         ]
         all_populations = [initial_population] + generated_populations
         results = [list(zip([10, 20, 30], pop)) for pop in all_populations]
@@ -439,7 +448,7 @@ class EvolveTest(unittest.TestCase):
             self.genome_params,
             self.selection_strategy,
             initial_population=initial_population,
-            num_generations=num_generations,
+            n_generations=n_generations,
         )
 
         expected_final_results = results[-1]
