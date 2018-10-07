@@ -10,7 +10,8 @@ def generate_next_generation(
     fitness_results,
     genome_params,
     selection_strategy,
-    random_per_generation=0,
+    n_random=0,
+    n_elite=0,
     population_size=None,
 ):
     """
@@ -25,14 +26,21 @@ def generate_next_generation(
     :param selection_strategy: a dictionary specifying selection parameters; see :ref:`selection-strategy`
     :type selection_strategy: dict
     
-    :param random_per_generation: the number of random genomes to introduce
-    :type random_per_generation: int
+    :param n_random: the number of random genomes to introduce
+    :type n_random: int
+
+    :param n_elite: the number of genomes from the current generation to preserve for the next generation unchanged (starting with the most fit genome)
+    :type n_elite: int
     
     :param population_size: the size of the population (defaults to length of ``fitness_results``)
     :type population_size: int or None
 
 
     :returns: a list of genomes
+
+    
+    :raises ValueError: if ``n_random < 0`` or ``n_elite < 0``
+    :raises ValueError: if ``n_random + n_elite > population_size``
 
 
     .. todo:: Write an example for usage
@@ -42,20 +50,36 @@ def generate_next_generation(
         * :func:`~holland.evolution.breed_next_generation`
         * :func:`~holland.evolution.generate_random_genomes`
     """
+    if n_random < 0 or n_elite < 0:
+        raise ValueError("Number of random or elite individuals cannot be negative")
+
     if population_size is None:
         population_size = len(fitness_results)
 
-    bred_per_generation = population_size - random_per_generation
+    if n_random + n_elite > population_size:
+        raise ValueError(
+            "Number of random and elite individuals must be less than or equal to population size"
+        )
 
-    return [
-        *breed_next_generation(
-            fitness_results, genome_params, selection_strategy, bred_per_generation
-        ),
-        *generate_random_genomes(genome_params, random_per_generation),
+    bred_per_generation = population_size - n_random - n_elite
+
+    elite_genomes = [
+        genome
+        for fitness, genome in sorted(
+            fitness_results, key=lambda x: x[0], reverse=True
+        )[:n_elite]
     ]
+    bred_genomes = breed_next_generation(
+        fitness_results, genome_params, selection_strategy, bred_per_generation
+    )
+    random_genomes = generate_random_genomes(genome_params, n_random)
+
+    return elite_genomes + bred_genomes + random_genomes
 
 
-def breed_next_generation(fitness_results, genome_params, selection_strategy, n_genomes):
+def breed_next_generation(
+    fitness_results, genome_params, selection_strategy, n_genomes
+):
     """
     Generates a given number of genomes by breeding, through crossover and mutation, existing genomes
 

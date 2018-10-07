@@ -21,7 +21,44 @@ class GenerateNextGenerationTest(unittest.TestCase):
             "parents": {"weighting_function": lambda x: x * x, "n_parents": 2},
         }
         self.population_size = 50
-        self.random_per_generation = 2
+        self.n_random = 2
+        self.n_elite = 3
+
+    def test_asserts_n_random_and_n_elites_are_nonnegative(self):
+        """generate_next_generation raises a Value error if n_random or n_elite is less than zero"""
+        # Random
+        with self.assertRaises(ValueError):
+            generate_next_generation(
+                self.fitness_results,
+                self.genome_params,
+                self.selection_strategy,
+                n_random=-1,
+            )
+
+        # Elite
+        with self.assertRaises(ValueError):
+            generate_next_generation(
+                self.fitness_results,
+                self.genome_params,
+                self.selection_strategy,
+                n_elite=-1,
+            )
+
+    def test_asserts_n_random_and_n_elites_sum_to_leq_population_size(self):
+        """generate_next_generation raises a ValueError if n_random + n_elite > population_size"""
+        n_random = 10
+        n_elite = 10
+        population_size = 10
+
+        with self.assertRaises(ValueError):
+            generate_next_generation(
+                self.fitness_results,
+                self.genome_params,
+                self.selection_strategy,
+                n_random=n_random,
+                n_elite=n_elite,
+                population_size=population_size,
+            )
 
     @patch("holland.evolution.breeding.breed_next_generation")
     @patch("holland.evolution.breeding.generate_random_genomes")
@@ -33,7 +70,8 @@ class GenerateNextGenerationTest(unittest.TestCase):
             self.fitness_results,
             self.genome_params,
             self.selection_strategy,
-            random_per_generation=self.random_per_generation,
+            n_random=self.n_random,
+            n_elite=self.n_elite,
             population_size=self.population_size,
         )
 
@@ -41,7 +79,7 @@ class GenerateNextGenerationTest(unittest.TestCase):
             self.fitness_results,
             self.genome_params,
             self.selection_strategy,
-            self.population_size - self.random_per_generation,
+            self.population_size - self.n_random - self.n_elite,
         )
 
     @patch("holland.evolution.breeding.breed_next_generation")
@@ -54,14 +92,15 @@ class GenerateNextGenerationTest(unittest.TestCase):
             self.fitness_results,
             self.genome_params,
             self.selection_strategy,
-            random_per_generation=self.random_per_generation,
+            n_random=self.n_random,
+            n_elite=self.n_elite,
         )
 
         mock_breed.assert_called_with(
             self.fitness_results,
             self.genome_params,
             self.selection_strategy,
-            len(self.fitness_results) - self.random_per_generation,
+            len(self.fitness_results) - self.n_random - self.n_elite,
         )
 
     @patch("holland.evolution.breeding.breed_next_generation")
@@ -74,19 +113,17 @@ class GenerateNextGenerationTest(unittest.TestCase):
             self.fitness_results,
             self.genome_params,
             self.selection_strategy,
-            random_per_generation=self.random_per_generation,
+            n_random=self.n_random,
         )
 
-        mock_generate_random.assert_called_with(
-            self.genome_params, self.random_per_generation
-        )
+        mock_generate_random.assert_called_with(self.genome_params, self.n_random)
 
     @patch(
         "holland.evolution.breeding.breed_next_generation",
-        return_value=["a", "b", "c", "d", "e"],
+        return_value=["v", "w", "x", "y", "z"],
     )
     @patch(
-        "holland.evolution.breeding.generate_random_genomes", return_value=["f", "g"]
+        "holland.evolution.breeding.generate_random_genomes", return_value=["t", "u"]
     )
     def test_returns_bred_and_random_individuals_in_one_list(
         self, mock_generate_random, mock_breed
@@ -96,13 +133,42 @@ class GenerateNextGenerationTest(unittest.TestCase):
             self.fitness_results,
             self.genome_params,
             self.selection_strategy,
-            random_per_generation=self.random_per_generation,
+            n_random=self.n_random,
         )
 
         expected_next_generation = (
             mock_breed.return_value + mock_generate_random.return_value
         )
-        self.assertListEqual(next_generation, expected_next_generation)
+        self.assertListEqual(sorted(next_generation), sorted(expected_next_generation))
+
+    @patch(
+        "holland.evolution.breeding.breed_next_generation",
+        return_value=["v", "w", "x", "y", "z"],
+    )
+    @patch(
+        "holland.evolution.breeding.generate_random_genomes", return_value=["t", "u"]
+    )
+    def test_returns_bred_random_and_elite_individuals_in_one_list(
+        self, mock_generate_random, mock_breed
+    ):
+        """generate_next_generation returns the results of breed_next_generation and generate_random_genomes and the top n_elite individuals from the current generation all concatenated together"""
+        random.shuffle(self.fitness_results)
+
+        next_generation = generate_next_generation(
+            self.fitness_results,
+            self.genome_params,
+            self.selection_strategy,
+            n_random=self.n_random,
+            n_elite=self.n_elite,
+        )
+
+        self.fitness_results.sort(key=lambda x: x[0])
+
+        elites = [g for s, g in self.fitness_results[-self.n_elite :]]
+        expected_next_generation = (
+            elites + mock_breed.return_value + mock_generate_random.return_value
+        )
+        self.assertListEqual(sorted(next_generation), sorted(expected_next_generation))
 
 
 class BreedNextGenerationTest(unittest.TestCase):
@@ -162,7 +228,7 @@ class BreedNextGenerationTest(unittest.TestCase):
     def test_calls_select_parents_correctly_with_given_number(
         self, mock_mutate, mock_cross, mock_select_parents, mock_select_pool
     ):
-        """breed_next_generation selects parents according to the parents selection_strategy and random_per_generation when population_size is specified"""
+        """breed_next_generation selects parents according to the parents selection_strategy and n_random when population_size is specified"""
         breed_next_generation(
             self.fitness_results,
             self.genome_params,
