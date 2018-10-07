@@ -74,6 +74,23 @@ def select_from(values, top=0, mid=0, bottom=0, random=0):
     return selected
 
 
+def is_numeric_type(gene_params):
+    """
+    Determines if a gene is of a numeric type or not (whether list type or not); e.g. returns ``False`` if type is ``"bool"`` or ``"[bool]"``, but ``True`` if type is ``"float"`` or ``"[float]"``
+
+    :param gene_params: a dictionary of parameters for a single gene; see :ref:`genome-params`
+    :type gene_params: dict
+
+    :returns: a boolean indiciating whether the gene is of a numeric type or not
+    """
+    if is_list_type(gene_params):
+        value_type = re.findall(r"\[(.+?)\]", gene_params["type"])[0]
+    else:
+        value_type = gene_params["type"]
+
+    return value_type in ["int", "float"]
+
+
 def is_list_type(gene_params):
     """
     Determines if a gene is of a list type or not; e.g. returns ``False`` if type is ``"float"`` but ``True`` if type is ``"[float]"``
