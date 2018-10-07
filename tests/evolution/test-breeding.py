@@ -15,7 +15,7 @@ class GenerateNextGenerationTest(unittest.TestCase):
         self.fitness_scores = (100, 90, 85, 50, 45, 44, 30, 10, 9, 8, 7)
         self.genomes = ("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k")
         self.fitness_results = list(zip(self.fitness_scores, self.genomes))
-        self.genome_params = {"a": {"type": "float"}}
+        self.genome_params = {"a": {"type": "[float]"}}
         self.selection_strategy = {
             "pool": {"top": 2, "bottom": 1, "random": 2},
             "parents": {"weighting_function": lambda x: x * x, "n_parents": 2},
@@ -176,7 +176,7 @@ class BreedNextGenerationTest(unittest.TestCase):
         self.fitness_scores = (100, 90, 85, 50, 45, 44, 30, 10, 9, 8, 7)
         self.genomes = ("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k")
         self.fitness_results = list(zip(self.fitness_scores, self.genomes))
-        self.genome_params = {"a": {"type": "float"}}
+        self.genome_params = {"a": {"type": "[float]"}}
         self.selection_strategy = {
             "pool": {"top": 2, "bottom": 1, "random": 2},
             "parents": {"weighting_function": lambda x: x * x, "n_parents": 2},
@@ -319,20 +319,31 @@ class BreedNextGenerationTest(unittest.TestCase):
 
 class GenerateRandomIndividualsTest(unittest.TestCase):
     def setUp(self):
-        self.genome_params = {
+        self.list_genome_params = {
             "gene1": {
-                "type": "bool",
+                "type": "[bool]",
                 "size": 10,
                 "initial_distribution": Mock(return_value=True),
             },
             "gene2": {
-                "type": "float",
+                "type": "[float]",
                 "size": 5,
                 "initial_distribution": Mock(return_value=1.5),
             },
             "gene3": {
-                "type": "float",
+                "type": "[float]",
                 "size": 20,
+                "initial_distribution": Mock(return_value=6.0),
+                "max": 10,
+                "min": 1,
+            },
+        }
+
+        self.value_genome_params = {
+            "gene1": {"type": "bool", "initial_distribution": Mock(return_value=True)},
+            "gene2": {"type": "float", "initial_distribution": Mock(return_value=1.5)},
+            "gene3": {
+                "type": "float",
                 "initial_distribution": Mock(return_value=6.0),
                 "max": 10,
                 "min": 1,
@@ -342,64 +353,97 @@ class GenerateRandomIndividualsTest(unittest.TestCase):
     def test_asserts_number_is_at_least_zero(self):
         """generate_random_genomes raises a ValueError if number is less than zero"""
         with self.assertRaises(ValueError):
-            generate_random_genomes(self.genome_params, -1)
+            generate_random_genomes(self.list_genome_params, -1)
 
     def test_returns_empty_list_if_number_is_zero(self):
         """generate_random_genomes returns an empty list if the given number is zero"""
-        random_individuals = generate_random_genomes(self.genome_params, 0)
+        random_genomes = generate_random_genomes(self.list_genome_params, 0)
 
         expected_random_individuals = []
-        self.assertListEqual(random_individuals, expected_random_individuals)
+        self.assertListEqual(random_genomes, expected_random_individuals)
 
-    def test_generates_genomes_according_to_genome_params(self):
+    def test_generates_genomes_according_to_genome_params_for_list_type_genes(self):
         """generate_random_genomes generates `number` genomes with values according to each gene's initial_distribution function and with length according to size"""
         number = 10
-        random_individuals = generate_random_genomes(self.genome_params, number)
+        random_genomes = generate_random_genomes(self.list_genome_params, number)
 
-        self.assertEqual(len(random_individuals), number)
+        self.assertEqual(len(random_genomes), number)
 
-        self.assertEqual(
-            self.genome_params["gene1"]["initial_distribution"].call_count,
-            number * self.genome_params["gene1"]["size"],
-        )
-        self.assertEqual(
-            self.genome_params["gene2"]["initial_distribution"].call_count,
-            number * self.genome_params["gene2"]["size"],
-        )
-        self.assertEqual(
-            self.genome_params["gene3"]["initial_distribution"].call_count,
-            number * self.genome_params["gene3"]["size"],
-        )
+        for gene_name, gene_params in self.list_genome_params.items():
+            self.assertEqual(
+                gene_params["initial_distribution"].call_count,
+                number * gene_params["size"],
+            )
 
-        for individual in random_individuals:
-            for gene_name, gene in individual.items():
-                self.assertEqual(len(gene), self.genome_params[gene_name]["size"])
+        for genome in random_genomes:
+            for gene_name, gene in genome.items():
+                self.assertEqual(len(gene), self.list_genome_params[gene_name]["size"])
+
+    def test_generates_genomes_according_to_genome_params_for_value_type_genes(self):
+        """generate_random_genomes generates `number` genomes with values according to each gene's initial_distribution function"""
+        number = 10
+        random_genomes = generate_random_genomes(self.value_genome_params, number)
+
+        self.assertEqual(len(random_genomes), number)
+
+        for gene_name, gene_params in self.value_genome_params.items():
+            self.assertEqual(gene_params["initial_distribution"].call_count, number)
+
+        for genome in random_genomes:
+            for gene_name, gene in genome.items():
+                self.assertFalse(isinstance(gene, list))
 
     @patch("holland.evolution.breeding.bound_value")
-    def test_calls_bound_value_on_each_value_generated_if_type_is_float(
+    def test_calls_bound_value_on_each_value_generated_if_type_is_list_numeric(
         self, mock_bound_value
     ):
-        """generate_random_genomes calls bound_value on each value if the gene's type is float using the gene_params max and min"""
+        """generate_random_genomes calls bound_value on each value if the gene's type is numeric using the gene_params max and min"""
         number = 1
-        generate_random_genomes(self.genome_params, number)
+        generate_random_genomes(self.list_genome_params, number)
 
         expected_calls = [
             call(
-                self.genome_params["gene2"]["initial_distribution"].return_value,
-                minimum=None,
-                maximum=None,
+                self.list_genome_params["gene2"]["initial_distribution"].return_value,
+                minimum=self.list_genome_params["gene2"].get("min"),
+                maximum=self.list_genome_params["gene2"].get("max"),
             )
-            for _ in range(self.genome_params["gene2"]["size"])
+            for _ in range(self.list_genome_params["gene2"]["size"])
         ] + [
             call(
-                self.genome_params["gene3"]["initial_distribution"].return_value,
-                minimum=self.genome_params["gene3"]["min"],
-                maximum=self.genome_params["gene3"]["max"],
+                self.list_genome_params["gene3"]["initial_distribution"].return_value,
+                minimum=self.list_genome_params["gene3"]["min"],
+                maximum=self.list_genome_params["gene3"]["max"],
             )
-            for _ in range(self.genome_params["gene3"]["size"])
+            for _ in range(self.list_genome_params["gene3"]["size"])
         ]
 
         mock_bound_value.assert_has_calls(expected_calls)
 
         expected_number_of_calls = len(expected_calls)
+        self.assertEqual(mock_bound_value.call_count, expected_number_of_calls)
+
+    @patch("holland.evolution.breeding.bound_value")
+    def test_calls_bound_value_on_the_generated_Value_if_type_is_numeric(
+        self, mock_bound_value
+    ):
+        """generate_random_genomes calls bound_value on the output of initial_distribution if type is numeric"""
+        number = 1
+        generate_random_genomes(self.value_genome_params, number)
+
+        expected_calls = [
+            call(
+                self.value_genome_params["gene2"]["initial_distribution"].return_value,
+                minimum=self.list_genome_params["gene2"].get("min"),
+                maximum=self.list_genome_params["gene2"].get("max"),
+            ),
+            call(
+                self.value_genome_params["gene3"]["initial_distribution"].return_value,
+                minimum=self.list_genome_params["gene3"]["min"],
+                maximum=self.list_genome_params["gene3"]["max"],
+            ),
+        ]
+
+        mock_bound_value.assert_has_calls(expected_calls)
+
+        expected_number_of_calls = 2
         self.assertEqual(mock_bound_value.call_count, expected_number_of_calls)

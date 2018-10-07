@@ -8,8 +8,8 @@ class EvolveTest(unittest.TestCase):
     def setUp(self):
         self.fitness_function = lambda x: 100
         self.genome_params = {
-            "gene1": {"type": "bool", "size": 10},
-            "gene2": {"type": "float", "size": 100},
+            "gene1": {"type": "[bool]", "size": 10},
+            "gene2": {"type": "[float]", "size": 100},
         }
         self.selection_strategy = {
             "pool": {"top": 1, "mid": 0, "bottom": 1, "random": 0},
