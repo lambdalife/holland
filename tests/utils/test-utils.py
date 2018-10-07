@@ -171,6 +171,22 @@ class SelectFromTest(unittest.TestCase):
         self.assertListEqual(sorted(selection_pool), sorted(expected_selected_values))
 
 
+class IsNumericTypeTest(unittest.TestCase):
+    def test_returns_False_if_is_not_numeric_type(self):
+        """is_numeric_type returns False if the type is not int or float"""
+        self.assertFalse(is_numeric_type({"type": "bool"}))
+        self.assertFalse(is_numeric_type({"type": "[bool]"}))
+        self.assertFalse(is_numeric_type({"type": "str"}))
+        self.assertFalse(is_numeric_type({"type": "[str]"}))
+
+    def test_returns_True_if_is_numeric_type(self):
+        """is_numeric_type returns True if the type is int or float"""
+        self.assertTrue(is_numeric_type({"type": "int"}))
+        self.assertTrue(is_numeric_type({"type": "[int]"}))
+        self.assertTrue(is_numeric_type({"type": "float"}))
+        self.assertTrue(is_numeric_type({"type": "[float]"}))
+
+
 class IsListTypeTest(unittest.TestCase):
     def test_returns_False_if_is_not_list_type(self):
         """is_list_type returns False if the type is not wrapped in brackets"""
