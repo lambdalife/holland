@@ -10,28 +10,6 @@ def get_flip_mutation_function():
 
 
     :returns: a function that returns the negated value if its input
-
-
-    Example::
-        
-        import random
-
-
-        genome = {
-            "gene1": [True, True, False, True, False, False, False],
-            "gene2": [False, False, True, False]
-        }
-        flip_mutate = get_flip_mutation_function()
-        mutation_rate = 0.01
-    
-        mutated_genome = {}
-        for gene_name, gene in genome:
-            mutated_gene = [
-                flip_mutate(value) if random.random() < mutation_rate else value #apply probabilistically
-                for value in gene
-            ]
-            mutated_genome[gene_name] = mutated_gene
-
     """
     return lambda value: not value
 
@@ -43,7 +21,6 @@ def get_boundary_mutation_function(minimum, maximum):
     :Valid For:
         ``"int"``, ``"[int]"``, ``"float"``, and ``"[float]"`` gene types
 
-
     :param minimum: the minimum allowed value
     :type minimum: int/float
 
@@ -52,29 +29,6 @@ def get_boundary_mutation_function(minimum, maximum):
 
 
     :returns: either ``minimum`` or ``maximum`` (equally likely)
-
-
-    Example::
-
-        import random
-
-
-        genome = {
-            "gene1": [123.8, 118.2, 103.0],
-            "gene2": [1.5, 3.7, 2.6, 1.9]
-        }
-        minimum = 0
-        maximum = 1000
-        boundary_mutate = get_boundary_mutation_function(minimum, maximum)
-        mutation_rate = 0.01
-    
-        mutated_genome = {}
-        for gene_name, gene in genome:
-            mutated_gene = [
-                boundary_mutate(value) if random.random() < mutation_rate else value #apply probabilistically
-                for value in gene
-            ]
-            mutated_genome[gene_name] = mutated_gene
     """
     return lambda value: minimum if random.random() < 0.5 else maximum
 
@@ -94,29 +48,6 @@ def get_uniform_mutation_function(minimum, maximum):
 
 
     :returns: a sample from a uniform distribution
-
-
-    Example::
-
-        import random
-
-
-        genome = {
-            "gene1": [123.8, 118.2, 103.0],
-            "gene2": [1.5, 3.7, 2.6, 1.9]
-        }
-        minimum = 0
-        maximum = 1000
-        uniform_mutate = get_uniform_mutation_function(minimum, maximum)
-        mutation_rate = 0.01
-    
-        mutated_genome = {}
-        for gene_name, gene in genome:
-            mutated_gene = [
-                uniform_mutate(value) if random.random() < mutation_rate else value #apply probabilistically
-                for value in gene
-            ]
-            mutated_genome[gene_name] = mutated_gene
     """
     return lambda value: random.uniform(minimum, maximum)
 
@@ -133,27 +64,5 @@ def get_gaussian_mutation_function(sigma):
 
 
     :returns: a sample from a gaussian distribution
-
-
-    Example::
-
-        import random
-
-
-        genome = {
-            "gene1": [123.8, 118.2, 103.0],
-            "gene2": [1.5, 3.7, 2.6, 1.9]
-        }
-        sigma = 50
-        gaussian_mutate = get_gaussian_mutation_function(sigma)
-        mutation_rate = 0.01
-    
-        mutated_genome = {}
-        for gene_name, gene in genome:
-            mutated_gene = [
-                gaussian_mutate(value) if random.random() < mutation_rate else value #apply probabilistically
-                for value in gene
-            ]
-            mutated_genome[gene_name] = mutated_gene
     """
     return lambda value: random.gauss(value, sigma)
