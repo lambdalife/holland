@@ -11,18 +11,6 @@ def get_uniform_crossover_function():
 
     
     :returns: a function that accepts a list of parent genes and applies uniform crossover to them and returns a new gene
-
-
-    Example::
-        
-        parent_genomes = select_parents(fitness_results)
-        gene_names = parent_genomes[0].keys()
-        uniform_crossover = get_uniform_crossover_function()
-
-        offspring = {}
-        for gene_name in gene_names:
-            parent_genes = [pg[gene_name] for pg in parent_genomes]
-            offspring[gene_name] = uniform_crossover(parent_genes)
     """
 
     def uniform_crossover(parent_genes):
@@ -48,18 +36,6 @@ def get_point_crossover_function(n_crossover_points=1):
 
 
     :raises ValueError: if ``n_crossover_points`` is negative
-
-    Example::
-        
-        parent_genomes = select_parents(fitness_results)
-        gene_names = parent_genomes[0].keys()
-        n_crossover_points = len(parent_genomes) - 1
-        point_crossover = get_point_crossover_function(n_crossover_points=n_crossover_points)
-
-        offspring = {}
-        for gene_name in gene_names:
-            parent_genes = [pg[gene_name] for pg in parent_genomes]
-            offspring[gene_name] = point_crossover(parent_genes)
     """
     if n_crossover_points < 0:
         raise ValueError("Number of crossover points cannot be negative")
@@ -90,18 +66,6 @@ def get_and_crossover_function():
 
 
     :returns: a function that accepts a list of parent genes and applies 'and' crossover
-
-
-    Example::
-
-        parent_genomes = select_parents(fitness_results)
-        gene_names = parent_genomes[0].keys()
-        and_crossover = get_and_crossover_function()
-
-        offspring = {}
-        for gene_name in gene_names:
-            parent_genes = [pg[gene_name] for pg in parent_genomes]
-            offspring[gene_name] = and_crossover(parent_genes)
     """
 
     def and_crossover(parent_genes):
@@ -122,18 +86,6 @@ def get_or_crossover_function():
 
 
     :returns: a function that accepts a list of parent genes and applies 'or' crossover
-
-
-    Example::
-
-        parent_genomes = select_parents(fitness_results)
-        gene_names = parent_genomes[0].keys()
-        or_crossover = get_or_crossover_function()
-
-        offspring = {}
-        for gene_name in gene_names:
-            parent_genes = [pg[gene_name] for pg in parent_genomes]
-            offspring[gene_name] = or_crossover(parent_genes)
     """
 
     def or_crossover(parent_genes):
