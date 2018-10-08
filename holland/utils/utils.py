@@ -3,7 +3,7 @@ import math
 import numpy as np
 
 
-def bound_value(value, minimum=-np.inf, maximum=np.inf):
+def bound_value(value, minimum=-np.inf, maximum=np.inf, to_int=False):
     """
     Bounds a value between a minimum and maximum
 
@@ -16,6 +16,9 @@ def bound_value(value, minimum=-np.inf, maximum=np.inf):
     :param maximum: the upper bound
     :type maximum: int/float
 
+    :param to_int: whether or not to cast the result to an int
+    :type to_int: bool
+
 
     :returns: the bounded value
     """
@@ -23,6 +26,10 @@ def bound_value(value, minimum=-np.inf, maximum=np.inf):
         minimum = -np.inf
     if maximum is None:
         maximum = np.inf
+    if to_int:
+        if isinstance(minimum, float) and minimum != -np.inf:
+            return int(min(max(value, math.ceil(minimum)), maximum))
+        return int(min(max(value, minimum), maximum))
     return min(max(value, minimum), maximum)
 
 
