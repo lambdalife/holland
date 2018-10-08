@@ -58,14 +58,14 @@ def select_parents(fitness_results, weighting_function=lambda x: 1, n_parents=2)
     :param weighting_function: a function for weighting the probability of selecting a genome based on its fitness, default is uniform probability (i.e. ``lambda x: 1``); see :ref:`selection-strategy`
     :type weighting_function: func
 
-    :param n_parents: the number of genomes to select; defined in :ref:`selection-strategy`
+    :param n_parents: the number of genomes to select; see :ref:`selection-strategy`
     :type n_parents: int
 
 
     :returns: a list of genomes (of length ``n_parents``)
 
 
-    :raises ValueError: if ``n_parents`` is less than 1
+    :raises ValueError: if ``n_parents < 1``
     """
     if n_parents < 1:
         raise ValueError("Number of parents must be at least 1")
@@ -73,6 +73,13 @@ def select_parents(fitness_results, weighting_function=lambda x: 1, n_parents=2)
     fitness_scores, genomes = zip(*fitness_results)
 
     weighted_scores = [weighting_function(fitness) for fitness in fitness_scores]
+    min_weighted_score = min(weighted_scores)
+    if min_weighted_score < 0:
+        max_weighted_score = max(weighted_scores)
+        base_shift = abs(min_weighted_score)
+        shift = base_shift + (base_shift + max_weighted_score) / 100
+        weighted_scores = [ws + shift for ws in weighted_scores]
+
     weighted_total = sum(weighted_scores)
     selection_probabilities = [
         weighted_score / weighted_total for weighted_score in weighted_scores

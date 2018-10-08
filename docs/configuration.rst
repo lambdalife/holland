@@ -147,9 +147,11 @@ The significance of these values is as follows:
         * **bottom** (*int*) -- number of genomes to select from the bottom (start) of the pack (by fitness)
         * **random** (*int*) -- number of genomes to select at random
     * **parents**
-        * **weighting_function** (*func*) -- function for converting a fitness score into a probability for selecting an individual as a parent (default is even weighting)
+        * **weighting_function** (*func*) -- function for converting a fitness score into a probability for selecting an individual as a parent (default is uniform weighting); higher weights indicate a higher probability of being selected
         * **n_parents** (*int*) -- number of parents to select for each offspring
 
+
+.. note:: It is recommended that the ``weighting_function`` return only positive values. While Holland can handle weighting functions that return negative values, this presents an ambiguous case in terms of converting weighted scores to probabilities. Current handling of this case aims to minimally distort probabilities, but results may not be exactly what you expect.
 
 
 
