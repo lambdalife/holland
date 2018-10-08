@@ -124,6 +124,8 @@ Selection Strategy
 
 The selection strategy for breeding the next generation of indviduals is specified in the ``selection_strategy`` dictionary. The strategy is ultimately used by the functions :func:`~holland.evolution.select_breeding_pool`, which uses information contained in the ``"pool"`` section of the selection strategy, and :func:`~holland.evolution.select_parents`, which uses information contained in ``"parents"``.
 
+The fitness weighting function determines how to weight fitness scores in order to translate into probabilities for selection of a genome as a parent for an individual in the next generation. For cases in which fitness is sought to be maximized, an increasing fitness weighting function should be used, whereas  cases in which fitness should be minimized (e.g. fitness represents error) should employ a decreasing fitness weighting function. In both cases a uniform weighting function will suffice. In the case of minimizing fitness, a reciprocal weighting function, linear weighting function with negative slope, or polynomial weighting function with negative power will work. See :ref:`library-fitness-weighting-functions` for stock fitness weighting functions.
+
 The dictionary ``selection_strategy`` should have the below form. The example values shown here are the defaults and any parameters that are not specified will use these values as defaults::
 
     {
