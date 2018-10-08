@@ -55,6 +55,9 @@ Library
 
 crossover functions
 ~~~~~~~~~~~~~~~~~~~
+
+Crossover functions are used by :func:`~holland.evolution.cross_genomes` to perform crossover. The following functions return stock crossover functions, some with configurable parameters. See :ref:`crossover-functions` for general information.
+
 .. autofunction:: holland.library.get_uniform_crossover_function
 .. autofunction:: holland.library.get_point_crossover_function
 .. autofunction:: holland.library.get_and_crossover_function
@@ -64,10 +67,34 @@ crossover functions
 
 mutation functions
 ~~~~~~~~~~~~~~~~~~
+
+Mutation functions are used by :func:`~holland.evolution.probibalistically_mutate_value` to apply mutation to a gene value. The following functions return stock mutation functions, some with configurable parameters. See :ref:`mutation-functions` for general information.
+
 .. autofunction:: holland.library.get_flip_mutation_function
 .. autofunction:: holland.library.get_boundary_mutation_function
 .. autofunction:: holland.library.get_uniform_mutation_function
 .. autofunction:: holland.library.get_gaussian_mutation_function
+
+.. _library-fitness-weighting-functions:
+
+fitness weighting functions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Fitness weighting functions are used by :func:`~holland.evolution.select_parents` to weight fitness scores and generate probabilities for selecting a genome to be a parent of a genome in the next generation. The following functions return stock weighting functions, some with configurable parameters. See :ref:`selection-strategy` for general information.
+
+General Example:
+
+    .. literalinclude:: examples/get_fitness_weighting_function_example.py
+        :emphasize-lines: 4,10
+
+
+.. autofunction:: holland.library.get_uniform_weighting_function
+.. autofunction:: holland.library.get_linear_weighting_function
+.. autofunction:: holland.library.get_polynomial_weighting_function
+.. autofunction:: holland.library.get_exponential_weighting_function
+.. autofunction:: holland.library.get_logarithmic_weighting_function
+.. autofunction:: holland.library.get_reciprocal_weighting_function
+
 
 
 
