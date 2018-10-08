@@ -43,6 +43,7 @@ def get_boundary_mutation_function(minimum, maximum):
     :Valid For:
         ``"int"``, ``"[int]"``, ``"float"``, and ``"[float]"`` gene types
 
+
     :param minimum: the minimum allowed value
     :type minimum: int/float
 
@@ -122,7 +123,7 @@ def get_uniform_mutation_function(minimum, maximum):
 
 def get_gaussian_mutation_function(sigma):
     """
-    Returns a function that returns a value drawn from a gaussian (normal) distribution with mean equal to ``value`` and standard_deviation equal to ``sigma``
+    Returns a function that returns a value drawn from a gaussian (normal) distribution with mean equal to ``value`` and standard_deviation equal to ``sigma``; see :ref:`mutation-functions`
 
     :Valid For:
         ``"int"``, ``"[int]"``, ``"float"``, and ``"[float]"`` gene types
