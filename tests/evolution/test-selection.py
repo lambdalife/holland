@@ -1,4 +1,3 @@
-import random
 import numpy as np
 import unittest
 from unittest.mock import patch
@@ -8,8 +7,8 @@ from holland.evolution.selection import select_breeding_pool, select_parents
 
 class SelectBreedingPoolTest(unittest.TestCase):
     def setUp(self):
-        self.fitness_scores = (100, 90, 85, 50, 45, 44, 30, 10, 9, 8, 7)
-        self.genomes = ("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k")
+        self.fitness_scores = (7, 8, 9, 10, 30, 44, 45, 50, 85, 90, 100)
+        self.genomes = ("k", "j", "i", "h", "g", "f", "e", "d", "c", "b", "a")
         self.fitness_results = list(zip(self.fitness_scores, self.genomes))
 
     def test_asserts_top_center_bottom_and_random_sum_to_leq_population_size(self):
@@ -32,7 +31,6 @@ class SelectBreedingPoolTest(unittest.TestCase):
         self
     ):
         """select_breeding_pool correctly selects individuals from the top, middle, and bottom according to the given arguments when poplutation size is odd"""
-        random.shuffle(self.fitness_results)
         selection_pool = select_breeding_pool(
             self.fitness_results, top=1, mid=1, bottom=1
         )
@@ -44,7 +42,6 @@ class SelectBreedingPoolTest(unittest.TestCase):
         self
     ):
         """select_breeding_pool correctly selects individuals from the top, middle, and bottom according to the given arguments when poplutation size is odd"""
-        random.shuffle(self.fitness_results)
         selection_pool = select_breeding_pool(
             self.fitness_results, top=3, mid=3, bottom=3
         )
@@ -66,8 +63,7 @@ class SelectBreedingPoolTest(unittest.TestCase):
         self
     ):
         """select_breeding_pool correctly selects individuals from the top, middle, and bottom according to the given arguments when poplutation size is even"""
-        fitness_results = self.fitness_results[:-1]
-        random.shuffle(fitness_results)
+        fitness_results = self.fitness_results[1:]
         selection_pool = select_breeding_pool(fitness_results, top=1, mid=1, bottom=1)
 
         expected_selection_pool = [(100, "a"), (45, "e"), (8, "j")]
@@ -77,8 +73,7 @@ class SelectBreedingPoolTest(unittest.TestCase):
         self
     ):
         """select_breeding_pool correctly selects individuals from the top, middle, and bottom according to the given arguments when poplutation size is even"""
-        fitness_results = self.fitness_results[:-1]
-        random.shuffle(fitness_results)
+        fitness_results = self.fitness_results[1:]
         selection_pool = select_breeding_pool(fitness_results, top=3, mid=3, bottom=3)
 
         expected_selection_pool = [
@@ -99,7 +94,6 @@ class SelectBreedingPoolTest(unittest.TestCase):
         self, mock_choice
     ):
         """narrow_selecetion_pool selects individuals randomly but does not select duplicates"""
-        random.shuffle(self.fitness_results)
 
         select_breeding_pool(self.fitness_results, top=1, mid=1, bottom=1)
 
@@ -117,13 +111,9 @@ class SelectBreedingPoolTest(unittest.TestCase):
     @patch("numpy.random.choice", return_value=np.array([2, 7]))
     def test_returns_selected_pool(self, mock_choice):
         """select_breeding_pool returns the fitness_results that were selected as expected"""
-        random.shuffle(self.fitness_results)
-
         selection_pool = select_breeding_pool(
             self.fitness_results, top=2, mid=2, bottom=2, random=2
         )
-
-        self.fitness_results.sort(key=lambda x: x[0])
 
         expected_selection_pool = [
             (100, "a"),

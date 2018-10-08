@@ -7,16 +7,16 @@ def select_breeding_pool(fitness_results, top=0, mid=0, bottom=0, random=0):
     """
     Selects a pool of genomes from a population from which to draw parents for breeding the next generation
 
-    :param fitness_results: a (not necessarily sorted) list of tuples containing a fitness score in the first position and a genome in the second (returned by :func:`~holland.evolution.evaluate_fitness`)
+    :param fitness_results: a sorted list of tuples containing a fitness score in the first position and a genome in the second (returned by :func:`~holland.evolution.evaluate_fitness`)
     :type fitness_results: list
 
-    :param top: number of elements to select from the top of the ``fitness_results`` sorted by fitness score
+    :param top: number of elements to select from the top of the ``fitness_results``
     :type top: int
 
-    :param mid: number of elements to select from the middle of the ``fitness_results`` sorted by fitness score
+    :param mid: number of elements to select from the middle of the ``fitness_results``
     :type mid: int
 
-    :param bottom: number of elements to select from the bottom of the ``fitness_results`` sorted by fitness score
+    :param bottom: number of elements to select from the bottom of the ``fitness_results``
     :type bottom: int
 
     :param random: number of elements to select randomly from the ``fitness_results``
@@ -29,6 +29,8 @@ def select_breeding_pool(fitness_results, top=0, mid=0, bottom=0, random=0):
     :raises ValueError: if ``top + mid + bottom + random > len(fitness_results)``
     :raises ValueError: if any of ``top``, ``mid``, ``bottom``, or ``random`` is negative
 
+    .. note:: For the sake of efficiency, this method expects ``fitness_results`` to be sorted in order to properly select genomes on the basis of fitness. :func:`~holland.evolution.evalute_fitness` returns sorted results.
+
     Dependencies:
         * :func:`~holland.utils.select_from`
     """
@@ -39,9 +41,8 @@ def select_breeding_pool(fitness_results, top=0, mid=0, bottom=0, random=0):
     if any(value < 0 for value in (top, mid, bottom, random)):
         raise ValueError("Select Bredding Pool strategy numbers cannot be negative")
 
-    sorted_results = sorted(fitness_results, key=lambda x: x[0])
     selection_pool = select_from(
-        sorted_results, top=top, mid=mid, bottom=bottom, random=random
+        fitness_results, top=top, mid=mid, bottom=bottom, random=random
     )
 
     return selection_pool
@@ -51,7 +52,7 @@ def select_parents(fitness_results, weighting_function=lambda x: 1, n_parents=2)
     """
     Selects parents from the given ``fitness_results`` to use for breeding a new genome
 
-    :param fitness_results: a (not necessarily sorted) list of tuples containing a fitness score in the first position and a genome in the second (returned by :func:`~holland.evolution.evaluate_fitness`)
+    :param fitness_results: a (not necessarily sorted list of tuples containing a fitness score in the first position and a genome in the second (returned by :func:`~holland.evolution.evaluate_fitness`)
     :type fitness_results: list
 
     :param weighting_function: a function for weighting the probability of selecting a genome based on its fitness, default is uniform probability (i.e. ``lambda x: 1``); see :ref:`selection-strategy`
