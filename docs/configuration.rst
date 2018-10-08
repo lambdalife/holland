@@ -29,19 +29,21 @@ Genome Parameters
 
 In order to generate initial and random genomes, perform crossover on genomes, and mutate genomes, ``genome_params`` are required to be specifed. The structure of genomes for populates are determined by these parameters. ``genome_params`` is a dictionary whose keys correspond to individual genes, where the dictionary contained at each key specifies parameters for that gene.
 
+Each gene must have a specified type. There are two broad categories of gene types: list-types and value-types. List-type genes are lists of a set length and containing only elements of a single type. Value-type genes are single values. List-type genes use the notation ``"[type]"`` while value-type genes use the notation ``"type"``.
+
 This is an example of ``genome_params``::
 
     {
-        "float_gene": {
-            "type": "float",
+        "gene1": {
+            "type": "int",
             "max": 100000,
             "min": -100000,
             "initial_distribution": lambda: random.uniform(-100000, 100000),
-            "crossover_function": get_point_crossover_function(n_crossover_points=3), #aaaaa
+            "crossover_function": get_uniform_crossover_function(),
             "mutation_function": get_gaussian_mutation_function(100),
             "mutation_rate": 0.01
         },
-        "list_of_floats_gene": {
+        "gene2": {
             "type": "[float]",
             "size": 100,
             "max": 100000,
@@ -51,17 +53,17 @@ This is an example of ``genome_params``::
             "mutation_function": get_gaussian_mutation_function(100),
             "mutation_rate": 0.01
         },
-        "bool_gene": {
+        "gene3": {
             "type": "bool",
             "initial_distribution": lambda: random.random() < 0.5,
             "crossover_function": get_uniform_crossover_function(),
-            "mutation_function": get_flip_mutation_function(), #aaaa
+            "mutation_function": get_flip_mutation_function(),
             "mutation_rate": 0.05
         },
-        "list_of_bools_gene": {
-            "type": "[bool]",
+        "gene4": {
+            "type": "[str]",
             "size": 5,
-            "initial_distribution": lambda: random.random() < 0.5,
+            "initial_distribution": lambda: random.sample(list_of_words, 1)[0],
             "crossover_function": get_uniform_crossover_function(),
             "mutation_function": get_flip_mutation_function(),
             "mutation_rate": 0.05
@@ -70,16 +72,20 @@ This is an example of ``genome_params``::
 
 The significance of these values is as follows:
 
-    * **type** (*str*) -- specifies the type of the gene; if the gene is just a single value, use the plain type, but if the gene is a list of values, use the type in brackets  (options: ``"float"``, ``"[float]"``, ``"bool"``, ``"[bool]"``)
-    * **size** (*int*) -- specifies the length of the gene
-    * **max** (*int/float*) -- specifies the maximum allowed value for any element of the gene
-    * **min** (*int/float*) -- specifies the minimum allowed value for any element of the gene
+    * **type** (*str*) -- specifies the type of the gene; if the gene is just a single value, use the plain type, but if the gene is a list of values, use the type in brackets; options:
+
+        * ``"float"``, ``"[float]"``
+        * ``"int"``, ``"[int]"``
+        * ``"bool"``, ``"[bool]"``
+        * ``"str"``, ``"[str]"``
+
+    * **size** (*int*) -- specifies the length of the gene if list-type
+    * **max** (*int/float*) -- specifies the maximum allowed value for the gene or any element of the gene if of a numeric type
+    * **min** (*int/float*) -- specifies the minimum allowed value for the gene or any element of the gene if of a numeric type
     * **initial_distribution** (*func*) -- a function for initializing a random gene with values; must not accept any positional arguments
     * **crossover_function** (*func*) -- a function to cross multiple parent genes; see :ref:`crossover-functions` for more
     * **mutation_function** (*func*) -- a function that mutates a single value of a gene; see :ref:`mutation-functions` for more
     * **mutation_rate** (*int/float*) -- probability (``0`` to ``1``) that each value of the gene gets mutated (by applying the ``mutation_function``)
-
-Note that each gene may contain values of only one type.
 
 
 
