@@ -173,6 +173,21 @@ class SelectParentsTest(unittest.TestCase):
             self.genomes, p=expected_probabilities, size=self.n_parents, replace=False
         )
 
+    @patch("numpy.random.choice")
+    def test_handles_negative_weighted_scores(self, mock_choice):
+        """select_parents does not pass negative probabilities to np.random.choice if some weighted scores are negative"""
+        weighting_function = lambda x: x
+        self.fitness_results.append((-10, "e"))
+
+        select_parents(
+            self.fitness_results,
+            weighting_function=weighting_function,
+            n_parents=self.n_parents,
+        )
+
+        actual_probabilities = mock_choice.call_args[1]["p"]
+        self.assertTrue(all(p >= 0 for p in actual_probabilities))
+
     @patch("numpy.random.choice", return_value=["a", "b", "c"])
     def test_returns_selected_parents(self, mock_choice):
         """select_parents returns the genomes it selects"""
