@@ -2,8 +2,6 @@ def cross_genomes(parent_genomes, genome_params):
     """
     Produces a new genome by applying crossover to multiple parent genomes
 
-    .. note:: Holland generalizes the usual 2 parent crossover and supports k-parent crossover
-
     :param parent_genomes: a list of parent genomes
     :type parent_geomes: list
 
