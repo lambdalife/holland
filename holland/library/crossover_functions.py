@@ -6,7 +6,7 @@ def get_uniform_crossover_function():
     """
     Returns a function that applies uniform crossover (each gene value is chosen at random from the parent genes); see :ref:`crossover-functions`
 
-    :Valid for:
+    :Valid For:
         any gene type
 
     
