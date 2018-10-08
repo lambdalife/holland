@@ -6,8 +6,12 @@ def get_uniform_crossover_function():
     """
     Returns a function that applies uniform crossover (each gene value is chosen at random from the parent genes); see :ref:`crossover-functions`
 
+    :Valid for:
+        any gene type
+
     
     :returns: a function that accepts a list of parent genes and applies uniform crossover to them and returns a new gene
+
 
     Example::
         
@@ -20,6 +24,7 @@ def get_uniform_crossover_function():
             parent_genes = [pg[gene_name] for pg in parent_genomes]
             offspring[gene_name] = uniform_crossover(parent_genes)
     """
+
     def uniform_crossover(parent_genes):
         if type(parent_genes[0]) != list:
             return random.choice(parent_genes)
@@ -31,6 +36,9 @@ def get_uniform_crossover_function():
 def get_point_crossover_function(n_crossover_points=1):
     """
     Returns a function that applies point crossover (take gene values from one parent gene at a time until reaching a crossover point, then switch parent genes); see :ref:`crossover-functions`
+
+    :Valid For:
+        any list-type gene
     
     :param n_crossover_points: number of points at which to switch to the next parent gene (should be at least ``len(parent_genes) - 1``)
     :type n_crossover_points: int
@@ -53,7 +61,6 @@ def get_point_crossover_function(n_crossover_points=1):
             parent_genes = [pg[gene_name] for pg in parent_genomes]
             offspring[gene_name] = point_crossover(parent_genes)
     """
-
     if n_crossover_points < 0:
         raise ValueError("Number of crossover points cannot be negative")
 
@@ -72,3 +79,67 @@ def get_point_crossover_function(n_crossover_points=1):
         return offspring
 
     return point_crossover
+
+
+def get_and_crossover_function():
+    """
+    Returns a function that reduces the values of the parent_genes by the logical 'and' operation; see :ref:`crossover-functions`
+    
+    :Valid For:
+        ``"bool"`` and ``"[bool]"`` gene types
+
+
+    :returns: a function that accepts a list of parent genes and applies 'and' crossover
+
+
+    Example::
+
+        parent_genomes = select_parents(fitness_results)
+        gene_names = parent_genomes[0].keys()
+        and_crossover = get_and_crossover_function()
+
+        offspring = {}
+        for gene_name in gene_names:
+            parent_genes = [pg[gene_name] for pg in parent_genomes]
+            offspring[gene_name] = and_crossover(parent_genes)
+    """
+
+    def and_crossover(parent_genes):
+        if isinstance(parent_genes[0], list):
+            size = len(parent_genes[0])
+            return [all(pg[i] for pg in parent_genes) for i in range(size)]
+        return all(parent_genes)
+
+    return and_crossover
+
+
+def get_or_crossover_function():
+    """
+    Returns a function that reduces the values of the parent_genes by the logical 'or' operation; see :ref:`crossover-functions`
+
+    :Valid For:
+        ``"bool"`` and ``"[bool]"`` gene types
+
+
+    :returns: a function that accepts a list of parent genes and applies 'or' crossover
+
+
+    Example::
+
+        parent_genomes = select_parents(fitness_results)
+        gene_names = parent_genomes[0].keys()
+        or_crossover = get_or_crossover_function()
+
+        offspring = {}
+        for gene_name in gene_names:
+            parent_genes = [pg[gene_name] for pg in parent_genomes]
+            offspring[gene_name] = or_crossover(parent_genes)
+    """
+
+    def or_crossover(parent_genes):
+        if isinstance(parent_genes[0], list):
+            size = len(parent_genes[0])
+            return [any(pg[i] for pg in parent_genes) for i in range(size)]
+        return any(parent_genes)
+
+    return or_crossover
