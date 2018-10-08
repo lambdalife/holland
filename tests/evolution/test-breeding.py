@@ -1,4 +1,3 @@
-import random
 import numpy as np
 import unittest
 from unittest.mock import patch, call, Mock
@@ -12,8 +11,8 @@ from holland.evolution.breeding import (
 
 class GenerateNextGenerationTest(unittest.TestCase):
     def setUp(self):
-        self.fitness_scores = (100, 90, 85, 50, 45, 44, 30, 10, 9, 8, 7)
-        self.genomes = ("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k")
+        self.fitness_scores = (7, 8, 9, 10, 30, 44, 45, 50, 85, 90, 100)
+        self.genomes = ("k", "j", "i", "h", "g", "f", "e", "d", "c", "b", "a")
         self.fitness_results = list(zip(self.fitness_scores, self.genomes))
         self.genome_params = {"a": {"type": "[float]"}}
         self.selection_strategy = {
@@ -152,8 +151,6 @@ class GenerateNextGenerationTest(unittest.TestCase):
         self, mock_generate_random, mock_breed
     ):
         """generate_next_generation returns the results of breed_next_generation and generate_random_genomes and the top n_elite individuals from the current generation all concatenated together"""
-        random.shuffle(self.fitness_results)
-
         next_generation = generate_next_generation(
             self.fitness_results,
             self.genome_params,
@@ -161,8 +158,6 @@ class GenerateNextGenerationTest(unittest.TestCase):
             n_random=self.n_random,
             n_elite=self.n_elite,
         )
-
-        self.fitness_results.sort(key=lambda x: x[0])
 
         elites = [g for s, g in self.fitness_results[-self.n_elite :]]
         expected_next_generation = (
