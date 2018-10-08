@@ -54,6 +54,9 @@ class BoundValueTest(unittest.TestCase):
         mock_max.assert_called_with(value, self.minimum)
         mock_min.assert_called_with(mock_max.return_value, np.inf)
 
+        mock_max.reset_mock()
+        mock_min.reset_mock()
+
         # Neither
         bound_value(value)
         mock_max.assert_called_with(value, -np.inf)
@@ -78,10 +81,44 @@ class BoundValueTest(unittest.TestCase):
         mock_max.assert_called_with(value, self.minimum)
         mock_min.assert_called_with(mock_max.return_value, np.inf)
 
+        mock_max.reset_mock()
+        mock_min.reset_mock()
+
         # Both are None
         bound_value(value, minimum=None, maximum=None)
         mock_max.assert_called_with(value, -np.inf)
         mock_min.assert_called_with(mock_max.return_value, np.inf)
+
+    def test_returns_int_if_to_int_is_True(self):
+        """bound_value returns an int if to_int is True"""
+        for maximum in [15, 9.4]:
+            value = 10.5
+            minimum = 2
+
+            output = bound_value(value, minimum=minimum, maximum=maximum, to_int=True)
+
+            self.assertTrue(isinstance(output, int))
+
+    def test_does_not_cast_to_int_if_to_int_is_False(self):
+        """bound_value does not cast to int if to_int is False"""
+        value = 10.5
+        minimum = 2
+        maximum = 15
+
+        output = bound_value(value, minimum=minimum, maximum=maximum, to_int=False)
+
+        self.assertFalse(isinstance(output, int))
+
+    def test_returns_an_int_above_the_minimum_if_minimum_is_float_and_to_int(self):
+        """bound_value returns the closest int above the minimum if minimum has a decimal and to_int is True and value < minimum or value < ceil(minimum)"""
+        for value in [1, 2.7]:
+            minimum = 2.3
+            maximum = 15
+
+            output = bound_value(value, minimum=minimum, maximum=maximum, to_int=True)
+
+            expected_output = 3
+            self.assertEqual(output, expected_output)
 
 
 class SelectFromTest(unittest.TestCase):

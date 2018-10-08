@@ -166,6 +166,7 @@ def generate_random_genomes(genome_params, n_genomes):
                             initial_distribution(),
                             minimum=gene_params.get("min"),
                             maximum=gene_params.get("max"),
+                            to_int=gene_params.get("type") == "[int]",
                         )
                         for _ in range(gene_params["size"])
                     ]
@@ -174,11 +175,12 @@ def generate_random_genomes(genome_params, n_genomes):
                         initial_distribution() for _ in range(gene_params["size"])
                     ]
             else:
-                if gene_params["type"] == "float":
+                if is_numeric_type(gene_params):
                     genome[gene_name] = bound_value(
                         initial_distribution(),
                         minimum=gene_params.get("min"),
                         maximum=gene_params.get("max"),
+                        to_int=gene_params.get("type") == "int",
                     )
                 else:
                     genome[gene_name] = initial_distribution()
