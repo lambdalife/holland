@@ -57,6 +57,8 @@ crossover functions
 ~~~~~~~~~~~~~~~~~~~
 .. autofunction:: holland.library.get_uniform_crossover_function
 .. autofunction:: holland.library.get_point_crossover_function
+.. autofunction:: holland.library.get_and_crossover_function
+.. autofunction:: holland.library.get_or_crossover_function
 
 .. _library-mutation-functions:
 

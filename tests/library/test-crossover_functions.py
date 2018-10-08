@@ -1,10 +1,7 @@
 import unittest
 from unittest.mock import patch, call
 
-from holland.library.crossover_functions import (
-    get_uniform_crossover_function,
-    get_point_crossover_function,
-)
+from holland.library.crossover_functions import *
 
 
 class GetUniformCrossoverFunctionTest(unittest.TestCase):
@@ -54,7 +51,7 @@ class GetUniformCrossoverFunctionTest(unittest.TestCase):
 
 class GetPointCrossoverFunction(unittest.TestCase):
     def test_asserts_number_of_crossover_points_is_nonnegative(self):
-        '''get_point_crossover_function raises a ValueError if n_crossover_points is negative'''
+        """get_point_crossover_function raises a ValueError if n_crossover_points is negative"""
         n_crossover_points = -1
         with self.assertRaises(ValueError):
             get_point_crossover_function(n_crossover_points=n_crossover_points)
@@ -137,3 +134,57 @@ class GetPointCrossoverFunction(unittest.TestCase):
         )
         self.assertEqual(output, expected_output)
         self.assertEqual(len(output), len(parent_genes[0]))
+
+
+class GetAndCrossoverFunctionTest(unittest.TestCase):
+    def test_returned_function_works_as_expected_with_value_type_genes(self):
+        """get_and_crossover_function returns a function that returns the value of all genes 'and'ed together"""
+        and_crossover = get_and_crossover_function()
+        parent_genes_sets = [
+            [True, True, True],
+            [False, True, True],
+            [False, False, False],
+        ]
+        expected_outputs = [True, False, False]
+
+        for parent_genes, expected_output in zip(parent_genes_sets, expected_outputs):
+            output = and_crossover(parent_genes)
+
+            self.assertEqual(output, expected_output)
+
+    def test_returned_function_works_as_expected_with_list_type_genes(self):
+        """get_and_crossover_function returns a function that returns a gene where each value is the result of 'and'ing all parent gene values at that position"""
+        and_crossover = get_and_crossover_function()
+        parent_genes = [[True, True, False], [True, False, False], [True, False, False]]
+
+        output = and_crossover(parent_genes)
+
+        expected_output = [True, False, False]
+        self.assertListEqual(output, expected_output)
+
+
+class GetOrCrossoverFunctionTest(unittest.TestCase):
+    def test_returned_function_works_as_expected_with_value_type_genes(self):
+        """get_or_crossover_function returns a function that returns the value of all genes 'or'ed together"""
+        or_crossover = get_or_crossover_function()
+        parent_genes_sets = [
+            [True, True, True],
+            [False, True, True],
+            [False, False, False],
+        ]
+        expected_outputs = [True, True, False]
+
+        for parent_genes, expected_output in zip(parent_genes_sets, expected_outputs):
+            output = or_crossover(parent_genes)
+
+            self.assertEqual(output, expected_output)
+
+    def test_returned_function_works_as_expected_with_list_type_genes(self):
+        """get_or_crossover_function returns a function that returns a gene where each value is the result of 'or'ing all parent gene values at that position"""
+        or_crossover = get_or_crossover_function()
+        parent_genes = [[True, True, False], [True, False, False], [True, False, False]]
+
+        output = or_crossover(parent_genes)
+
+        expected_output = [True, True, False]
+        self.assertListEqual(output, expected_output)
