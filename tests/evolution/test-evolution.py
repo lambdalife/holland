@@ -121,7 +121,7 @@ class EvolveTest(unittest.TestCase):
         )
 
         expected_evaluate_fitness_calls = [
-            call(pop, self.fitness_function) for pop in all_populations
+            call(pop, self.fitness_function, ascending=True) for pop in all_populations
         ]
         expected_generate_next_gen_calls = [
             call(
@@ -143,6 +143,52 @@ class EvolveTest(unittest.TestCase):
         mock_generate_next_gen.assert_has_calls(expected_generate_next_gen_calls)
         self.assertEqual(
             mock_generate_next_gen.call_count, len(expected_generate_next_gen_calls)
+        )
+
+    @patch("holland.evolution.evolution.generate_random_genomes")
+    @patch("holland.evolution.evolution.evaluate_fitness")
+    @patch("holland.evolution.evolution.generate_next_generation")
+    def test_calls_evaluate_fitness_with_asc_if_maximize(
+        self, mock_generate_next_gen, mock_evaluate_fitness, mock_generate_random
+    ):
+        """evolve calls evalute_fitness with ascending=True if should_maximize_fitness=True"""
+        n_generations = 1
+        initial_population = ["A", "B", "C"]
+
+        evolve(
+            self.fitness_function,
+            self.genome_params,
+            self.selection_strategy,
+            should_maximize_fitness=True,
+            initial_population=initial_population,
+            n_generations=n_generations,
+        )
+
+        mock_evaluate_fitness.assert_called_with(
+            initial_population, self.fitness_function, ascending=True
+        )
+
+    @patch("holland.evolution.evolution.generate_random_genomes")
+    @patch("holland.evolution.evolution.evaluate_fitness")
+    @patch("holland.evolution.evolution.generate_next_generation")
+    def test_calls_evaluate_fitness_with_asc_False_if_not_maximize(
+        self, mock_generate_next_gen, mock_evaluate_fitness, mock_generate_random
+    ):
+        """evolve calls evalute_fitness with ascending=False if should_maximize_fitness=False"""
+        n_generations = 1
+        initial_population = ["A", "B", "C"]
+
+        evolve(
+            self.fitness_function,
+            self.genome_params,
+            self.selection_strategy,
+            should_maximize_fitness=False,
+            initial_population=initial_population,
+            n_generations=n_generations,
+        )
+
+        mock_evaluate_fitness.assert_called_with(
+            initial_population, self.fitness_function, ascending=False
         )
 
     @patch("holland.evolution.evolution.generate_random_genomes")
