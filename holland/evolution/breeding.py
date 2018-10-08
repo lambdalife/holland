@@ -17,7 +17,7 @@ def generate_next_generation(
     """
     Generates the next generation
 
-    :param fitness_results: a list of tuples containing a fitness score in the first position and a genome in the second (returned by :func:`~holland.evolution.evaluate_fitness`)
+    :param fitness_results: a sorted list of tuples containing a fitness score in the first position and a genome in the second (returned by :func:`~holland.evolution.evaluate_fitness`)
     :type fitness_results: list
 
     :param genome_params: a dictionary specifying genome parameters; see :ref:`genome-params`
@@ -42,6 +42,8 @@ def generate_next_generation(
     :raises ValueError: if ``n_random < 0`` or ``n_elite < 0``
     :raises ValueError: if ``n_random + n_elite > population_size``
 
+    
+    .. note:: For the sake of efficiency, this method expects ``fitness_results`` to be sorted in order to properly select genomes on the basis of fitness. :func:`~holland.evolution.evalute_fitness` returns sorted results.
 
     .. todo:: Write an example for usage
 
@@ -63,12 +65,11 @@ def generate_next_generation(
 
     bred_per_generation = population_size - n_random - n_elite
 
-    elite_genomes = [
-        genome
-        for fitness, genome in sorted(
-            fitness_results, key=lambda x: x[0], reverse=True
-        )[:n_elite]
-    ]
+    if n_elite > 0:
+        elite_genomes = [genome for fitness, genome in fitness_results[-n_elite:]]
+    else:
+        elite_genomes = []
+
     bred_genomes = breed_next_generation(
         fitness_results, genome_params, selection_strategy, bred_per_generation
     )
@@ -83,7 +84,7 @@ def breed_next_generation(
     """
     Generates a given number of genomes by breeding, through crossover and mutation, existing genomes
 
-    :param fitness_results: a list of tuples containing a fitness score in the first position and a genome in the second (returned by :func:`~holland.evolution.evaluate_fitness`)
+    :param fitness_results: a sorted list of tuples containing a fitness score in the first position and a genome in the second (returned by :func:`~holland.evolution.evaluate_fitness`)
     :type fitness_results: list
 
     :param genome_params: a dictionary specifying genome parameters; see :ref:`genome-params`
@@ -99,8 +100,10 @@ def breed_next_generation(
     :returns: a list of bred genomes
 
 
-    :raises ValueError: if n_genomes < 0
+    :raises ValueError: if ``n_genomes < 0``
 
+    
+    .. note:: For the sake of efficiency, this method expects ``fitness_results`` to be sorted in order to properly select genomes on the basis of fitness. :func:`~holland.evolution.evalute_fitness` returns sorted results.
 
     .. todo:: Write an example for usage
 
@@ -143,7 +146,7 @@ def generate_random_genomes(genome_params, n_genomes):
     :returns: a list of randomly generated genomes
 
 
-    :raises ValueError: if n_genomes < 0
+    :raises ValueError: if ``n_genomes < 0``
 
     .. todo:: Write an example for usage
 
