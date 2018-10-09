@@ -16,6 +16,12 @@ Contribution Guide
 
 To contribute a new feature, please fork `our repository`_ and submit a pull request.
 
+Here is a visualization of our git workflow
+
+.. raw:: html
+	:file: gitflow.html
+
+
 Style Guide
 ~~~~~~~~~~~
 

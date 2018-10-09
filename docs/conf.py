@@ -18,7 +18,9 @@ sys.path.insert(0, os.path.abspath('../.'))
 # print(os.path.abspath('../holland/'))
 # sys.path.insert(0, os.path.abspath('../holland/evolution'))
 
+# html_css_files = ["https://cdnjs.cloudflare.com/ajax/libs/gitgraph.js/1.13.0/gitgraph.min.css"]
 
+# html_js_files = [('https://cdnjs.cloudflare.com/ajax/libs/gitgraph.js/1.13.0/gitgraph.min.js',{'async':'async'})]
 # -- Project information -----------------------------------------------------
 
 project = 'Holland Documentation Test'

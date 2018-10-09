@@ -1,0 +1,135 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gitgraph.js/1.13.0/gitgraph.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/gitgraph.js/1.13.0/gitgraph.min.css" />
+<canvas id="gitGraph"></canvas>
+<script>
+	const capitalize = (word) => word.charAt(0).toUpperCase()+word.substring(1,word.length)
+	const name_info = (name, email) => capitalize(name) + " <"+(email||name+"@hexinsights.com")+">";
+	const commit_msg = (text, name, email) => {
+		return {
+			message: text,
+			author: capitalize(name)//name_info(name, email)
+		};
+	}
+	const commit_auth = (name) => {
+		return {
+			author: capitalize(name)// name_info(name)
+		};
+	}
+
+	const my_palette = ["#ff8b94", "#ffaaa5", "#ffd3b6", "#dcedc1", "#a8e6cf"]
+		// ["#ffadad", "#ffefaa", "#beffc2", "#a3fdff", "#e6afff"],
+	const graphConfig = new GitGraph.Template({
+		colors: my_palette,
+		branch: {
+			showLabel: true,
+			lineWidth: 4,
+			spacingX: 30,
+			labelRotation: 0,
+			labelFont: "normal 10pt Arial"
+		},
+		commit: {
+			spacingY: -40,
+			dot: {
+				size: 6
+			},
+			message: {
+				color: "#666",
+				font: "normal 10pt Arial",
+				display: true,
+				displayHash: false,
+			}
+		},
+	})
+	const gitgraph = new GitGraph({
+		template: graphConfig,
+		// template: "metro"
+		// orientation: "horizontal"
+		author: "Henry <henry@hexinsights.com>",
+	});
+
+	const master = gitgraph.branch("master");
+
+	master.commit({
+		messageDisplay:false,
+		message: "Some point in time",
+		messageAuthorDisplay: false,
+		messageBranchDisplay: false
+	});
+
+		const staging = gitgraph.branch({
+			parentBranch: master,
+			name:"staging"
+		});
+
+		const dev = gitgraph.branch({
+			parentBranch: master,
+			name:"dev"
+		});
+
+	dev.commit({
+		messageDisplay: false
+	})
+	// dev.commit(commit_msg(
+	// 	"first dev commit",
+	// 	"henry"
+	// ));
+
+		const feature1 = gitgraph.branch({
+			parentBranch: dev,
+			name:"feature 1"
+		});
+
+	feature1.commit({...commit_msg(
+		"adds basics for feature 1",
+		"jesse"
+	)});
+
+		const feature2 = gitgraph.branch({
+			parentBranch: dev,
+			name:"feature 2"
+		});
+
+	feature1.commit(commit_msg(
+		"adds more to feature 1",
+		"jesse"
+	));
+
+	feature2.commit({
+		messageColor: my_palette[0],
+		...commit_msg(
+			"adds feature 2",
+			"contributor",
+			"contributor@coolpeople.com"
+		)});
+
+	feature2.merge(dev, {
+		message: "Merge pull request #"+Math.floor(10 + Math.random()*90)+" from contributor/master",
+		messageColor: my_palette[0],
+		...commit_auth("henry")
+	});
+
+	feature1.commit(commit_msg(
+		"adds even more to feature 1",
+		"jesse"
+	));
+
+	feature1.merge(dev, commit_auth("henry"));
+
+	feature2.delete();
+
+	// 	const feature3 = gitgraph.branch({
+	// 		parentBranch: dev,
+	// 		name:"feature 3"
+	// 	});
+
+	// feature3.commit(commit_msg(
+	// 	"adds feature 3",
+	// 	"henry"
+	// ));
+
+	// feature3.merge(dev, commit_auth("henry"))
+
+	dev.merge(staging, commit_auth("henry"));
+
+	staging.merge(master, commit_auth("henry"));
+</script>
