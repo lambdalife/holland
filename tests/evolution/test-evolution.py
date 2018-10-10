@@ -1,6 +1,7 @@
 import unittest
 from unittest.mock import patch, call
 
+from holland.storage.storage_manager import StorageManager
 from holland.evolution.evolution import evolve
 
 
@@ -87,6 +88,30 @@ class EvolveTest(unittest.TestCase):
         )
 
         mock_generate_random.assert_not_called()
+
+    @patch("holland.evolution.evolution.generate_random_genomes")
+    @patch("holland.evolution.evolution.StorageManager")
+    @patch("holland.evolution.evolution.evaluate_fitness")
+    @patch("holland.evolution.evolution.generate_next_generation")
+    def test_constructs_a_storage_manager_with_the_correct_args(
+        self, mock_generate_next_gen, mock_evaluate_fitness, MockStorageManager, mock_generate_random
+    ):
+        """evolve constructs an instance of StorageManager with the correct arguments"""
+        fitness_storage_options = {"file_name": "test.csv"}
+        genome_storage_options = {"file_name": "test.json"}
+
+        evolve(
+            self.fitness_function,
+            self.genome_params,
+            self.selection_strategy,
+            fitness_storage_options=fitness_storage_options,
+            genome_storage_options=genome_storage_options,
+        )
+
+        MockStorageManager.assert_called_with(
+            fitness_storage_options=fitness_storage_options,
+            genome_storage_options=genome_storage_options,
+        )
 
     @patch("holland.evolution.evolution.generate_random_genomes")
     @patch("holland.evolution.evolution.evaluate_fitness")
@@ -193,23 +218,17 @@ class EvolveTest(unittest.TestCase):
 
     @patch("holland.evolution.evolution.generate_random_genomes")
     @patch("holland.evolution.evolution.evaluate_fitness")
-    @patch("holland.evolution.evolution.record_fitness")
+    @patch.object(StorageManager, "update_storage")
     @patch("holland.evolution.evolution.generate_next_generation")
-    def test_calls_record_fitness_with_correct_args_should_record_fitness(
+    def test_calls_storage_manager_update_storage_with_correct_args(
         self,
         mock_generate_next_gen,
-        mock_record_fitness,
+        mock_update_storage,
         mock_evaluate_fitness,
         mock_generate_random,
     ):
-        """evolve calls record_fitness in each generation with the generation_num, fitness_scores, and fitness_storage_options if fitness_storage_options['should_record_fitness'] is True"""
+        """evolve calls StorageManager.update_storage with the generation_num and fitness_results in each generation"""
         n_generations = 10
-        fitness_storage_options = {
-            "file_name": "test.csv",
-            "path": "test/test",
-            "should_record_fitness": True,
-            "format": "csv",
-        }
         fitness_results = [
             [(i + j, chr(65 + i + j)) for j in range(4)] for i in range(n_generations)
         ]
@@ -220,163 +239,25 @@ class EvolveTest(unittest.TestCase):
             self.genome_params,
             self.selection_strategy,
             n_generations=n_generations,
-            fitness_storage_options=fitness_storage_options,
         )
 
-        fitness_scores = [
-            [s for s, g in fitness_result] for fitness_result in fitness_results
-        ]
-        expected_calls = [
-            call(i, fitness_scores[i], **fitness_storage_options)
-            for i in range(n_generations)
-        ]
-        mock_record_fitness.assert_has_calls(expected_calls)
-        self.assertEqual(mock_record_fitness.call_count, len(expected_calls))
-
-    @patch("holland.evolution.evolution.generate_random_genomes")
-    @patch("holland.evolution.evolution.evaluate_fitness")
-    @patch("holland.evolution.evolution.record_fitness")
-    @patch("holland.evolution.evolution.generate_next_generation")
-    def test_does_not_call_record_fitness_if_should_not(
-        self,
-        mock_generate_next_gen,
-        mock_record_fitness,
-        mock_evaluate_fitness,
-        mock_generate_random,
-    ):
-        """evolve does not call record_fitness if fitness_storage_options['should_record_fitness'] is False or not specified"""
-        n_generations = 10
-        fitness_storage_options_options = [{"should_record_fitness": False}, {}]
-
-        for fitness_storage_options in fitness_storage_options_options:
-            evolve(
-                self.fitness_function,
-                self.genome_params,
-                self.selection_strategy,
-                n_generations=n_generations,
-                fitness_storage_options=fitness_storage_options,
-            )
-
-            mock_record_fitness.assert_not_called()
-
-    @patch("holland.evolution.evolution.generate_random_genomes")
-    @patch("holland.evolution.evolution.evaluate_fitness")
-    @patch("holland.evolution.evolution.record_genomes_and_fitnesses")
-    @patch("holland.evolution.evolution.generate_next_generation")
-    def test_calls_record_genomes_and_fitnesses_with_correct_args_should_record_genomes(
-        self,
-        mock_generate_next_gen,
-        mock_record_genomes_and_fitnesses,
-        mock_evaluate_fitness,
-        mock_generate_random,
-    ):
-        """evolve calls record_genomes_and_fitnesses in each generation with the generation_num, fitness_scores, and genome_storage_options if genome_storage_options['should_record_genomes'] is True"""
-        n_generations = 10
-        genome_storage_options = {
-            "file_name": "test.json",
-            "path": "test/test",
-            "should_record_genomes": True,
-            "record_every_n_generations": 1,
-            "format": "json",
-        }
-        fitness_results = [
-            [(i + j, chr(65 + i + j)) for j in range(4)] for i in range(n_generations)
-        ]
-        mock_evaluate_fitness.side_effect = fitness_results
-
-        evolve(
-            self.fitness_function,
-            self.genome_params,
-            self.selection_strategy,
-            n_generations=n_generations,
-            genome_storage_options=genome_storage_options,
-        )
-
-        expected_calls = [
-            call(i, fitness_results[i], **genome_storage_options)
-            for i in range(n_generations)
-        ]
-        mock_record_genomes_and_fitnesses.assert_has_calls(expected_calls)
-        self.assertEqual(
-            mock_record_genomes_and_fitnesses.call_count, len(expected_calls)
-        )
-
-    @patch("holland.evolution.evolution.generate_random_genomes")
-    @patch("holland.evolution.evolution.evaluate_fitness")
-    @patch("holland.evolution.evolution.record_genomes_and_fitnesses")
-    @patch("holland.evolution.evolution.generate_next_generation")
-    def test_does_not_call_record_genomes_and_fitnesses_if_should_not_at_all(
-        self,
-        mock_generate_next_gen,
-        mock_record_genomes_and_fitnesses,
-        mock_evaluate_fitness,
-        mock_generate_random,
-    ):
-        """evolve does not call record_genomes_and_fitnesses if genome_storage_options['should_record_genomes'] is False or not specified or generation_num is not right"""
-        n_generations = 10
-        genome_storage_options_options = [{"should_record_genomes": False}, {}]
-
-        for genome_storage_options in genome_storage_options_options:
-            evolve(
-                self.fitness_function,
-                self.genome_params,
-                self.selection_strategy,
-                n_generations=n_generations,
-                genome_storage_options=genome_storage_options,
-            )
-
-            mock_record_genomes_and_fitnesses.assert_not_called()
-
-    @patch("holland.evolution.evolution.generate_random_genomes")
-    @patch("holland.evolution.evolution.evaluate_fitness")
-    @patch("holland.evolution.evolution.record_genomes_and_fitnesses")
-    @patch("holland.evolution.evolution.generate_next_generation")
-    def test_does_not_call_record_genomes_if_generation_num_is_not_right(
-        self,
-        mock_generate_next_gen,
-        mock_record_genomes_and_fitnesses,
-        mock_evaluate_fitness,
-        mock_generate_random,
-    ):
-        """evolve does not call record_genomes_and_fitnesses if generation_number % genome_storage_options['record_every_n_generations'] != 0"""
-        n_generations = 10
-        record_every = 2
-        genome_storage_options = {
-            "should_record_genomes": True,
-            "record_every_n_generations": record_every,
-        }
-
-        evolve(
-            self.fitness_function,
-            self.genome_params,
-            self.selection_strategy,
-            n_generations=n_generations,
-            genome_storage_options=genome_storage_options,
-        )
-
-        expected_calls = [
-            call(i, mock_evaluate_fitness.return_value, **genome_storage_options)
-            for i in range(0, n_generations, record_every)
-        ]
+        expected_calls = [call(i, fitness_results[i]) for i in range(n_generations)]
+        mock_update_storage.assert_has_calls(expected_calls)
+        self.assertEqual(mock_update_storage.call_count, len(expected_calls))
 
     @patch("holland.evolution.evolution.generate_random_genomes")
     @patch("holland.evolution.evolution.evaluate_fitness", return_value=[1, 2, 3])
-    @patch("holland.evolution.evolution.record_genomes_and_fitnesses")
+    @patch.object(StorageManager, "react_to_interruption")
     @patch("holland.evolution.evolution.generate_next_generation")
     def test_calls_record_genomes_and_fitnesses_on_interrupt_if_should(
         self,
         mock_generate_next_gen,
-        mock_record_genomes_and_fitnesses,
+        mock_react,
         mock_evaluate_fitness,
         mock_generate_random,
     ):
-        """evolve calls record_genomes_and_fitnesses if there is an unhandled interruption before re-raising the Exception"""
+        """evolve calls StorageManager.react_to_interruption if there is an unhandled interruption before re-raising the Exception"""
         n_generations = 10
-        genome_storage_options = {
-            "should_record_on_interrupt": True,
-            "file_name": "test.json",
-            "record_every_n_generations": 20,
-        }
         interrupt_generation = 4
         mock_evaluate_fitness.side_effect = [
             mock_evaluate_fitness.return_value
@@ -388,88 +269,36 @@ class EvolveTest(unittest.TestCase):
                 self.genome_params,
                 self.selection_strategy,
                 n_generations=n_generations,
-                genome_storage_options=genome_storage_options,
             )
 
-        expected_calls = [
-            call(
-                interrupt_generation,
-                mock_evaluate_fitness.return_value,
-                **genome_storage_options
-            )
-        ]
-        mock_record_genomes_and_fitnesses.assert_has_calls(expected_calls)
-
-    @patch("holland.evolution.evolution.generate_random_genomes")
-    @patch("holland.evolution.evolution.evaluate_fitness", return_value=[1, 2, 3])
-    @patch("holland.evolution.evolution.record_genomes_and_fitnesses")
-    @patch("holland.evolution.evolution.generate_next_generation")
-    def test_does_not_call_record_genomes_and_fitnesses_on_interrupt_if_should_not(
-        self,
-        mock_generate_next_gen,
-        mock_record_genomes_and_fitnesses,
-        mock_evaluate_fitness,
-        mock_generate_random,
-    ):
-        """evolve does not call record_genomes_and_fitnesses if should_record_on_interrupt is False or not specified"""
-        n_generations = 10
-        genome_storage_options_options = [
-            {
-                "should_record_on_interrupt": False,
-                "file_name": "test.json",
-                "record_every_n_generations": 20,
-            },
-            {"file_name": "test.json", "record_every_n_generations": 20},
-        ]
-
-        for genome_storage_options in genome_storage_options_options:
-            interrupt_generation = 4
-            mock_evaluate_fitness.side_effect = [
-                mock_evaluate_fitness.return_value
-            ] * interrupt_generation + [Exception]
-
-            with self.assertRaises(Exception):
-                evolve(
-                    self.fitness_function,
-                    self.genome_params,
-                    self.selection_strategy,
-                    n_generations=n_generations,
-                    genome_storage_options=genome_storage_options,
-                )
-
-            mock_record_genomes_and_fitnesses.assert_not_called()
+        mock_react.assert_called_once_with(
+            interrupt_generation, mock_evaluate_fitness.return_value
+        )
 
     @patch("holland.evolution.evolution.generate_random_genomes")
     @patch("holland.evolution.evolution.evaluate_fitness")
-    @patch("holland.evolution.evolution.record_fitness")
     @patch("holland.evolution.evolution.generate_next_generation")
     def test_stores_and_returns_fitness_statistics_if_storage_format_is_memory(
-        self,
-        mock_generate_next_gen,
-        mock_record_fitness,
-        mock_evaluate_fitness,
-        mock_generate_random,
+        self, mock_generate_next_gen, mock_evaluate_fitness, mock_generate_random
     ):
-        """evolve appends the returned fitness_statistics from record_fitness to fitness_history and returns fitness_history if storage format is 'memory'"""
+        """evolve returns the fitness_history of the StorageManager if should_record_fitness storage format is 'memory'"""
         n_generations = 10
         fitness_storage_options = {"should_record_fitness": True, "format": "memory"}
-        fitness_results = [
-            [(i + j, chr(65 + i + j)) for j in range(4)] for i in range(n_generations)
-        ]
-        mock_evaluate_fitness.side_effect = fitness_results
 
-        all_fitness_stats = [{"gen": i, "max": i} for i in range(n_generations)]
-        mock_record_fitness.side_effect = all_fitness_stats
+        with patch("holland.evolution.evolution.StorageManager") as MockStorageManager:
+            MockStorageManager.return_value.fitness_history = ["a", "b", "c", "d"]
 
-        _, fitness_history = evolve(
-            self.fitness_function,
-            self.genome_params,
-            self.selection_strategy,
-            n_generations=n_generations,
-            fitness_storage_options=fitness_storage_options,
-        )
+            _, fitness_history = evolve(
+                self.fitness_function,
+                self.genome_params,
+                self.selection_strategy,
+                n_generations=n_generations,
+                fitness_storage_options=fitness_storage_options,
+            )
 
-        self.assertListEqual(fitness_history, all_fitness_stats)
+            self.assertListEqual(
+                fitness_history, MockStorageManager.return_value.fitness_history
+            )
 
     @patch("holland.evolution.evolution.generate_random_genomes")
     @patch("holland.evolution.evolution.evaluate_fitness")
