@@ -1,10 +1,10 @@
 import unittest
 from unittest.mock import Mock, call
 
-from holland.evolution.crossover import cross_genomes
+from holland.evolution.crossover import *
 
 
-class CrossGenomesTest(unittest.TestCase):
+class CrosserCrossGenomesTest(unittest.TestCase):
     def setUp(self):
         self.genomes = [
             {"gene1": [1, 2, 3, 4], "gene2": [True, False]},
@@ -17,8 +17,9 @@ class CrossGenomesTest(unittest.TestCase):
             "gene1": {"crossover_function": Mock()},
             "gene2": {"crossover_function": Mock()},
         }
+        crosser = Crosser(genome_params)
 
-        cross_genomes(self.genomes, genome_params)
+        crosser.cross_genomes(self.genomes)
 
         genome_params["gene1"]["crossover_function"].assert_called_with(
             [g["gene1"] for g in self.genomes]
@@ -33,8 +34,9 @@ class CrossGenomesTest(unittest.TestCase):
             "gene1": {"crossover_function": Mock(return_value=[10, 12, 14, 16])},
             "gene2": {"crossover_function": Mock(return_value=[True, True])},
         }
+        crosser = Crosser(genome_params)
 
-        crossed = cross_genomes(self.genomes, genome_params)
+        crossed = crosser.cross_genomes(self.genomes)
 
         expected_crossed = {
             "gene1": genome_params["gene1"]["crossover_function"].return_value,
@@ -49,8 +51,9 @@ class CrossGenomesTest(unittest.TestCase):
             "gene1": {"crossover_function": Mock()},
             "gene2": {"crossover_function": Mock()},
         }
+        crosser = Crosser(genome_params)
 
-        cross_genomes(self.genomes, genome_params)
+        crosser.cross_genomes(self.genomes)
 
     def test_handles_more_than_two_parents(self):
         """if the given list of parents contains more than two elements, cross_genomes does not break"""
@@ -63,5 +66,6 @@ class CrossGenomesTest(unittest.TestCase):
             "gene1": {"crossover_function": Mock()},
             "gene2": {"crossover_function": Mock()},
         }
+        crosser = Crosser(genome_params)
 
-        cross_genomes(self.genomes, genome_params)
+        crosser.cross_genomes(self.genomes)
