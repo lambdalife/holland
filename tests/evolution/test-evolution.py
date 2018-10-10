@@ -6,7 +6,7 @@ from holland.evolution.breeding import PopulationGenerator
 from holland.storage.storage_manager import StorageManager
 
 
-class EvolveTest(unittest.TestCase):
+class EvolverEvolveTest(unittest.TestCase):
     def setUp(self):
         self.fitness_function = lambda x: 100
         self.genome_params = {
@@ -21,39 +21,27 @@ class EvolveTest(unittest.TestCase):
 
     def test_asserts_n_random_and_n_elites_per_generation_are_nonnegative(self):
         """evolve raises a ValueError if generation_params["n_random"] or generation_params["n_elite"] is negative"""
-        with self.assertRaises(ValueError):
-            evolve(
-                self.fitness_function,
-                self.genome_params,
-                self.selection_strategy,
-                generation_params={"n_random": -1},
-            )
+        evolver = Evolver(
+            self.fitness_function, self.genome_params, self.selection_strategy
+        )
 
         with self.assertRaises(ValueError):
-            evolve(
-                self.fitness_function,
-                self.genome_params,
-                self.selection_strategy,
-                generation_params={"n_elite": -1},
-            )
+            evolver.evolve(generation_params={"n_random": -1})
+
+        with self.assertRaises(ValueError):
+            evolver.evolve(generation_params={"n_elite": -1})
 
     def test_asserts_population_size_and_n_generations_are_at_least_one(self):
         """evolve raises a ValueError if generation_params["population_size"] or n_generations is less than 1"""
-        with self.assertRaises(ValueError):
-            evolve(
-                self.fitness_function,
-                self.genome_params,
-                self.selection_strategy,
-                generation_params={"population_size": 0},
-            )
+        evolver = Evolver(
+            self.fitness_function, self.genome_params, self.selection_strategy
+        )
 
         with self.assertRaises(ValueError):
-            evolve(
-                self.fitness_function,
-                self.genome_params,
-                self.selection_strategy,
-                n_generations=0,
-            )
+            evolver.evolve(generation_params={"population_size": 0})
+
+        with self.assertRaises(ValueError):
+            evolver.evolve(n_generations=0)
 
     @patch("holland.evolution.evolution.PopulationGenerator")
     @patch("holland.evolution.evolution.Evaluator")
@@ -61,12 +49,11 @@ class EvolveTest(unittest.TestCase):
         self, MockEvaluator, MockPopulationGenerator
     ):
         """evolve creates an instance of the PopulationGenerator class and passes the genome_params, selection_strategy, and generation_params to the constructor"""
-        evolve(
-            self.fitness_function,
-            self.genome_params,
-            self.selection_strategy,
-            generation_params=self.generation_params,
+        evolver = Evolver(
+            self.fitness_function, self.genome_params, self.selection_strategy
         )
+
+        evolver.evolve(generation_params=self.generation_params)
 
         MockPopulationGenerator.assert_called_with(
             self.genome_params,
@@ -81,13 +68,12 @@ class EvolveTest(unittest.TestCase):
         self, mock_generate_next_gen, MockEvaluator, mock_generate_random
     ):
         """evolve generates a random initial population if one is not passed as an argument"""
-        population_size = 100
-        evolve(
-            self.fitness_function,
-            self.genome_params,
-            self.selection_strategy,
-            generation_params={"population_size": population_size},
+        evolver = Evolver(
+            self.fitness_function, self.genome_params, self.selection_strategy
         )
+        population_size = 100
+
+        evolver.evolve(generation_params={"population_size": population_size})
 
         mock_generate_random.assert_called_with(population_size)
 
@@ -100,10 +86,11 @@ class EvolveTest(unittest.TestCase):
         """evolve does not generate a random initial population if one is passed as an argument"""
         population_size = 100
         initial_population = ["a", "b", "c"]
-        evolve(
-            self.fitness_function,
-            self.genome_params,
-            self.selection_strategy,
+        evolver = Evolver(
+            self.fitness_function, self.genome_params, self.selection_strategy
+        )
+
+        evolver.evolve(
             generation_params={"population_size": population_size},
             initial_population=initial_population,
         )
@@ -117,12 +104,14 @@ class EvolveTest(unittest.TestCase):
         self, mock_generate_next_gen, MockEvaluator, mock_generate_random
     ):
         """evolve creates an instance of the Evaluator class and passes the fitness function and asc=True to the constructor if should_maximize_fitness is True"""
-        evolve(
+        evolver = Evolver(
             self.fitness_function,
             self.genome_params,
             self.selection_strategy,
             should_maximize_fitness=True,
         )
+
+        evolver.evolve()
 
         MockEvaluator.assert_called_with(self.fitness_function, ascending=True)
 
@@ -133,12 +122,14 @@ class EvolveTest(unittest.TestCase):
         self, mock_generate_next_gen, MockEvaluator, mock_generate_random
     ):
         """evolve creates an instance of the Evaluator class and passes the fitness function and asc=False to the constructor if should_maximize_fitness is False"""
-        evolve(
+        evolver = Evolver(
             self.fitness_function,
             self.genome_params,
             self.selection_strategy,
             should_maximize_fitness=False,
         )
+
+        evolver.evolve()
 
         MockEvaluator.assert_called_with(self.fitness_function, ascending=False)
 
@@ -168,10 +159,11 @@ class EvolveTest(unittest.TestCase):
         mock_evaluate_fitness.side_effect = results
         mock_generate_next_gen.side_effect = generated_populations
 
-        evolve(
-            self.fitness_function,
-            self.genome_params,
-            self.selection_strategy,
+        evolver = Evolver(
+            self.fitness_function, self.genome_params, self.selection_strategy
+        )
+
+        evolver.evolve(
             initial_population=initial_population,
             n_generations=n_generations,
             generation_params=generation_params,
@@ -207,13 +199,12 @@ class EvolveTest(unittest.TestCase):
         """evolve constructs an instance of StorageManager with the correct arguments"""
         fitness_storage_options = {"file_name": "test.csv"}
         genome_storage_options = {"file_name": "test.json"}
+        evolver = Evolver(
+            self.fitness_function, self.genome_params, self.selection_strategy
+        )
 
-        evolve(
-            self.fitness_function,
-            self.genome_params,
-            self.selection_strategy,
-            fitness_storage_options=fitness_storage_options,
-            genome_storage_options=genome_storage_options,
+        evolver.evolve(
+            storage_options={"fitness": fitness_storage_options, "genomes": genome_storage_options}
         )
 
         MockStorageManager.assert_called_with(
@@ -238,13 +229,11 @@ class EvolveTest(unittest.TestCase):
             [(i + j, chr(65 + i + j)) for j in range(4)] for i in range(n_generations)
         ]
         mock_evaluate_fitness.side_effect = fitness_results
-
-        evolve(
-            self.fitness_function,
-            self.genome_params,
-            self.selection_strategy,
-            n_generations=n_generations,
+        evolver = Evolver(
+            self.fitness_function, self.genome_params, self.selection_strategy
         )
+
+        evolver.evolve(n_generations=n_generations)
 
         expected_calls = [call(i, fitness_results[i]) for i in range(n_generations)]
         mock_update_storage.assert_has_calls(expected_calls)
@@ -267,14 +256,12 @@ class EvolveTest(unittest.TestCase):
         mock_evaluate_fitness.side_effect = [
             mock_evaluate_fitness.return_value
         ] * interrupt_generation + [Exception]
+        evolver = Evolver(
+            self.fitness_function, self.genome_params, self.selection_strategy
+        )
 
         with self.assertRaises(Exception):
-            evolve(
-                self.fitness_function,
-                self.genome_params,
-                self.selection_strategy,
-                n_generations=n_generations,
-            )
+            evolver.evolve(n_generations=n_generations)
 
         mock_react.assert_called_once_with(
             interrupt_generation, mock_evaluate_fitness.return_value
@@ -288,17 +275,17 @@ class EvolveTest(unittest.TestCase):
     ):
         """evolve returns the fitness_history of the StorageManager if should_record_fitness storage format is 'memory'"""
         n_generations = 10
-        fitness_storage_options = {"should_record_fitness": True, "format": "memory"}
+        storage_options = {"fitness": {"should_record_fitness": True, "format": "memory"}}
+        evolver = Evolver(
+            self.fitness_function, self.genome_params, self.selection_strategy
+        )
 
         with patch("holland.evolution.evolution.StorageManager") as MockStorageManager:
             MockStorageManager.return_value.fitness_history = ["a", "b", "c", "d"]
 
-            _, fitness_history = evolve(
-                self.fitness_function,
-                self.genome_params,
-                self.selection_strategy,
+            _, fitness_history = evolver.evolve(
                 n_generations=n_generations,
-                fitness_storage_options=fitness_storage_options,
+                storage_options=storage_options,
             )
 
             self.assertListEqual(
@@ -323,12 +310,12 @@ class EvolveTest(unittest.TestCase):
         mock_evaluate_fitness.side_effect = results
         mock_generate_next_gen.side_effect = generated_populations
 
-        final_results = evolve(
-            self.fitness_function,
-            self.genome_params,
-            self.selection_strategy,
-            initial_population=initial_population,
-            n_generations=n_generations,
+        evolver = Evolver(
+            self.fitness_function, self.genome_params, self.selection_strategy
+        )
+
+        final_results = evolver.evolve(
+            initial_population=initial_population, n_generations=n_generations
         )
 
         expected_final_results = results[-1]
