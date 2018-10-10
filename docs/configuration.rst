@@ -156,6 +156,20 @@ The significance of these values is as follows:
 .. note:: It is recommended that the ``weighting_function`` return only positive values. While Holland can handle weighting functions that return negative values, this presents an ambiguous case in terms of converting weighted scores to probabilities. Current handling of this case aims to minimally distort probabilities, but results may not be exactly what you expect.
 
 
+.. _generation-params:
+
+Generation Parameters
+---------------------
+
+When creating the population for the next generation, a few optional parameters can be set:
+
+    * **n_random** (*int*) -- number of fully random genomes to introduce to the population in each generation
+    * **n_elite** (*int*) -- number of (most fit) genomes to preserve for the next generation
+    * **population_size** (*int*) -- size of the population in each generation (required if an initial population is not given)
+
+These values should be placed in the ``generation_params`` dictionary.
+
+
 
 .. _fitness-storage-options:
 

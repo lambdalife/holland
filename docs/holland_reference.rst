@@ -22,9 +22,8 @@ evaluation
 
 breeding
 ~~~~~~~~
-.. autofunction:: holland.evolution.generate_next_generation
-.. autofunction:: holland.evolution.breed_next_generation
-.. autofunction:: holland.evolution.generate_random_genomes
+.. autoclass:: holland.evolution.PopulationGenerator
+	:members:
 
 
 selection
