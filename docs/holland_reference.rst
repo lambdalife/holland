@@ -34,9 +34,8 @@ crossover
 
 mutation
 ~~~~~~~~
-.. autofunction:: holland.evolution.mutate_genome
-.. autofunction:: holland.evolution.mutate_gene
-.. autofunction:: holland.evolution.probabilistically_mutate_value
+.. autoclass:: holland.evolution.Mutator
+	:members:
 
 
 selection
