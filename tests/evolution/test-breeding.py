@@ -8,6 +8,36 @@ from holland.evolution.crossover import Crosser
 from holland.evolution.mutation import Mutator
 
 
+class PopulationGeneratorInitTest(unittest.TestCase):
+    def test_asserts_n_random_and_n_elites_are_nonnegative(self):
+        """__init__ raises a Value error if n_random or n_elite is less than zero"""
+        # Random
+        with self.assertRaises(ValueError):
+            PopulationGenerator({}, {}, generation_params={"n_random": -1})
+
+        # Elite
+        with self.assertRaises(ValueError):
+            PopulationGenerator({}, {}, generation_params={"n_elite": -1})
+
+    def test_asserts_n_random_and_n_elites_sum_to_leq_population_size(self):
+        """__init__ raises a ValueError if n_random + n_elite > population_size"""
+
+        with self.assertRaises(ValueError):
+            PopulationGenerator(
+                {},
+                {},
+                generation_params={
+                    "n_random": 10,
+                    "n_elite": 10,
+                    "population_size": 10,
+                },
+            )
+
+    def test_doesnt_compare_n_random_n_elite_and_pop_size_if_no_pop_size(self):
+        """__init__ does not make the comparison n_random + n_elite > population_size if population_size is None (would throw a TypeError)"""
+        PopulationGenerator({}, {}, generation_params={"n_random": 100, "n_elite": 100})
+
+
 class GenerateNextGenerationTest(unittest.TestCase):
     def setUp(self):
         self.fitness_scores = (7, 8, 9, 10, 30, 44, 45, 50, 85, 90, 100)
@@ -18,120 +48,90 @@ class GenerateNextGenerationTest(unittest.TestCase):
             "pool": {"top": 2, "bottom": 1, "random": 2},
             "parents": {"weighting_function": lambda x: x * x, "n_parents": 2},
         }
-        self.population_size = 50
-        self.n_random = 2
-        self.n_elite = 3
-
-    def test_asserts_n_random_and_n_elites_are_nonnegative(self):
-        """generate_next_generation raises a Value error if n_random or n_elite is less than zero"""
-        # Random
-        with self.assertRaises(ValueError):
-            generate_next_generation(
-                self.fitness_results,
-                self.genome_params,
-                self.selection_strategy,
-                n_random=-1,
-            )
-
-        # Elite
-        with self.assertRaises(ValueError):
-            generate_next_generation(
-                self.fitness_results,
-                self.genome_params,
-                self.selection_strategy,
-                n_elite=-1,
-            )
+        self.generation_params = {"population_size": 50, "n_random": 2, "n_elite": 3}
 
     def test_asserts_n_random_and_n_elites_sum_to_leq_population_size(self):
-        """generate_next_generation raises a ValueError if n_random + n_elite > population_size"""
-        n_random = 10
-        n_elite = 10
-        population_size = 10
+        """generate_next_generation raises a ValueError if population_size has not been set and len(fitness_results) < n_random + n_elite"""
+        self.generation_params.pop("population_size")
+        population_generator = PopulationGenerator(
+            self.genome_params, self.selection_strategy, self.generation_params
+        )
 
         with self.assertRaises(ValueError):
-            generate_next_generation(
-                self.fitness_results,
-                self.genome_params,
-                self.selection_strategy,
-                n_random=n_random,
-                n_elite=n_elite,
-                population_size=population_size,
-            )
+            population_generator.generate_next_generation(self.fitness_results[:2])
 
-    @patch("holland.evolution.breeding.breed_next_generation")
-    @patch("holland.evolution.breeding.generate_random_genomes")
-    def test_calls_breed_next_generation_with_correct_args_if_given_popluation_size(
+    @patch.object(PopulationGenerator, "breed_next_generation")
+    @patch.object(PopulationGenerator, "generate_random_genomes")
+    def test_calls_breed_next_generation_with_correct_args_if_pop_size_set_in_constructor(
         self, mock_generate_random, mock_breed
     ):
         """generate_next_generation calls breed_next_generation with the correct args"""
-        generate_next_generation(
-            self.fitness_results,
-            self.genome_params,
-            self.selection_strategy,
-            n_random=self.n_random,
-            n_elite=self.n_elite,
-            population_size=self.population_size,
+        population_generator = PopulationGenerator(
+            self.genome_params, self.selection_strategy, self.generation_params
         )
 
-        mock_breed.assert_called_with(
-            self.fitness_results,
-            self.genome_params,
-            self.selection_strategy,
-            self.population_size - self.n_random - self.n_elite,
-        )
+        population_generator.generate_next_generation(self.fitness_results)
 
-    @patch("holland.evolution.breeding.breed_next_generation")
-    @patch("holland.evolution.breeding.generate_random_genomes")
-    def test_calls_breed_next_generation_with_correct_args_if_not_given_popluation_size(
+        expected_n_bred = (
+            self.generation_params["population_size"]
+            - self.generation_params["n_random"]
+            - self.generation_params["n_elite"]
+        )
+        mock_breed.assert_called_with(self.fitness_results, expected_n_bred)
+
+    @patch.object(PopulationGenerator, "breed_next_generation")
+    @patch.object(PopulationGenerator, "generate_random_genomes")
+    def test_calls_breed_next_generation_with_correct_args_if_not_given_popluation_size_in_constructor(
         self, mock_generate_random, mock_breed
     ):
         """generate_next_generation calls breed_next_generation with the correct args"""
-        generate_next_generation(
-            self.fitness_results,
-            self.genome_params,
-            self.selection_strategy,
-            n_random=self.n_random,
-            n_elite=self.n_elite,
+        self.generation_params.pop("population_size")
+        population_generator = PopulationGenerator(
+            self.genome_params, self.selection_strategy, self.generation_params
         )
 
-        mock_breed.assert_called_with(
-            self.fitness_results,
-            self.genome_params,
-            self.selection_strategy,
-            len(self.fitness_results) - self.n_random - self.n_elite,
-        )
+        population_generator.generate_next_generation(self.fitness_results)
 
-    @patch("holland.evolution.breeding.breed_next_generation")
-    @patch("holland.evolution.breeding.generate_random_genomes")
+        expected_n_bred = (
+            len(self.fitness_results)
+            - self.generation_params["n_random"]
+            - self.generation_params["n_elite"]
+        )
+        mock_breed.assert_called_with(self.fitness_results, expected_n_bred)
+
+    @patch.object(PopulationGenerator, "breed_next_generation")
+    @patch.object(PopulationGenerator, "generate_random_genomes")
     def test_calls_generate_random_genomes_with_correct_args(
         self, mock_generate_random, mock_breed
     ):
         """generate_next_generation calls generate_random_genomes with the correct args"""
-        generate_next_generation(
-            self.fitness_results,
-            self.genome_params,
-            self.selection_strategy,
-            n_random=self.n_random,
+        population_generator = PopulationGenerator(
+            self.genome_params, self.selection_strategy, self.generation_params
         )
 
-        mock_generate_random.assert_called_with(self.genome_params, self.n_random)
+        population_generator.generate_next_generation(self.fitness_results)
 
-    @patch(
-        "holland.evolution.breeding.breed_next_generation",
+        mock_generate_random.assert_called_with(self.generation_params["n_random"])
+
+    @patch.object(
+        PopulationGenerator,
+        "breed_next_generation",
         return_value=["v", "w", "x", "y", "z"],
     )
-    @patch(
-        "holland.evolution.breeding.generate_random_genomes", return_value=["t", "u"]
+    @patch.object(
+        PopulationGenerator, "generate_random_genomes", return_value=["t", "u"]
     )
     def test_returns_bred_and_random_individuals_in_one_list(
         self, mock_generate_random, mock_breed
     ):
         """generate_next_generation returns the results of breed_next_generation and generate_random_genomes concatenated together"""
-        next_generation = generate_next_generation(
-            self.fitness_results,
-            self.genome_params,
-            self.selection_strategy,
-            n_random=self.n_random,
+        self.generation_params["n_elite"] = 0
+        population_generator = PopulationGenerator(
+            self.genome_params, self.selection_strategy, self.generation_params
+        )
+
+        next_generation = population_generator.generate_next_generation(
+            self.fitness_results
         )
 
         expected_next_generation = (
@@ -139,26 +139,28 @@ class GenerateNextGenerationTest(unittest.TestCase):
         )
         self.assertListEqual(sorted(next_generation), sorted(expected_next_generation))
 
-    @patch(
-        "holland.evolution.breeding.breed_next_generation",
+    @patch.object(
+        PopulationGenerator,
+        "breed_next_generation",
         return_value=["v", "w", "x", "y", "z"],
     )
-    @patch(
-        "holland.evolution.breeding.generate_random_genomes", return_value=["t", "u"]
+    @patch.object(
+        PopulationGenerator, "generate_random_genomes", return_value=["t", "u"]
     )
     def test_returns_bred_random_and_elite_individuals_in_one_list(
         self, mock_generate_random, mock_breed
     ):
         """generate_next_generation returns the results of breed_next_generation and generate_random_genomes and the top n_elite individuals from the current generation all concatenated together"""
-        next_generation = generate_next_generation(
-            self.fitness_results,
-            self.genome_params,
-            self.selection_strategy,
-            n_random=self.n_random,
-            n_elite=self.n_elite,
+        population_generator = PopulationGenerator(
+            self.genome_params, self.selection_strategy, self.generation_params
         )
 
-        elites = [g for s, g in self.fitness_results[-self.n_elite :]]
+        next_generation = population_generator.generate_next_generation(
+            self.fitness_results
+        )
+
+        n_elite = self.generation_params["n_elite"]
+        elites = [g for s, g in self.fitness_results[-n_elite:]]
         expected_next_generation = (
             elites + mock_breed.return_value + mock_generate_random.return_value
         )
@@ -179,15 +181,21 @@ class BreedNextGenerationTest(unittest.TestCase):
 
     def test_asserts_number_is_at_least_zero(self):
         """breed_next_generation raises a ValueError if the given number is negative"""
+        population_generator = PopulationGenerator(
+            self.genome_params, self.selection_strategy
+        )
+
         with self.assertRaises(ValueError):
-            breed_next_generation(
-                self.fitness_results, self.genome_params, self.selection_strategy, -1
-            )
+            population_generator.breed_next_generation(self.fitness_results, -1)
 
     def test_returns_empty_list_if_number_is_zero(self):
         """breed_next_generation returns an empty list if the given number is zero"""
-        bred_individuals = breed_next_generation(
-            self.fitness_results, self.genome_params, self.selection_strategy, 0
+        population_generator = PopulationGenerator(
+            self.genome_params, self.selection_strategy
+        )
+
+        bred_individuals = population_generator.breed_next_generation(
+            self.fitness_results, 0
         )
 
         expected_bred_individuals = []
@@ -200,12 +208,11 @@ class BreedNextGenerationTest(unittest.TestCase):
         self, MockMutator, MockCrosser, MockSelector
     ):
         """breed_next_generation creates an instance of the Selector class and passes the selection_strategy to the constructor"""
-        breed_next_generation(
-            self.fitness_results,
-            self.genome_params,
-            self.selection_strategy,
-            self.n_genomes,
+        population_generator = PopulationGenerator(
+            self.genome_params, self.selection_strategy
         )
+
+        population_generator.breed_next_generation(self.fitness_results, self.n_genomes)
 
         MockSelector.assert_called_with(self.selection_strategy)
 
@@ -217,12 +224,11 @@ class BreedNextGenerationTest(unittest.TestCase):
         self, MockMutator, MockCrosser, mock_select_parents, mock_select_pool
     ):
         """breed_next_generation selects a breeding pool using the fitness results of the current generation"""
-        breed_next_generation(
-            self.fitness_results,
-            self.genome_params,
-            self.selection_strategy,
-            self.n_genomes,
+        population_generator = PopulationGenerator(
+            self.genome_params, self.selection_strategy
         )
+
+        population_generator.breed_next_generation(self.fitness_results, self.n_genomes)
 
         mock_select_pool.assert_called_with(self.fitness_results)
 
@@ -236,12 +242,11 @@ class BreedNextGenerationTest(unittest.TestCase):
         self, MockMutator, MockCrosser, mock_select_parents, mock_select_pool
     ):
         """breed_next_generation calls select_parents with the breeding_pool"""
-        breed_next_generation(
-            self.fitness_results,
-            self.genome_params,
-            self.selection_strategy,
-            self.n_genomes,
+        population_generator = PopulationGenerator(
+            self.genome_params, self.selection_strategy
         )
+
+        population_generator.breed_next_generation(self.fitness_results, self.n_genomes)
 
         expected_number_of_calls = self.n_genomes
         expected_calls = [
@@ -260,12 +265,11 @@ class BreedNextGenerationTest(unittest.TestCase):
         self, MockMutator, MockCrosser, mock_select_parents, mock_select_pool
     ):
         """breed_next_generation creates an instance of the Crosser class and passes the genome_params to the constructor"""
-        breed_next_generation(
-            self.fitness_results,
-            self.genome_params,
-            self.selection_strategy,
-            self.n_genomes,
+        population_generator = PopulationGenerator(
+            self.genome_params, self.selection_strategy
         )
+
+        population_generator.breed_next_generation(self.fitness_results, self.n_genomes)
 
         MockCrosser.assert_called_with(self.genome_params)
 
@@ -279,12 +283,11 @@ class BreedNextGenerationTest(unittest.TestCase):
         self, MockMutator, mock_cross, mock_select_parents, mock_select_pool
     ):
         """breed_next_generation crosses the genomes of the parents to create an offspring genome"""
-        breed_next_generation(
-            self.fitness_results,
-            self.genome_params,
-            self.selection_strategy,
-            self.n_genomes,
+        population_generator = PopulationGenerator(
+            self.genome_params, self.selection_strategy
         )
+
+        population_generator.breed_next_generation(self.fitness_results, self.n_genomes)
 
         expected_calls = [
             call(mock_select_parents.return_value) for _ in range(self.n_genomes)
@@ -301,12 +304,11 @@ class BreedNextGenerationTest(unittest.TestCase):
         self, MockMutator, MockCrosser, mock_select_parents, mock_select_pool
     ):
         """breed_next_generation creates an instance of Mutator and passes the genome_params to Mutator.__init__"""
-        breed_next_generation(
-            self.fitness_results,
-            self.genome_params,
-            self.selection_strategy,
-            self.n_genomes,
+        population_generator = PopulationGenerator(
+            self.genome_params, self.selection_strategy
         )
+
+        population_generator.breed_next_generation(self.fitness_results, self.n_genomes)
 
         MockMutator.assert_called_once_with(self.genome_params)
 
@@ -320,12 +322,11 @@ class BreedNextGenerationTest(unittest.TestCase):
         self, mock_mutate, mock_cross, mock_select_parents, mock_select_pool
     ):
         """breed_next_generation mutates the genome of the offspring created"""
-        breed_next_generation(
-            self.fitness_results,
-            self.genome_params,
-            self.selection_strategy,
-            self.n_genomes,
+        population_generator = PopulationGenerator(
+            self.genome_params, self.selection_strategy
         )
+
+        population_generator.breed_next_generation(self.fitness_results, self.n_genomes)
 
         expected_calls = [call(mock_cross.return_value) for _ in range(self.n_genomes)]
         mock_mutate.assert_has_calls(expected_calls)
@@ -342,12 +343,12 @@ class BreedNextGenerationTest(unittest.TestCase):
         """breed_next_generation returns the list of the mutated_offspring generated"""
         mutated_genomes = ["a", "b", "c", "d", "e"]
         mock_mutate.side_effect = mutated_genomes
+        population_generator = PopulationGenerator(
+            self.genome_params, self.selection_strategy
+        )
 
-        next_generation = breed_next_generation(
-            self.fitness_results,
-            self.genome_params,
-            self.selection_strategy,
-            len(mutated_genomes),
+        next_generation = population_generator.breed_next_generation(
+            self.fitness_results, len(mutated_genomes)
         )
 
         expected_next_generation = mutated_genomes
@@ -389,12 +390,16 @@ class GenerateRandomGenomesTest(unittest.TestCase):
 
     def test_asserts_number_is_at_least_zero(self):
         """generate_random_genomes raises a ValueError if number is less than zero"""
+        population_generator = PopulationGenerator({}, {})
+
         with self.assertRaises(ValueError):
-            generate_random_genomes(self.list_genome_params, -1)
+            population_generator.generate_random_genomes(-1)
 
     def test_returns_empty_list_if_number_is_zero(self):
         """generate_random_genomes returns an empty list if the given number is zero"""
-        random_genomes = generate_random_genomes(self.list_genome_params, 0)
+        population_generator = PopulationGenerator(self.list_genome_params, {})
+
+        random_genomes = population_generator.generate_random_genomes(0)
 
         expected_random_individuals = []
         self.assertListEqual(random_genomes, expected_random_individuals)
@@ -402,8 +407,9 @@ class GenerateRandomGenomesTest(unittest.TestCase):
     def test_generates_genomes_according_to_genome_params_for_list_type_genes(self):
         """generate_random_genomes generates `number` genomes with values according to each gene's initial_distribution function and with length according to size"""
         number = 10
+        population_generator = PopulationGenerator(self.list_genome_params, {})
 
-        random_genomes = generate_random_genomes(self.list_genome_params, number)
+        random_genomes = population_generator.generate_random_genomes(number)
 
         self.assertEqual(len(random_genomes), number)
 
@@ -420,7 +426,9 @@ class GenerateRandomGenomesTest(unittest.TestCase):
     def test_generates_genomes_according_to_genome_params_for_value_type_genes(self):
         """generate_random_genomes generates `number` genomes with values according to each gene's initial_distribution function"""
         number = 10
-        random_genomes = generate_random_genomes(self.value_genome_params, number)
+        population_generator = PopulationGenerator(self.value_genome_params, {})
+
+        random_genomes = population_generator.generate_random_genomes(number)
 
         self.assertEqual(len(random_genomes), number)
 
@@ -437,8 +445,9 @@ class GenerateRandomGenomesTest(unittest.TestCase):
     ):
         """generate_random_genomes calls bound_value on each value if the gene's type is numeric using the gene_params max and min"""
         number = 1
+        population_generator = PopulationGenerator(self.list_genome_params, {})
 
-        generate_random_genomes(self.list_genome_params, number)
+        population_generator.generate_random_genomes(number)
 
         expected_calls = [
             call(
@@ -469,8 +478,9 @@ class GenerateRandomGenomesTest(unittest.TestCase):
     ):
         """generate_random_genomes calls bound_value on the output of initial_distribution if type is numeric"""
         number = 1
+        population_generator = PopulationGenerator(self.value_genome_params, {})
 
-        generate_random_genomes(self.value_genome_params, number)
+        population_generator.generate_random_genomes(number)
 
         expected_calls = [
             call(
@@ -523,8 +533,9 @@ class GenerateRandomGenomesTest(unittest.TestCase):
                 "initial_distribution": lambda: 4.6,
             },
         }
+        population_generator = PopulationGenerator(genome_params, {})
 
-        random_genomes = generate_random_genomes(genome_params, number)
+        random_genomes = population_generator.generate_random_genomes(number)
 
         # value-types
         self.assertTrue(isinstance(random_genomes[0]["gene1"], int))

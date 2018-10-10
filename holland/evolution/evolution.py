@@ -1,5 +1,5 @@
 from .evaluation import evaluate_fitness
-from .breeding import generate_next_generation, generate_random_genomes
+from .breeding import PopulationGenerator
 from ..storage import StorageManager
 
 
@@ -8,9 +8,7 @@ def evolve(
     genome_params,
     selection_strategy,
     should_maximize_fitness=True,
-    population_size=1000,
-    n_random_per_generation=0,
-    n_elite_per_generation=0,
+    generation_params={},
     initial_population=None,
     n_generations=100,
     fitness_storage_options={},
@@ -31,14 +29,8 @@ def evolve(
     :param should_maximize_fitness: whether fitness should be maximized or minimized
     :type should_maximize_fitness: bool
 
-    :param population_size: the size of the population
-    :type population_size: int
-
-    :param n_random_per_generation: the number of random genomes to introduce per generation
-    :type n_random_per_generation: int
-
-    :param n_elite_per_generation: the number of genomes from the current generation to preserve for the next generation unchanged (starting with the most fit genome)
-    :type n_elite_per_generation: int
+    :param generation_params: a dictionary specifying how to create each generation; see :ref:`generation-params`
+    :type generation_params: dict
 
     :param initial_population: an initial population
     :type initial_population: list
@@ -67,8 +59,9 @@ def evolve(
     .. todo:: If an initial population is given and some genomes are missing parameters, a warning is given unless a flag is set to fill those values randomly
 
     Dependencies:
+        * :func:`~holland.evolution.PopulationGenerator.generate_random_genomes`
         * :func:`~holland.evolution.evaluate_fitness`
-        * :func:`~holland.evolution.generate_next_generation`
+        * :func:`~holland.evolution.PopulationGenerator.generate_next_generation`
         * :func:`~holland.storage.StorageManager.update_storage`
         * :func:`~holland.storage.StorageManager.react_to_interruption`
 
@@ -79,6 +72,10 @@ def evolve(
             :linenos:
             :emphasize-lines: 23-26
     """
+    n_random_per_generation = generation_params.get("n_random", 0)
+    n_elite_per_generation = generation_params.get("n_elite", 0)
+    population_size = generation_params.get("population_size", 1000)
+
     if n_random_per_generation < 0 or n_elite_per_generation < 0:
         raise ValueError(
             "Number of random and elite genomes per generation cannot be negative"
@@ -88,9 +85,13 @@ def evolve(
     if n_generations < 1:
         raise ValueError("Number of generations must be at least 1")
 
+    population_generator = PopulationGenerator(
+        genome_params, selection_strategy, generation_params=generation_params
+    )
+
     population = initial_population
     if population is None:
-        population = generate_random_genomes(genome_params, population_size)
+        population = population_generator.generate_random_genomes(population_size)
 
     storage_manager = StorageManager(
         fitness_storage_options=fitness_storage_options,
@@ -106,13 +107,8 @@ def evolve(
             storage_manager.update_storage(generation_num, fitness_results)
 
             if generation_num < n_generations - 1:
-                population = generate_next_generation(
-                    fitness_results,
-                    genome_params,
-                    selection_strategy,
-                    population_size=population_size,
-                    n_random=n_random_per_generation,
-                    n_elite=n_elite_per_generation,
+                population = population_generator.generate_next_generation(
+                    fitness_results
                 )
         except:
             storage_manager.react_to_interruption(generation_num, fitness_results)
