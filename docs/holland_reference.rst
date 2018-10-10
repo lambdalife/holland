@@ -113,6 +113,14 @@ General Example:
 Storage
 -------
 
+.. _storage-manager:
+
+storage manager
+~~~~~~~~~~~~~~~
+.. autoclass:: holland.storage.StorageManager
+	:members:
+
+
 .. _storage-fitness:
 
 fitness

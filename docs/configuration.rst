@@ -167,8 +167,8 @@ To measure performance improvements over the generations, fitness statistics can
 The following options are available:
 
     * **should_record_fitness** (*bool*) – determines whether or not to record fitness
-    * **file_name** (*str*) – name of the file to write to
     * **format** (*str*) – file format (options: 'csv', 'memory'); if 'memory', stats are returned as second element of tuple in :func:`~holland.evolution.evolve`
+    * **file_name** (*str*) – name of the file to write to
     * **path** (*str*) – location of the file to write
 
 See the :ref:`storage-fitness` subsection of :ref:`storage` for more on how these values are used.
@@ -187,10 +187,10 @@ The following options are available:
     * **should_record_genomes** (*bool*) – determines wether or not to record genomes at all
     * **record_every_n_generations** (*int*) – recording frequency
     * **should_record_on_interrupt** (*bool*) – determines wether or not to record genomes if an unhandled exception (including KeyboardInterrupt) is raised
-    * **should_add_generation_suffix** (*bool*) – determines whether or not to append '-generation_{n}' to the end of file_name
-    * **file_name** (*str*) – name of the file to write to
     * **format** (*str*) – file format (options: 'json')
+    * **file_name** (*str*) – name of the file to write to
     * **path** (*str*) – location of the file to write
+    * **should_add_generation_suffix** (*bool*) – determines whether or not to append '-generation_{n}' to the end of file_name
     * **top** (*int*) – number of genomes and scores to select from the top of the pack (by fitness)
     * **mid** (*int*) – number of genomes and scores to select from the middle of the pack (by fitness)
     * **bottom** (*int*) – number of genomes and scores to select from the bottom of the pack (by fitness)
