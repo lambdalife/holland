@@ -1,4 +1,4 @@
-from .evaluation import evaluate_fitness
+from .evaluation import Evaluator
 from .breeding import PopulationGenerator
 from ..storage import StorageManager
 
@@ -85,6 +85,11 @@ def evolve(
     if n_generations < 1:
         raise ValueError("Number of generations must be at least 1")
 
+    evaluator = Evaluator(fitness_function, ascending=should_maximize_fitness)
+    storage_manager = StorageManager(
+        fitness_storage_options=fitness_storage_options,
+        genome_storage_options=genome_storage_options,
+    )
     population_generator = PopulationGenerator(
         genome_params, selection_strategy, generation_params=generation_params
     )
@@ -93,16 +98,9 @@ def evolve(
     if population is None:
         population = population_generator.generate_random_genomes(population_size)
 
-    storage_manager = StorageManager(
-        fitness_storage_options=fitness_storage_options,
-        genome_storage_options=genome_storage_options,
-    )
-
     for generation_num in range(n_generations):
         try:
-            fitness_results = evaluate_fitness(
-                population, fitness_function, ascending=should_maximize_fitness
-            )
+            fitness_results = evaluator.evaluate_fitness(population)
 
             storage_manager.update_storage(generation_num, fitness_results)
 

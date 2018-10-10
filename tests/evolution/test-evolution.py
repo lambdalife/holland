@@ -56,9 +56,9 @@ class EvolveTest(unittest.TestCase):
             )
 
     @patch("holland.evolution.evolution.PopulationGenerator")
-    @patch("holland.evolution.evolution.evaluate_fitness")
+    @patch("holland.evolution.evolution.Evaluator")
     def test_creates_PopulationGenerator_instance_correctly(
-        self, mock_evaluate_fitness, MockPopulationGenerator
+        self, MockEvaluator, MockPopulationGenerator
     ):
         """evolve creates an instance of the PopulationGenerator class and passes the genome_params, selection_strategy, and generation_params to the constructor"""
         evolve(
@@ -75,10 +75,10 @@ class EvolveTest(unittest.TestCase):
         )
 
     @patch.object(PopulationGenerator, "generate_random_genomes")
-    @patch("holland.evolution.evolution.evaluate_fitness")
+    @patch("holland.evolution.evolution.Evaluator")
     @patch.object(PopulationGenerator, "generate_next_generation")
     def test_generates_random_init_pop_if_not_given_init_pop(
-        self, mock_generate_next_gen, mock_evaluate_fitness, mock_generate_random
+        self, mock_generate_next_gen, MockEvaluator, mock_generate_random
     ):
         """evolve generates a random initial population if one is not passed as an argument"""
         population_size = 100
@@ -92,10 +92,10 @@ class EvolveTest(unittest.TestCase):
         mock_generate_random.assert_called_with(population_size)
 
     @patch.object(PopulationGenerator, "generate_random_genomes")
-    @patch("holland.evolution.evolution.evaluate_fitness")
+    @patch("holland.evolution.evolution.Evaluator")
     @patch.object(PopulationGenerator, "generate_next_generation")
     def test_does_not_generate_random_init_pop_if_given_init_pop(
-        self, mock_generate_next_gen, mock_evaluate_fitness, mock_generate_random
+        self, mock_generate_next_gen, MockEvaluator, mock_generate_random
     ):
         """evolve does not generate a random initial population if one is passed as an argument"""
         population_size = 100
@@ -111,35 +111,39 @@ class EvolveTest(unittest.TestCase):
         mock_generate_random.assert_not_called()
 
     @patch.object(PopulationGenerator, "generate_random_genomes")
-    @patch("holland.evolution.evolution.StorageManager")
-    @patch("holland.evolution.evolution.evaluate_fitness")
+    @patch("holland.evolution.evolution.Evaluator")
     @patch.object(PopulationGenerator, "generate_next_generation")
-    def test_constructs_a_storage_manager_with_the_correct_args(
-        self,
-        mock_generate_next_gen,
-        mock_evaluate_fitness,
-        MockStorageManager,
-        mock_generate_random,
+    def test_creates_Evaluator_instance_correctly_if_maximize_fitness(
+        self, mock_generate_next_gen, MockEvaluator, mock_generate_random
     ):
-        """evolve constructs an instance of StorageManager with the correct arguments"""
-        fitness_storage_options = {"file_name": "test.csv"}
-        genome_storage_options = {"file_name": "test.json"}
-
+        """evolve creates an instance of the Evaluator class and passes the fitness function and asc=True to the constructor if should_maximize_fitness is True"""
         evolve(
             self.fitness_function,
             self.genome_params,
             self.selection_strategy,
-            fitness_storage_options=fitness_storage_options,
-            genome_storage_options=genome_storage_options,
+            should_maximize_fitness=True,
         )
 
-        MockStorageManager.assert_called_with(
-            fitness_storage_options=fitness_storage_options,
-            genome_storage_options=genome_storage_options,
-        )
+        MockEvaluator.assert_called_with(self.fitness_function, ascending=True)
 
     @patch.object(PopulationGenerator, "generate_random_genomes")
-    @patch("holland.evolution.evolution.evaluate_fitness")
+    @patch("holland.evolution.evolution.Evaluator")
+    @patch.object(PopulationGenerator, "generate_next_generation")
+    def test_creates_Evaluator_instance_correctly_if_minimize_fitness(
+        self, mock_generate_next_gen, MockEvaluator, mock_generate_random
+    ):
+        """evolve creates an instance of the Evaluator class and passes the fitness function and asc=False to the constructor if should_maximize_fitness is False"""
+        evolve(
+            self.fitness_function,
+            self.genome_params,
+            self.selection_strategy,
+            should_maximize_fitness=False,
+        )
+
+        MockEvaluator.assert_called_with(self.fitness_function, ascending=False)
+
+    @patch.object(PopulationGenerator, "generate_random_genomes")
+    @patch.object(Evaluator, "evaluate_fitness")
     @patch.object(PopulationGenerator, "generate_next_generation")
     def test_evaluates_fitness_and_generates_new_generation_in_each_generation(
         self, mock_generate_next_gen, mock_evaluate_fitness, mock_generate_random
@@ -173,9 +177,7 @@ class EvolveTest(unittest.TestCase):
             generation_params=generation_params,
         )
 
-        expected_evaluate_fitness_calls = [
-            call(pop, self.fitness_function, ascending=True) for pop in all_populations
-        ]
+        expected_evaluate_fitness_calls = [call(pop) for pop in all_populations]
         expected_generate_next_gen_calls = [
             call(res)
             for res in results[:-1]
@@ -192,53 +194,35 @@ class EvolveTest(unittest.TestCase):
         )
 
     @patch.object(PopulationGenerator, "generate_random_genomes")
-    @patch("holland.evolution.evolution.evaluate_fitness")
+    @patch("holland.evolution.evolution.StorageManager")
+    @patch.object(Evaluator, "evaluate_fitness")
     @patch.object(PopulationGenerator, "generate_next_generation")
-    def test_calls_evaluate_fitness_with_asc_if_maximize(
-        self, mock_generate_next_gen, mock_evaluate_fitness, mock_generate_random
+    def test_constructs_a_storage_manager_with_the_correct_args(
+        self,
+        mock_generate_next_gen,
+        mock_evaluate_fitness,
+        MockStorageManager,
+        mock_generate_random,
     ):
-        """evolve calls evalute_fitness with ascending=True if should_maximize_fitness=True"""
-        n_generations = 1
-        initial_population = ["A", "B", "C"]
+        """evolve constructs an instance of StorageManager with the correct arguments"""
+        fitness_storage_options = {"file_name": "test.csv"}
+        genome_storage_options = {"file_name": "test.json"}
 
         evolve(
             self.fitness_function,
             self.genome_params,
             self.selection_strategy,
-            should_maximize_fitness=True,
-            initial_population=initial_population,
-            n_generations=n_generations,
+            fitness_storage_options=fitness_storage_options,
+            genome_storage_options=genome_storage_options,
         )
 
-        mock_evaluate_fitness.assert_called_with(
-            initial_population, self.fitness_function, ascending=True
-        )
-
-    @patch.object(PopulationGenerator, "generate_random_genomes")
-    @patch("holland.evolution.evolution.evaluate_fitness")
-    @patch.object(PopulationGenerator, "generate_next_generation")
-    def test_calls_evaluate_fitness_with_asc_False_if_not_maximize(
-        self, mock_generate_next_gen, mock_evaluate_fitness, mock_generate_random
-    ):
-        """evolve calls evalute_fitness with ascending=False if should_maximize_fitness=False"""
-        n_generations = 1
-        initial_population = ["A", "B", "C"]
-
-        evolve(
-            self.fitness_function,
-            self.genome_params,
-            self.selection_strategy,
-            should_maximize_fitness=False,
-            initial_population=initial_population,
-            n_generations=n_generations,
-        )
-
-        mock_evaluate_fitness.assert_called_with(
-            initial_population, self.fitness_function, ascending=False
+        MockStorageManager.assert_called_with(
+            fitness_storage_options=fitness_storage_options,
+            genome_storage_options=genome_storage_options,
         )
 
     @patch.object(PopulationGenerator, "generate_random_genomes")
-    @patch("holland.evolution.evolution.evaluate_fitness")
+    @patch.object(Evaluator, "evaluate_fitness")
     @patch.object(StorageManager, "update_storage")
     @patch.object(PopulationGenerator, "generate_next_generation")
     def test_calls_storage_manager_update_storage_with_correct_args(
@@ -267,7 +251,7 @@ class EvolveTest(unittest.TestCase):
         self.assertEqual(mock_update_storage.call_count, len(expected_calls))
 
     @patch.object(PopulationGenerator, "generate_random_genomes")
-    @patch("holland.evolution.evolution.evaluate_fitness", return_value=[1, 2, 3])
+    @patch.object(Evaluator, "evaluate_fitness", return_value=[1, 2, 3])
     @patch.object(StorageManager, "react_to_interruption")
     @patch.object(PopulationGenerator, "generate_next_generation")
     def test_calls_record_genomes_and_fitnesses_on_interrupt_if_should(
@@ -297,7 +281,7 @@ class EvolveTest(unittest.TestCase):
         )
 
     @patch.object(PopulationGenerator, "generate_random_genomes")
-    @patch("holland.evolution.evolution.evaluate_fitness")
+    @patch.object(Evaluator, "evaluate_fitness")
     @patch.object(PopulationGenerator, "generate_next_generation")
     def test_stores_and_returns_fitness_statistics_if_storage_format_is_memory(
         self, mock_generate_next_gen, mock_evaluate_fitness, mock_generate_random
@@ -322,7 +306,7 @@ class EvolveTest(unittest.TestCase):
             )
 
     @patch.object(PopulationGenerator, "generate_random_genomes")
-    @patch("holland.evolution.evolution.evaluate_fitness")
+    @patch.object(Evaluator, "evaluate_fitness")
     @patch.object(PopulationGenerator, "generate_next_generation")
     def test_returns_fitness_results_from_last_generation(
         self, mock_generate_next_gen, mock_evaluate_fitness, mock_generate_random

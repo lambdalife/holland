@@ -17,7 +17,8 @@ evolution
 
 evaluation
 ~~~~~~~~~~
-.. autofunction:: holland.evolution.evaluate_fitness
+.. autoclass:: holland.evolution.Evaluator
+	:members:
 
 
 breeding
