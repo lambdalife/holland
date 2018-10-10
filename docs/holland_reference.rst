@@ -57,7 +57,7 @@ Library
 fitness weighting functions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Fitness weighting functions are used by :func:`~holland.evolution.select_parents` to weight fitness scores and generate probabilities for selecting a genome to be a parent of a genome in the next generation. The following functions return stock weighting functions, some with configurable parameters. See :ref:`selection-strategy` for general information.
+Fitness weighting functions are used by :func:`~holland.evolution.Selector.select_parents` to weight fitness scores and generate probabilities for selecting a genome to be a parent of a genome in the next generation. The following functions return stock weighting functions, some with configurable parameters. See :ref:`selection-strategy` for general information.
 
 General Example:
 
@@ -74,7 +74,7 @@ General Example:
 crossover functions
 ~~~~~~~~~~~~~~~~~~~
 
-Crossover functions are used by :func:`~holland.evolution.cross_genomes` to perform crossover. The following functions return stock crossover functions, some with configurable parameters. See :ref:`crossover-functions` for general information.
+Crossover functions are used by :func:`~holland.evolution.Crosser.cross_genomes` to perform crossover. The following functions return stock crossover functions, some with configurable parameters. See :ref:`crossover-functions` for general information.
 
 General Example:
 	
@@ -89,7 +89,7 @@ General Example:
 mutation functions
 ~~~~~~~~~~~~~~~~~~
 
-Mutation functions are used by :func:`~holland.evolution.probabilistically_apply_mutation` to apply mutation to a gene value. The following functions return stock mutation functions, some with configurable parameters. See :ref:`mutation-functions` for general information.
+Mutation functions are used by :func:`~holland.evolution.Mutator.probabilistically_apply_mutation` to apply mutation to a gene value. The following functions return stock mutation functions, some with configurable parameters. See :ref:`mutation-functions` for general information.
 
 General Example:
 	

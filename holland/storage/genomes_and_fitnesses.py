@@ -9,7 +9,7 @@ def record_genomes_and_fitnesses(generation_num, fitness_results, **storage_opti
     :param generation_num: the generation number of the population that generated the fitness_scores
     :type generation_num: int
 
-    :param fitness_results: the results of a round of evaluation (returned by :func:`~holland.evolve.evaluate_fitness`)
+    :param fitness_results: the results of a round of evaluation (returned by :func:`~holland.evolution.Evaluator.evaluate_fitness`)
     :type fitness_results: list
 
     :param storage_options: options for selecting which results to store and how to store them, specifically ``should_add_generation_suffix``, ``format``, ``file_name``, ``path``, ``top``, ``mid``, ``bottom`` are relevant; see :ref:`genome-storage-options`
@@ -20,7 +20,7 @@ def record_genomes_and_fitnesses(generation_num, fitness_results, **storage_opti
 
 
     Dependencies:
-        * :func:`~holland.storage.format_genomes_and_fitnesses_for_storage`
+        * :func:`~holland.storage.genomes_and_fitnesses.format_genomes_and_fitnesses_for_storage`
     """
     formatted_data = format_genomes_and_fitnesses_for_storage(
         generation_num, fitness_results, **storage_options
@@ -55,10 +55,10 @@ def format_genomes_and_fitnesses_for_storage(
     :returns: a dictionary of the form ``{"generation": generation_num, "results": selected_results}``
 
 
-    .. note:: For the sake of efficiency, this method expects ``fitness_results`` to be sorted in order to properly select genomes on the basis of fitness. :func:`~holland.evolution.evalute_fitness` returns sorted results.
+    .. note:: For the sake of efficiency, this method expects ``fitness_results`` to be sorted in order to properly select genomes on the basis of fitness. :func:`~holland.evolution.Evaluator.evaluate_fitness` returns sorted results.
 
     Dependencies:
-        * :func:`~holland.utils.select_from`
+        * :func:`~holland.utils.utils.select_from`
     """
     selected_results = select_from(
         fitness_results,

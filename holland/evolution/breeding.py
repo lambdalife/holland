@@ -49,14 +49,14 @@ class PopulationGenerator:
         """
         Generates the next generation
 
-        :param fitness_results: a sorted list of tuples containing a fitness score in the first position and a genome in the second (returned by :func:`~holland.evolution.evaluate_fitness`)
+        :param fitness_results: a sorted list of tuples containing a fitness score in the first position and a genome in the second (returned by :func:`~holland.evolution.Evaluator.evaluate_fitness`)
         :type fitness_results: list
 
 
         :returns: a list of genomes
 
         
-        .. note:: For the sake of efficiency, this method expects ``fitness_results`` to be sorted in order to properly select genomes on the basis of fitness. :func:`~holland.evolution.evalute_fitness` returns sorted results.
+        .. note:: For the sake of efficiency, this method expects ``fitness_results`` to be sorted in order to properly select genomes on the basis of fitness. :func:`~holland.evolution.Evaluator.evaluate_fitness` returns sorted results.
 
         .. todo:: Write an example for usage
 
@@ -92,7 +92,7 @@ class PopulationGenerator:
         """
         Generates a given number of genomes by breeding, through crossover and mutation, existing genomes
 
-        :param fitness_results: a sorted list of tuples containing a fitness score in the first position and a genome in the second (returned by :func:`~holland.evolution.evaluate_fitness`)
+        :param fitness_results: a sorted list of tuples containing a fitness score in the first position and a genome in the second (returned by :func:`~holland.evolution.Evaluator.evaluate_fitness`)
         :type fitness_results: list
 
         :param n_genomes: the number of genomes to produce
@@ -105,7 +105,7 @@ class PopulationGenerator:
         :raises ValueError: if ``n_genomes < 0``
 
         
-        .. note:: For the sake of efficiency, this method expects ``fitness_results`` to be sorted in order to properly select genomes on the basis of fitness. :func:`~holland.evolution.evalute_fitness` returns sorted results.
+        .. note:: For the sake of efficiency, this method expects ``fitness_results`` to be sorted in order to properly select genomes on the basis of fitness. :func:`~holland.evolution.Evaluator.evaluate_fitness` returns sorted results.
 
         .. todo:: Write an example for usage
 
@@ -150,7 +150,7 @@ class PopulationGenerator:
         .. todo:: Write an example for usage
 
         Dependencies:
-            * :func:`holland.utils.bound_value`
+            * :func:`~holland.utils.utils.bound_value`
         """
         if n_genomes < 0:
             raise ValueError(

@@ -26,7 +26,7 @@ class Mutator:
 
 
         Dependencies:
-            * :func:`holland.evolution.Mutator.mutate_gene`
+            * :func:`~holland.evolution.Mutator.mutate_gene`
         """
         return {
             gene_name: self.mutate_gene(
@@ -50,7 +50,7 @@ class Mutator:
 
 
         Dependencies:
-            * :func:`holland.evolution.Mutator.probabilistically_apply_mutation`
+            * :func:`~holland.evolution.Mutator.probabilistically_apply_mutation`
         """
         mutation_level = (
             "value" if gene_params.get("mutation_level") != "gene" else "gene"
@@ -79,7 +79,7 @@ class Mutator:
 
 
         Dependencies:
-            * :func:`holland.utils.bound_value`
+            * :func:`~holland.utils.utils.bound_value`
         """
         mutation_function = gene_params["mutation_function"]
         mutation_rate = gene_params["mutation_rate"]

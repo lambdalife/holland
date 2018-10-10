@@ -37,7 +37,7 @@ class StorageManager:
         :param generation_num: the generation number of the population that generated the ``fitness_results``
         :type generation_num: int
 
-        :param fitness_results: the results of a round of evaluation (returned by :func:`~holland.evolution.evaluate_fitness`)
+        :param fitness_results: the results of a round of evaluation (returned by :func:`~holland.evolution.Evaluator.evaluate_fitness`)
         :type fitness_results: list
 
 
@@ -58,7 +58,7 @@ class StorageManager:
         :param generation_num: the generation number of the population that generated the ``fitness_results``
         :type generation_num: int
 
-        :param fitness_results: the results of a round of evaluation (returned by :func:`~holland.evolution.evaluate_fitness`)
+        :param fitness_results: the results of a round of evaluation (returned by :func:`~holland.evolution.Evaluator.evaluate_fitness`)
         :type fitness_results: list
 
 
@@ -66,7 +66,7 @@ class StorageManager:
 
 
         Dependencies:
-            * :func:`~holland.storage.record_genomes_and_fitnesses`
+            * :func:`~holland.storage.genomes_and_fitnesses.record_genomes_and_fitnesses`
         """
         if self.should_record_genomes_on_interrupt:
             record_genomes_and_fitnesses(
@@ -80,14 +80,14 @@ class StorageManager:
         :param generation_num: the generation number of the population that generated the ``fitness_results``
         :type generation_num: int
 
-        :param fitness_results: the results of a round of evaluation (returned by :func:`~holland.evolution.evaluate_fitness`)
+        :param fitness_results: the results of a round of evaluation (returned by :func:`~holland.evolution.Evaluator.evaluate_fitness`)
         :type fitness_results: list
 
         :returns: ``None``
 
 
         Dependencies:
-            * :func:`~holland.storage.record_fitness`
+            * :func:`~holland.storage.fitness.record_fitness`
         """
         if self.should_record_fitness:
             fitness_scores = [fitness for fitness, genome in fitness_results]
@@ -104,7 +104,7 @@ class StorageManager:
         :param generation_num: the generation number of the population that generated the ``fitness_results``
         :type generation_num: int
 
-        :param fitness_results: the results of a round of evaluation (returned by :func:`~holland.evolution.evaluate_fitness`)
+        :param fitness_results: the results of a round of evaluation (returned by :func:`~holland.evolution.Evaluator.evaluate_fitness`)
         :type fitness_results: list
 
 
@@ -113,7 +113,7 @@ class StorageManager:
 
         Dependencies:
             * :func:`~holland.storage.StorageManager.should_record_genomes_now`
-            * :func:`~holland.storage.record_genomes_and_fitnesses`
+            * :func:`~holland.storage.genomes_and_fitnesses.record_genomes_and_fitnesses`
         """
         if self.should_record_genomes_now(generation_num):
             record_genomes_and_fitnesses(
