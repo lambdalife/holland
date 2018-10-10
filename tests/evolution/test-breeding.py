@@ -2,12 +2,9 @@ import numpy as np
 import unittest
 from unittest.mock import patch, call, Mock
 
-from holland.evolution.breeding import (
-    generate_next_generation,
-    breed_next_generation,
-    generate_random_genomes,
-)
+from holland.evolution.breeding import *
 from holland.evolution.mutation import Mutator
+from holland.evolution.crossover import Crosser
 
 
 class GenerateNextGenerationTest(unittest.TestCase):
@@ -177,7 +174,7 @@ class BreedNextGenerationTest(unittest.TestCase):
             "pool": {"top": 2, "bottom": 1, "random": 2},
             "parents": {"weighting_function": lambda x: x * x, "n_parents": 2},
         }
-        self.number = 10
+        self.n_genomes = 10
 
     def test_asserts_number_is_at_least_zero(self):
         """breed_next_generation raises a ValueError if the given number is negative"""
@@ -197,17 +194,17 @@ class BreedNextGenerationTest(unittest.TestCase):
 
     @patch("holland.evolution.breeding.select_breeding_pool")
     @patch("holland.evolution.breeding.select_parents")
-    @patch("holland.evolution.breeding.cross_genomes")
+    @patch("holland.evolution.breeding.Crosser")
     @patch("holland.evolution.breeding.Mutator")
     def test_calls_select_breeding_pool_correctly(
-        self, MockMutator, mock_cross, mock_select_parents, mock_select_pool
+        self, MockMutator, MockCrosser, mock_select_parents, mock_select_pool
     ):
         """breed_next_generation selects a breeding pool using the fitness results of the current generation"""
         breed_next_generation(
             self.fitness_results,
             self.genome_params,
             self.selection_strategy,
-            self.number,
+            self.n_genomes,
         )
 
         mock_select_pool.assert_called_with(
@@ -219,20 +216,20 @@ class BreedNextGenerationTest(unittest.TestCase):
         return_value=[(100, "a"), (90, "b")],
     )
     @patch("holland.evolution.breeding.select_parents")
-    @patch("holland.evolution.breeding.cross_genomes")
+    @patch("holland.evolution.breeding.Crosser")
     @patch("holland.evolution.breeding.Mutator")
     def test_calls_select_parents_correctly_with_given_number(
-        self, MockMutator, mock_cross, mock_select_parents, mock_select_pool
+        self, MockMutator, MockCrosser, mock_select_parents, mock_select_pool
     ):
         """breed_next_generation selects parents according to the parents selection_strategy and n_random when population_size is specified"""
         breed_next_generation(
             self.fitness_results,
             self.genome_params,
             self.selection_strategy,
-            self.number,
+            self.n_genomes,
         )
 
-        expected_number_of_calls = self.number
+        expected_number_of_calls = self.n_genomes
         expected_calls = [
             call(mock_select_pool.return_value, **self.selection_strategy["parents"])
             for _ in range(expected_number_of_calls)
@@ -245,9 +242,29 @@ class BreedNextGenerationTest(unittest.TestCase):
         return_value=[(100, "a"), (90, "b")],
     )
     @patch("holland.evolution.breeding.select_parents", return_value=["a", "b"])
-    @patch("holland.evolution.breeding.cross_genomes")
+    @patch("holland.evolution.breeding.Crosser")
     @patch("holland.evolution.breeding.Mutator")
-    def test_calls_cross_correctly(
+    def test_creates_Crosser_instance_correctly(
+        self, MockMutator, MockCrosser, mock_select_parents, mock_select_pool
+    ):
+        """breed_next_generation creates an instance of the Crosser class and passes the genome_params to the constructor"""
+        breed_next_generation(
+            self.fitness_results,
+            self.genome_params,
+            self.selection_strategy,
+            self.n_genomes,
+        )
+
+        MockCrosser.assert_called_with(self.genome_params)
+
+    @patch(
+        "holland.evolution.breeding.select_breeding_pool",
+        return_value=[(100, "a"), (90, "b")],
+    )
+    @patch("holland.evolution.breeding.select_parents", return_value=["a", "b"])
+    @patch.object(Crosser, "cross_genomes")
+    @patch("holland.evolution.breeding.Mutator")
+    def test_calls_cross_genomes_correctly(
         self, MockMutator, mock_cross, mock_select_parents, mock_select_pool
     ):
         """breed_next_generation crosses the genomes of the parents to create an offspring genome"""
@@ -255,12 +272,11 @@ class BreedNextGenerationTest(unittest.TestCase):
             self.fitness_results,
             self.genome_params,
             self.selection_strategy,
-            self.number,
+            self.n_genomes,
         )
 
         expected_calls = [
-            call(mock_select_parents.return_value, self.genome_params)
-            for _ in range(self.number)
+            call(mock_select_parents.return_value) for _ in range(self.n_genomes)
         ]
         mock_cross.assert_has_calls(expected_calls)
 
@@ -269,17 +285,17 @@ class BreedNextGenerationTest(unittest.TestCase):
         return_value=[(100, "a"), (90, "b")],
     )
     @patch("holland.evolution.breeding.select_parents")
-    @patch("holland.evolution.breeding.cross_genomes")
+    @patch("holland.evolution.breeding.Crosser")
     @patch("holland.evolution.breeding.Mutator")
     def test_creates_Mutator_instance_correctly(
-        self, MockMutator, mock_cross, mock_select_parents, mock_select_pool
+        self, MockMutator, MockCrosser, mock_select_parents, mock_select_pool
     ):
         """breed_next_generation creates an instance of Mutator and passes the genome_params to Mutator.__init__"""
         breed_next_generation(
             self.fitness_results,
             self.genome_params,
             self.selection_strategy,
-            self.number,
+            self.n_genomes,
         )
 
         MockMutator.assert_called_once_with(self.genome_params)
@@ -289,7 +305,7 @@ class BreedNextGenerationTest(unittest.TestCase):
         return_value=[(100, "a"), (90, "b")],
     )
     @patch("holland.evolution.breeding.select_parents", return_value=["a", "b"])
-    @patch("holland.evolution.breeding.cross_genomes", return_value="a")
+    @patch.object(Crosser, "cross_genomes", return_value="a")
     @patch.object(Mutator, "mutate_genome")
     def test_calls_Mutator_mutate_genome_on_offspring(
         self, mock_mutate, mock_cross, mock_select_parents, mock_select_pool
@@ -299,10 +315,10 @@ class BreedNextGenerationTest(unittest.TestCase):
             self.fitness_results,
             self.genome_params,
             self.selection_strategy,
-            self.number,
+            self.n_genomes,
         )
 
-        expected_calls = [call(mock_cross.return_value) for _ in range(self.number)]
+        expected_calls = [call(mock_cross.return_value) for _ in range(self.n_genomes)]
         mock_mutate.assert_has_calls(expected_calls)
 
     @patch(
@@ -310,9 +326,9 @@ class BreedNextGenerationTest(unittest.TestCase):
         return_value=[(100, "a"), (90, "b")],
     )
     @patch("holland.evolution.breeding.select_parents", return_value=["a", "b"])
-    @patch("holland.evolution.breeding.cross_genomes", return_value="a")
+    @patch.object(Crosser, "cross_genomes", return_value="a")
     @patch.object(Mutator, "mutate_genome")
-    def test_returns_the_next_population(
+    def test_returns_the_bred_population(
         self, mock_mutate, mock_cross, mock_select_parents, mock_select_pool
     ):
         """breed_next_generation returns the list of the mutated_offspring generated"""
