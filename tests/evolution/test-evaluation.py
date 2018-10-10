@@ -1,16 +1,17 @@
 import unittest
 from unittest.mock import Mock, call
 
-from holland.evolution.evaluation import evaluate_fitness
+from holland.evolution.evaluation import *
 
 
-class EvaluateFitnessTest(unittest.TestCase):
+class EvaluatorEvaluateFitnessTest(unittest.TestCase):
     def test_calls_evaluate_on_each_element_of_gene_pool(self):
         """evaluate_fitness calls fitness_function on each individual in gene_pool"""
         fitness_function = Mock(return_value=1)
         gene_pool = ["a", "b", "c", "d", "e", "f"]
+        evaluator = Evaluator(fitness_function)
 
-        evaluate_fitness(gene_pool, fitness_function)
+        evaluator.evaluate_fitness(gene_pool)
 
         expected_calls = [call(genome) for genome in gene_pool]
         fitness_function.assert_has_calls(expected_calls)
@@ -20,8 +21,9 @@ class EvaluateFitnessTest(unittest.TestCase):
         scores = [10, 20, 30, 40, 50, 60]
         fitness_function = Mock(side_effect=scores)
         gene_pool = ["a", "b", "c", "d", "e", "f"]
+        evaluator = Evaluator(fitness_function)
 
-        results = evaluate_fitness(gene_pool, fitness_function)
+        results = evaluator.evaluate_fitness(gene_pool)
 
         expected_results = list(zip(scores, gene_pool))
         self.assertListEqual(
@@ -34,8 +36,9 @@ class EvaluateFitnessTest(unittest.TestCase):
         scores = [500, 10, 90, -5, 100, 1]
         fitness_function = Mock(side_effect=scores)
         gene_pool = ["a", "b", "c", "d", "e", "f"]
+        evaluator = Evaluator(fitness_function, ascending=True)
 
-        results = evaluate_fitness(gene_pool, fitness_function, ascending=True)
+        results = evaluator.evaluate_fitness(gene_pool)
 
         expected_results = sorted(list(zip(scores, gene_pool)), key=lambda x: x[0])
         self.assertListEqual(results, expected_results)
@@ -45,8 +48,9 @@ class EvaluateFitnessTest(unittest.TestCase):
         scores = [500, 10, 90, -5, 100, 1]
         fitness_function = Mock(side_effect=scores)
         gene_pool = ["a", "b", "c", "d", "e", "f"]
+        evaluator = Evaluator(fitness_function)
 
-        results = evaluate_fitness(gene_pool, fitness_function)
+        results = evaluator.evaluate_fitness(gene_pool)
 
         expected_results = sorted(list(zip(scores, gene_pool)), key=lambda x: x[0])
         self.assertListEqual(results, expected_results)
@@ -56,8 +60,9 @@ class EvaluateFitnessTest(unittest.TestCase):
         scores = [500, 10, 90, -5, 100, 1]
         fitness_function = Mock(side_effect=scores)
         gene_pool = ["a", "b", "c", "d", "e", "f"]
+        evaluator = Evaluator(fitness_function, ascending=False)
 
-        results = evaluate_fitness(gene_pool, fitness_function, ascending=False)
+        results = evaluator.evaluate_fitness(gene_pool)
 
         expected_results = sorted(
             list(zip(scores, gene_pool)), key=lambda x: x[0], reverse=True
