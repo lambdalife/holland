@@ -65,7 +65,8 @@ This is an example of ``genome_params``::
             "size": 5,
             "initial_distribution": lambda: random.sample(list_of_words, 1)[0],
             "crossover_function": get_uniform_crossover_function(),
-            "mutation_function": get_flip_mutation_function(),
+            "mutation_function": rotate_order,
+            "mutation_level": "gene",
             "mutation_rate": 0.05
         }
     }
@@ -84,7 +85,8 @@ The significance of these values is as follows:
     * **min** (*int/float*) -- specifies the minimum allowed value for the gene or any element of the gene if of a numeric type
     * **initial_distribution** (*func*) -- a function for initializing a random gene with values; must not accept any positional arguments
     * **crossover_function** (*func*) -- a function to cross multiple parent genes; see :ref:`crossover-functions` for more
-    * **mutation_function** (*func*) -- a function that mutates a single value of a gene; see :ref:`mutation-functions` for more
+    * **mutation_function** (*func*) -- a function that mutates either the whole gene or a single value of the gene (depending on ``mutation_level``); see :ref:`mutation-functions` for more
+    * **mutation_level** (*str*) -- specifies how to apply the ``mutation_funtion``: either to the gene as a whole, or just individual values; default is ``"value"`` (options: ``"value"``, ``"gene"``); irrelevant for value-type genes
     * **mutation_rate** (*int/float*) -- probability (``0`` to ``1``) that each value of the gene gets mutated (by applying the ``mutation_function``)
 
 
@@ -110,7 +112,9 @@ Mutation Functions
 
 Mutation functions are used to modify gene values. Like :ref:`crossover-functions`, mutation functions can be custom made, but Holland offers a few common mutation functions built in, these are described in the :ref:`library-mutation-functions` subsection of :ref:`library`. If you write or find a novel mutation function that you find useful, consider contributing it to the Holland library!
 
-Mutation functions act on individual values of a gene, rather than entire genes or genomes. Mutation functions are specified for each gene. A mutation function is applied probabilistically (by :func:`~holland.evolution.probabilistically_mutate_value`), and, therefore, need not consider the ``mutation_rate`` for the gene. Mutation functions must return the mutated value.
+Mutation functions can act on either individual values of a gene or an entire gene, but not the whole genome. Mutation functions are specified for each gene. To have a mutation function applied to a whole gene (when the gene is a list-type), the option ``"mutation_level"`` should be set to ``"gene"`` instead of ``"value"`` (see :ref:`genome-params` for more detail); for value-type genes this distinction does not matter. For most applications of the Genetic Algorithm a ``"mutation_level"`` of ``"value"`` should be appropriate, but some applications---e.g. Travelling Salesman---require mutations be applied at the gene level.
+
+A mutation function is applied probabilistically (by :func:`~holland.evolution.Mutator.probabilistically_apply_mutation`), and, therefore, need not consider the ``mutation_rate`` of the gene. Mutation functions must return the mutated value or gene.
 
 Example:
     .. literalinclude:: examples/mutation_function_example.py

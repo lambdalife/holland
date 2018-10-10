@@ -50,29 +50,32 @@ class Mutator:
 
 
         Dependencies:
-            * :func:`holland.evolution.Mutator.probabilistically_mutate_value`
+            * :func:`holland.evolution.Mutator.probabilistically_apply_mutation`
         """
-        if is_list_type(gene_params):
+        mutation_level = (
+            "value" if gene_params.get("mutation_level") != "gene" else "gene"
+        )
+
+        if is_list_type(gene_params) and mutation_level == "value":
             return [
-                self.probabilistically_mutate_value(value, gene_params)
+                self.probabilistically_apply_mutation(value, gene_params)
                 for value in gene
             ]
 
-        return self.probabilistically_mutate_value(gene, gene_params)
+        return self.probabilistically_apply_mutation(gene, gene_params)
 
-    def probabilistically_mutate_value(self, value, gene_params):
-
+    def probabilistically_apply_mutation(self, target, gene_params):
         """
-        Either applies a mutation function to a value of a gene or does not, probabilistically according to the ``mutation_rate``
+        Either applies a mutation function to a target (gene or value of a gene) or does not, probabilistically according to the ``mutation_rate``
 
-        :param value: the gene value to mutate
-        :type value: a valid, non-list, gene type
+        :param target: the target to which to apply the mutation
+        :type target: a valid, non-list, gene type
 
         :param gene_params: parameters for a single gene; see :ref:`genome-params`
         :type gene_params: dict
 
 
-        :returns: either the mutated value or the original value
+        :returns: either the mutated target or the original target
 
 
         Dependencies:
@@ -86,10 +89,18 @@ class Mutator:
         maximum = gene_params.get("max")
 
         if random.random() < mutation_rate:
-            mutated_value = mutation_function(value)
+            mutated_target = mutation_function(target)
             if should_bound:
-                mutated_value = bound_value(
-                    mutated_value, minimum=minimum, maximum=maximum, to_int=to_int
-                )
-            return mutated_value
-        return value
+                if isinstance(target, list):
+                    mutated_target = [
+                        bound_value(
+                            value, minimum=minimum, maximum=maximum, to_int=to_int
+                        )
+                        for value in mutated_target
+                    ]
+                else:
+                    mutated_target = bound_value(
+                        mutated_target, minimum=minimum, maximum=maximum, to_int=to_int
+                    )
+            return mutated_target
+        return target

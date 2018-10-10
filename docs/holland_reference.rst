@@ -74,7 +74,7 @@ General Example:
 mutation functions
 ~~~~~~~~~~~~~~~~~~
 
-Mutation functions are used by :func:`~holland.evolution.probabilistically_mutate_value` to apply mutation to a gene value. The following functions return stock mutation functions, some with configurable parameters. See :ref:`mutation-functions` for general information.
+Mutation functions are used by :func:`~holland.evolution.probabilistically_apply_mutation` to apply mutation to a gene value. The following functions return stock mutation functions, some with configurable parameters. See :ref:`mutation-functions` for general information.
 
 General Example:
 	
