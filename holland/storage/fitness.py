@@ -21,7 +21,7 @@ def record_fitness(generation_num, fitness_scores, **storage_options):
     
 
     Dependencies:
-        * :func:`~holland.storage.format_fitness_statistics`
+        * :func:`~holland.storage.fitness.format_fitness_statistics`
     """
     fitness_statistics = format_fitness_statistics(generation_num, fitness_scores)
 

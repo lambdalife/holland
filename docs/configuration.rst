@@ -1,7 +1,7 @@
 Configuration
 =============
 
-This page provides information on configuring Holland, specifically the use of :func:`~holland.evolution.evolve`.
+This page provides information on configuring Holland, specifically initializing the :class:`~holland.evolution.Evolver` class and using its :func:`~holland.evolution.Evolver.evolve` method.
 
 .. contents::
     :local:
@@ -13,7 +13,7 @@ This page provides information on configuring Holland, specifically the use of :
 Fitness Function
 ----------------
 
-The fitness function is a user-written function that maps genomes to fitness scores, which in turn, are used in breeding the next generation. A fitness function must accept a single genome and return an integer or float corresponding to the fitness of the given genome. See :func:`~holland.evolution.evaluate_fitness` for details on how the fitness function is used.
+The fitness function is a user-written function that maps genomes to fitness scores, which in turn, are used in breeding the next generation. A fitness function must accept a single genome and return an integer or float corresponding to the fitness of the given genome. See :func:`~holland.evolution.Evaluator.evaluate_fitness` for details on how the fitness function is used.
 
 Holland is designed to be application-agnostic, so a fitness function can evaluate a genome in any way so long as the input and output match what is expected. A fitness function might simply plug in different values from a genome's genes into a formula or it might create an instance of some class according to the parameters specified in the genome and then run a simulation for that individual.
 
@@ -126,7 +126,7 @@ Example:
 Selection Strategy
 ------------------
 
-The selection strategy for breeding the next generation of indviduals is specified in the ``selection_strategy`` dictionary. The strategy is ultimately used by the functions :func:`~holland.evolution.select_breeding_pool`, which uses information contained in the ``"pool"`` section of the selection strategy, and :func:`~holland.evolution.select_parents`, which uses information contained in ``"parents"``.
+The selection strategy for breeding the next generation of indviduals is specified in the ``selection_strategy`` dictionary. The strategy is ultimately used by the functions :func:`~holland.evolution.Selector.select_breeding_pool`, which uses information contained in the ``"pool"`` section of the selection strategy, and :func:`~holland.evolution.Selector.select_parents`, which uses information contained in ``"parents"``.
 
 The fitness weighting function determines how to weight fitness scores in order to translate into probabilities for selection of a genome as a parent for an individual in the next generation. For cases in which fitness is sought to be maximized, an increasing fitness weighting function should be used, whereas  cases in which fitness should be minimized (e.g. fitness represents error) should employ a decreasing fitness weighting function. In both cases a uniform weighting function will suffice. In the case of minimizing fitness, a reciprocal weighting function, linear weighting function with negative slope, or polynomial weighting function with negative power will work. See :ref:`library-fitness-weighting-functions` for stock fitness weighting functions.
 
@@ -180,12 +180,12 @@ These values should be placed in the ``generation_params`` dictionary.
 Fitness Storage Options
 -----------------------
 
-To measure performance improvements over the generations, fitness statistics can be stored for each generation. If enabled, the statistics recorde are max, min, mean, median, and standard deviation. Values can be stored either to a file (csv) or in memory and returned by :func:`~holland.evolution.evolve`. By default fitness statistics are not recorded.
+To measure performance improvements over the generations, fitness statistics can be stored for each generation. If enabled, the statistics recorde are max, min, mean, median, and standard deviation. Values can be stored either to a file (csv) or in memory and returned by :func:`~holland.evolution.Evolver.evolve`. By default fitness statistics are not recorded.
 
 The following options are available:
 
     * **should_record_fitness** (*bool*) – determines whether or not to record fitness
-    * **format** (*str*) – file format (options: 'csv', 'memory'); if 'memory', stats are returned as second element of tuple in :func:`~holland.evolution.evolve`
+    * **format** (*str*) – file format (options: 'csv', 'memory'); if 'memory', stats are returned as second element of tuple in :func:`~holland.evolution.Evolver.evolve`
     * **file_name** (*str*) – name of the file to write to
     * **path** (*str*) – location of the file to write
 
@@ -198,7 +198,7 @@ See the :ref:`storage-fitness` subsection of :ref:`storage` for more on how thes
 Genome Storage Options
 ----------------------
 
-To record snapshots of the population over the generations genomes and their corresponding fitness scores (in the same format returned by :func:`~holland.evolution.evaluate_fitness`) can be recorded. If enabled, individuals will be selected according to the specified strategy and stored to a file (json). Additionally, by setting ``should_record_on_interrupt`` to ``True`` (which is independent of the value of ``should_record_genomes``), genomes will be recorded if an unhandled exception is thrown during execution. By default genomes are not recorded.
+To record snapshots of the population over the generations genomes and their corresponding fitness scores (in the same format returned by :func:`~holland.evolution.Evaluator.evaluate_fitness`) can be recorded. If enabled, individuals will be selected according to the specified strategy and stored to a file (json). Additionally, by setting ``should_record_on_interrupt`` to ``True`` (which is independent of the value of ``should_record_genomes``), genomes will be recorded if an unhandled exception is thrown during execution. By default genomes are not recorded.
 
 The following options are available:
 
