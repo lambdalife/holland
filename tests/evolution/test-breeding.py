@@ -3,8 +3,9 @@ import unittest
 from unittest.mock import patch, call, Mock
 
 from holland.evolution.breeding import *
-from holland.evolution.mutation import Mutator
+from holland.evolution.selection import Selector
 from holland.evolution.crossover import Crosser
+from holland.evolution.mutation import Mutator
 
 
 class GenerateNextGenerationTest(unittest.TestCase):
@@ -192,8 +193,24 @@ class BreedNextGenerationTest(unittest.TestCase):
         expected_bred_individuals = []
         self.assertListEqual(bred_individuals, expected_bred_individuals)
 
-    @patch("holland.evolution.breeding.select_breeding_pool")
-    @patch("holland.evolution.breeding.select_parents")
+    @patch("holland.evolution.breeding.Selector")
+    @patch("holland.evolution.breeding.Crosser")
+    @patch("holland.evolution.breeding.Mutator")
+    def test_creates_Selector_instance_correctly(
+        self, MockMutator, MockCrosser, MockSelector
+    ):
+        """breed_next_generation creates an instance of the Selector class and passes the selection_strategy to the constructor"""
+        breed_next_generation(
+            self.fitness_results,
+            self.genome_params,
+            self.selection_strategy,
+            self.n_genomes,
+        )
+
+        MockSelector.assert_called_with(self.selection_strategy)
+
+    @patch.object(Selector, "select_breeding_pool")
+    @patch.object(Selector, "select_parents")
     @patch("holland.evolution.breeding.Crosser")
     @patch("holland.evolution.breeding.Mutator")
     def test_calls_select_breeding_pool_correctly(
@@ -207,21 +224,18 @@ class BreedNextGenerationTest(unittest.TestCase):
             self.n_genomes,
         )
 
-        mock_select_pool.assert_called_with(
-            self.fitness_results, **self.selection_strategy["pool"]
-        )
+        mock_select_pool.assert_called_with(self.fitness_results)
 
-    @patch(
-        "holland.evolution.breeding.select_breeding_pool",
-        return_value=[(100, "a"), (90, "b")],
+    @patch.object(
+        Selector, "select_breeding_pool", return_value=[(100, "a"), (90, "b")]
     )
-    @patch("holland.evolution.breeding.select_parents")
+    @patch.object(Selector, "select_parents")
     @patch("holland.evolution.breeding.Crosser")
     @patch("holland.evolution.breeding.Mutator")
     def test_calls_select_parents_correctly_with_given_number(
         self, MockMutator, MockCrosser, mock_select_parents, mock_select_pool
     ):
-        """breed_next_generation selects parents according to the parents selection_strategy and n_random when population_size is specified"""
+        """breed_next_generation calls select_parents with the breeding_pool"""
         breed_next_generation(
             self.fitness_results,
             self.genome_params,
@@ -231,17 +245,15 @@ class BreedNextGenerationTest(unittest.TestCase):
 
         expected_number_of_calls = self.n_genomes
         expected_calls = [
-            call(mock_select_pool.return_value, **self.selection_strategy["parents"])
-            for _ in range(expected_number_of_calls)
+            call(mock_select_pool.return_value) for _ in range(expected_number_of_calls)
         ]
         mock_select_parents.assert_has_calls(expected_calls)
         self.assertEqual(mock_select_parents.call_count, expected_number_of_calls)
 
-    @patch(
-        "holland.evolution.breeding.select_breeding_pool",
-        return_value=[(100, "a"), (90, "b")],
+    @patch.object(
+        Selector, "select_breeding_pool", return_value=[(100, "a"), (90, "b")]
     )
-    @patch("holland.evolution.breeding.select_parents", return_value=["a", "b"])
+    @patch.object(Selector, "select_parents", return_value=["a", "b"])
     @patch("holland.evolution.breeding.Crosser")
     @patch("holland.evolution.breeding.Mutator")
     def test_creates_Crosser_instance_correctly(
@@ -257,11 +269,10 @@ class BreedNextGenerationTest(unittest.TestCase):
 
         MockCrosser.assert_called_with(self.genome_params)
 
-    @patch(
-        "holland.evolution.breeding.select_breeding_pool",
-        return_value=[(100, "a"), (90, "b")],
+    @patch.object(
+        Selector, "select_breeding_pool", return_value=[(100, "a"), (90, "b")]
     )
-    @patch("holland.evolution.breeding.select_parents", return_value=["a", "b"])
+    @patch.object(Selector, "select_parents", return_value=["a", "b"])
     @patch.object(Crosser, "cross_genomes")
     @patch("holland.evolution.breeding.Mutator")
     def test_calls_cross_genomes_correctly(
@@ -280,11 +291,10 @@ class BreedNextGenerationTest(unittest.TestCase):
         ]
         mock_cross.assert_has_calls(expected_calls)
 
-    @patch(
-        "holland.evolution.breeding.select_breeding_pool",
-        return_value=[(100, "a"), (90, "b")],
+    @patch.object(
+        Selector, "select_breeding_pool", return_value=[(100, "a"), (90, "b")]
     )
-    @patch("holland.evolution.breeding.select_parents")
+    @patch.object(Selector, "select_parents")
     @patch("holland.evolution.breeding.Crosser")
     @patch("holland.evolution.breeding.Mutator")
     def test_creates_Mutator_instance_correctly(
@@ -300,11 +310,10 @@ class BreedNextGenerationTest(unittest.TestCase):
 
         MockMutator.assert_called_once_with(self.genome_params)
 
-    @patch(
-        "holland.evolution.breeding.select_breeding_pool",
-        return_value=[(100, "a"), (90, "b")],
+    @patch.object(
+        Selector, "select_breeding_pool", return_value=[(100, "a"), (90, "b")]
     )
-    @patch("holland.evolution.breeding.select_parents", return_value=["a", "b"])
+    @patch.object(Selector, "select_parents", return_value=["a", "b"])
     @patch.object(Crosser, "cross_genomes", return_value="a")
     @patch.object(Mutator, "mutate_genome")
     def test_calls_Mutator_mutate_genome_on_offspring(
@@ -321,11 +330,10 @@ class BreedNextGenerationTest(unittest.TestCase):
         expected_calls = [call(mock_cross.return_value) for _ in range(self.n_genomes)]
         mock_mutate.assert_has_calls(expected_calls)
 
-    @patch(
-        "holland.evolution.breeding.select_breeding_pool",
-        return_value=[(100, "a"), (90, "b")],
+    @patch.object(
+        Selector, "select_breeding_pool", return_value=[(100, "a"), (90, "b")]
     )
-    @patch("holland.evolution.breeding.select_parents", return_value=["a", "b"])
+    @patch.object(Selector, "select_parents", return_value=["a", "b"])
     @patch.object(Crosser, "cross_genomes", return_value="a")
     @patch.object(Mutator, "mutate_genome")
     def test_returns_the_bred_population(
