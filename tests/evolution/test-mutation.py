@@ -1,14 +1,10 @@
 import unittest
 from unittest.mock import patch, Mock, call
 
-from holland.evolution.mutation import (
-    mutate_genome,
-    mutate_gene,
-    probabilistically_mutate_value,
-)
+from holland.evolution.mutation import *
 
 
-class MutateGenomeTest(unittest.TestCase):
+class MutatorMutateGenomeTest(unittest.TestCase):
     def setUp(self):
         self.genome = {
             "gene1": [1, 2, 3, 4, 5],
@@ -20,11 +16,12 @@ class MutateGenomeTest(unittest.TestCase):
             "gene2": {"type": "[int]"},
             "gene3": {"type": "bool"},
         }
+        self.mutator = Mutator(self.genome_params)
 
-    @patch("holland.evolution.mutation.mutate_gene")
+    @patch("holland.evolution.mutation.Mutator.mutate_gene")
     def test_calls_mutate_gene_on_each_gene_in_genome(self, mock_mutate_gene):
         """mutate_genome calls mutate_gene on each of the genes in genome"""
-        mutate_genome(self.genome, self.genome_params)
+        self.mutator.mutate_genome(self.genome)
 
         expected_calls = [
             call(self.genome[gene_name], self.genome_params[gene_name])
@@ -32,7 +29,7 @@ class MutateGenomeTest(unittest.TestCase):
         ]
         mock_mutate_gene.assert_has_calls(expected_calls)
 
-    @patch("holland.evolution.mutation.mutate_gene")
+    @patch("holland.evolution.mutation.Mutator.mutate_gene")
     def test_returns_mutated_genome(self, mock_mutate_gene):
         """mutate_genome returns a genome in the same structure as the given genome, but containing the mutated genes"""
         mutated_genes = [
@@ -42,7 +39,7 @@ class MutateGenomeTest(unittest.TestCase):
         ]
         mock_mutate_gene.side_effect = mutated_genes
 
-        mutated_genome = mutate_genome(self.genome, self.genome_params)
+        mutated_genome = self.mutator.mutate_genome(self.genome)
 
         expected_mutated_genome = {
             "gene1": mutated_genes[0],
@@ -52,77 +49,82 @@ class MutateGenomeTest(unittest.TestCase):
         self.assertDictEqual(mutated_genome, expected_mutated_genome)
 
 
-class MutateGeneTest(unittest.TestCase):
+class MutatorMutateGeneTest(unittest.TestCase):
     def setUp(self):
         self.gene_params = {"mutation_function": Mock(), "mutation_rate": 0.01}
 
-    @patch("holland.evolution.mutation.probabilistically_mutate_value")
+    @patch("holland.evolution.mutation.Mutator.probabilistically_mutate_value")
     def test_calls_probabilistically_mutate_value_on_the_gene_for_numeric_type(
         self, mock_mutate_value
     ):
         """mutate_gene calls probabilistically_mutate_value once on the gene, passing the gene value, the mutation function, the mutation_rate, and bounds info"""
         gene = 100.5
         gene_params = {**self.gene_params, "type": "float", "min": 0, "max": 100}
+        mutator = Mutator({})
 
-        mutate_gene(gene, gene_params)
+        mutator.mutate_gene(gene, gene_params)
 
         mock_mutate_value.assert_called_once_with(gene, gene_params)
 
-    @patch("holland.evolution.mutation.probabilistically_mutate_value")
+    @patch("holland.evolution.mutation.Mutator.probabilistically_mutate_value")
     def test_calls_probabilitistically_mutate_value_for_each_element_of_gene_with_correct_args_for_numeric_list_type(
         self, mock_mutate_value
     ):
         """mutate_gene calls probabilistically_mutate_value many times, passing each value of the gene, the mutation function, the mutation_rate, and bounds info each time"""
         gene = [1, 2, 3, 4, 5, 6]
         gene_params = {**self.gene_params, "type": "[float]", "min": 0, "max": 100}
+        mutator = Mutator({})
 
-        mutate_gene(gene, gene_params)
+        mutator.mutate_gene(gene, gene_params)
 
         expected_calls = [call(value, gene_params) for value in gene]
         mock_mutate_value.assert_has_calls(expected_calls)
         self.assertEqual(mock_mutate_value.call_count, len(expected_calls))
 
-    @patch("holland.evolution.mutation.probabilistically_mutate_value")
+    @patch("holland.evolution.mutation.Mutator.probabilistically_mutate_value")
     def test_calls_probabilistically_mutation_value_on_the_gene_for_nonnumeric_type(
         self, mock_mutate_value
     ):
         """mutate_gene calls probabilistically_mutate_value once on the gene, passing the gene value, the mutation function, the mutation_rate, and bounds info"""
         gene = True
         gene_params = {**self.gene_params, "type": "bool"}
+        mutator = Mutator({})
 
-        mutate_gene(gene, gene_params)
+        mutator.mutate_gene(gene, gene_params)
 
         mock_mutate_value.assert_called_once_with(gene, gene_params)
 
-    @patch("holland.evolution.mutation.probabilistically_mutate_value")
+    @patch("holland.evolution.mutation.Mutator.probabilistically_mutate_value")
     def test_calls_probabilitistically_mutate_value_for_each_element_of_gene_with_correct_args_for_nonnumeric_list_type(
         self, mock_mutate_value
     ):
         """mutate_gene calls probabilistically_mutate_value many times, passing each value of the gene, the mutation function, the mutation_rate, and bounds info each time"""
         gene = [True, True, True, False, True, False]
         gene_params = {**self.gene_params, "type": "[bool]"}
+        mutator = Mutator({})
 
-        mutate_gene(gene, gene_params)
+        mutator.mutate_gene(gene, gene_params)
 
         expected_calls = [call(value, gene_params) for value in gene]
         mock_mutate_value.assert_has_calls(expected_calls)
         self.assertEqual(mock_mutate_value.call_count, len(expected_calls))
 
-    @patch("holland.evolution.mutation.probabilistically_mutate_value")
+    @patch("holland.evolution.mutation.Mutator.probabilistically_mutate_value")
     def test_returns_mutated_gene(self, mock_mutate_value):
         """mutate_gene returns a new gene composed of the outputs of calling probabilistically_mutate_value on each value of the given gene"""
         gene = [1, 2, 3, 4, 5, 6]
         mutated_values = [2, 2, 5, 4, 9, 6]
         mock_mutate_value.side_effect = mutated_values
         gene_params = {**self.gene_params, "type": "[float]"}
+        mutator = Mutator({})
 
-        mutated_gene = mutate_gene(gene, gene_params)
+        mutated_gene = mutator.mutate_gene(gene, gene_params)
 
         expected_mutated_gene = mutated_values
         self.assertListEqual(mutated_gene, expected_mutated_gene)
 
 
-class ProbabilisticallyMutateValueTest(unittest.TestCase):
+class MutatorProbabilisticallyMutateValueTest(unittest.TestCase):
     def test_calls_mutation_function_according_to_mutation_rate(self):
         """probabilistically_mutate_value calls the mutation_function according to the given mutation_rate"""
         value = 1
@@ -131,15 +133,16 @@ class ProbabilisticallyMutateValueTest(unittest.TestCase):
             "mutation_rate": 0.1,
             "type": "bool",
         }
+        mutator = Mutator({})
 
         with patch("random.random", return_value=0.001):
-            probabilistically_mutate_value(value, gene_params)
+            mutator.probabilistically_mutate_value(value, gene_params)
             self.assertTrue(gene_params["mutation_function"].called)
 
         gene_params["mutation_function"].reset_mock()
 
         with patch("random.random", return_value=0.9):
-            probabilistically_mutate_value(value, gene_params)
+            mutator.probabilistically_mutate_value(value, gene_params)
             self.assertFalse(gene_params["mutation_function"].called)
 
     @patch("random.random", return_value=0.001)
@@ -154,8 +157,9 @@ class ProbabilisticallyMutateValueTest(unittest.TestCase):
             "min": 0,
             "max": 10,
         }
+        mutator = Mutator({})
 
-        probabilistically_mutate_value(value, gene_params)
+        mutator.probabilistically_mutate_value(value, gene_params)
 
         mock_bound_value.assert_called_with(
             gene_params["mutation_function"].return_value,
@@ -178,8 +182,9 @@ class ProbabilisticallyMutateValueTest(unittest.TestCase):
             "min": 0,
             "max": 10,
         }
+        mutator = Mutator({})
 
-        probabilistically_mutate_value(value, gene_params)
+        mutator.probabilistically_mutate_value(value, gene_params)
 
         mock_bound_value.assert_not_called()
 
@@ -197,8 +202,9 @@ class ProbabilisticallyMutateValueTest(unittest.TestCase):
             "min": 0,
             "max": 10,
         }
+        mutator = Mutator({})
 
-        output = probabilistically_mutate_value(value, gene_params)
+        output = mutator.probabilistically_mutate_value(value, gene_params)
 
         expected_output = mock_bound_value.return_value
         self.assertEqual(output, expected_output)
@@ -217,8 +223,9 @@ class ProbabilisticallyMutateValueTest(unittest.TestCase):
             "min": 0,
             "max": 10,
         }
+        mutator = Mutator({})
 
-        output = probabilistically_mutate_value(value, gene_params)
+        output = mutator.probabilistically_mutate_value(value, gene_params)
 
         expected_output = gene_params["mutation_function"].return_value
         self.assertEqual(output, expected_output)
@@ -232,8 +239,9 @@ class ProbabilisticallyMutateValueTest(unittest.TestCase):
             "mutation_rate": 0.1,
             "type": "str",
         }
+        mutator = Mutator({})
 
-        output = probabilistically_mutate_value(value, gene_params)
+        output = mutator.probabilistically_mutate_value(value, gene_params)
 
         expected_output = value
         self.assertEqual(output, expected_output)
@@ -248,7 +256,8 @@ class ProbabilisticallyMutateValueTest(unittest.TestCase):
                 "mutation_rate": 0.1,
                 "type": gene_type,
             }
+            mutator = Mutator({})
 
-            output = probabilistically_mutate_value(value, gene_params)
+            output = mutator.probabilistically_mutate_value(value, gene_params)
 
             self.assertTrue(isinstance(output, int))
