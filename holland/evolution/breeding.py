@@ -1,6 +1,6 @@
 import numpy as np
 
-from .selection import select_breeding_pool, select_parents
+from .selection import Selector
 from .crossover import Crosser
 from .mutation import Mutator
 from ..utils import bound_value, is_numeric_type, is_list_type
@@ -109,28 +109,26 @@ def breed_next_generation(
 
 
     Dependencies:
-        * :func:`~holland.evolution.select_breeding_pool`
-        * :func:`~holland.evolution.select_parents`
+        * :func:`~holland.evolution.Selector.select_breeding_pool`
+        * :func:`~holland.evolution.Selector.select_parents`
         * :func:`~holland.evolution.Crosser.cross_genomes`
         * :func:`~holland.evolution.Mutator.mutate_genome`
     """
     if n_genomes < 0:
         raise ValueError("Number of bred genomes per generation cannot be negative")
 
-    breeding_pool = select_breeding_pool(
-        fitness_results, **selection_strategy.get("pool")
-    )
-
+    selector = Selector(selection_strategy)
     crosser = Crosser(genome_params)
     mutator = Mutator(genome_params)
 
-    next_generation = []
+    next_generation = [None] * n_genomes
+    breeding_pool = selector.select_breeding_pool(fitness_results)
 
-    for _ in range(n_genomes):
-        parents = select_parents(breeding_pool, **selection_strategy.get("parents"))
+    for i in range(n_genomes):
+        parents = selector.select_parents(breeding_pool)
         offspring = crosser.cross_genomes(parents)
         mutated_offspring = mutator.mutate_genome(offspring)
-        next_generation.append(mutated_offspring)
+        next_generation[i] = mutated_offspring
 
     return next_generation
 

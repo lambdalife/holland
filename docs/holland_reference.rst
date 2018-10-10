@@ -27,6 +27,12 @@ breeding
 .. autofunction:: holland.evolution.generate_random_genomes
 
 
+selection
+~~~~~~~~~
+.. autoclass:: holland.evolution.Selector
+	:members:
+
+
 crossover
 ~~~~~~~~~
 .. autoclass:: holland.evolution.Crosser
@@ -37,12 +43,6 @@ mutation
 ~~~~~~~~
 .. autoclass:: holland.evolution.Mutator
 	:members:
-
-
-selection
-~~~~~~~~~
-.. autofunction:: holland.evolution.select_breeding_pool
-.. autofunction:: holland.evolution.select_parents
 
 
 
