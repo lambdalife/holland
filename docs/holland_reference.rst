@@ -12,7 +12,8 @@ Evolution
 
 evolution
 ~~~~~~~~~
-.. autofunction:: holland.evolution.evolve
+.. autoclass:: holland.evolution.Evolver
+	:members:
 
 
 evaluation
