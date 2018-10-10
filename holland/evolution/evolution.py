@@ -1,6 +1,6 @@
 from .evaluation import evaluate_fitness
 from .breeding import generate_next_generation, generate_random_genomes
-from ..storage import record_fitness, record_genomes_and_fitnesses
+from ..storage import StorageManager
 
 
 def evolve(
@@ -69,8 +69,8 @@ def evolve(
     Dependencies:
         * :func:`~holland.evolution.evaluate_fitness`
         * :func:`~holland.evolution.generate_next_generation`
-        * :func:`~holland.storage.record_fitness`
-        * :func:`~holland.storage.record_genomes_and_fitnesses`
+        * :func:`~holland.storage.StorageManager.update_storage`
+        * :func:`~holland.storage.StorageManager.react_to_interruption`
 
 
 
@@ -92,33 +92,18 @@ def evolve(
     if population is None:
         population = generate_random_genomes(genome_params, population_size)
 
-    fitness_history = []
+    storage_manager = StorageManager(
+        fitness_storage_options=fitness_storage_options,
+        genome_storage_options=genome_storage_options,
+    )
+
     for generation_num in range(n_generations):
         try:
             fitness_results = evaluate_fitness(
                 population, fitness_function, ascending=should_maximize_fitness
             )
 
-            if fitness_storage_options.get("should_record_fitness", False):
-                fitness_scores = [score for score, genome in fitness_results]
-                fitness_statistics = record_fitness(
-                    generation_num, fitness_scores, **fitness_storage_options
-                )
-                if fitness_storage_options.get("format") == "memory":
-                    fitness_history.append(fitness_statistics)
-
-            is_genome_recording_on = genome_storage_options.get(
-                "should_record_genomes", False
-            )
-            is_valid_generation_num = (
-                generation_num
-                % genome_storage_options.get("record_every_n_generations", 1)
-                == 0
-            )
-            if is_genome_recording_on and is_valid_generation_num:
-                record_genomes_and_fitnesses(
-                    generation_num, fitness_results, **genome_storage_options
-                )
+            storage_manager.update_storage(generation_num, fitness_results)
 
             if generation_num < n_generations - 1:
                 population = generate_next_generation(
@@ -130,15 +115,12 @@ def evolve(
                     n_elite=n_elite_per_generation,
                 )
         except:
-            if genome_storage_options.get("should_record_on_interrupt", False):
-                record_genomes_and_fitnesses(
-                    generation_num, fitness_results, **genome_storage_options
-                )
+            storage_manager.react_to_interruption(generation_num, fitness_results)
             raise
 
     if (
         fitness_storage_options.get("should_record_fitness", False)
         and fitness_storage_options.get("format") == "memory"
     ):
-        return fitness_results, fitness_history
+        return fitness_results, storage_manager.fitness_history
     return fitness_results
