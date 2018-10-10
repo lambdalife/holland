@@ -6,10 +6,10 @@ def record_genomes_and_fitnesses(generation_num, fitness_results, **storage_opti
     """
     Records results of a round of evaluation
 
-    :param generation_num: the generation number of the results
+    :param generation_num: the generation number of the population that generated the fitness_scores
     :type generation_num: int
 
-    :param fitness_results: the results of a round of evaluation (returned by evaluate_fitness)
+    :param fitness_results: the results of a round of evaluation (returned by :func:`~holland.evolve.evaluate_fitness`)
     :type fitness_results: list
 
     :param storage_options: options for selecting which results to store and how to store them, specifically ``should_add_generation_suffix``, ``format``, ``file_name``, ``path``, ``top``, ``mid``, ``bottom`` are relevant; see :ref:`genome-storage-options`
