@@ -29,7 +29,8 @@ breeding
 
 crossover
 ~~~~~~~~~
-.. autofunction:: holland.evolution.cross_genomes
+.. autoclass:: holland.evolution.Crosser
+	:members:
 
 
 mutation
