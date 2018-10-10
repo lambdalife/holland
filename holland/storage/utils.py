@@ -17,8 +17,8 @@ def record(data, **storage_options):
 
 
     Dependencies:
-        * :func:`~holland.storage.record_to_csv`
-        * :func:`~holland.storage.record_to_json`
+        * :func:`~holland.storage.utils.record_to_csv`
+        * :func:`~holland.storage.utils.record_to_json`
     """
     storage_format = storage_options.get("format")
     if storage_format == "csv":

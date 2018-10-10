@@ -36,7 +36,7 @@ class Selector:
         """
         Selects a pool of genomes from a population from which to draw parents for breeding the next generation
 
-        :param fitness_results: a sorted list of tuples containing a fitness score in the first position and a genome in the second (returned by :func:`~holland.evolution.evaluate_fitness`)
+        :param fitness_results: a sorted list of tuples containing a fitness score in the first position and a genome in the second (returned by :func:`~holland.evolution.Evaluator.evaluate_fitness`)
         :type fitness_results: list
 
 
@@ -45,10 +45,10 @@ class Selector:
 
         :raises ValueError: if ``len(fitness_results) < self.top + self.mid + self.bottom + self.random``
 
-        .. note:: For the sake of efficiency, this method expects ``fitness_results`` to be sorted in order to properly select genomes on the basis of fitness. :func:`~holland.evolution.evalute_fitness` returns sorted results.
+        .. note:: For the sake of efficiency, this method expects ``fitness_results`` to be sorted in order to properly select genomes on the basis of fitness. :func:`~holland.evolution.Evaluator.evaluate_fitness` returns sorted results.
 
         Dependencies:
-            * :func:`~holland.utils.select_from`
+            * :func:`~holland.utils.utils.select_from`
         """
         if self.top + self.mid + self.bottom + self.random > len(fitness_results):
             raise ValueError(
@@ -69,7 +69,7 @@ class Selector:
         """
         Selects parents from the given ``fitness_results`` to use for breeding a new genome
 
-        :param fitness_results: a (not necessarily sorted list of tuples containing a fitness score in the first position and a genome in the second (returned by :func:`~holland.evolution.evaluate_fitness`)
+        :param fitness_results: a (not necessarily sorted list of tuples containing a fitness score in the first position and a genome in the second (returned by :func:`~holland.evolution.Evaluator.evaluate_fitness`)
         :type fitness_results: list
 
 
