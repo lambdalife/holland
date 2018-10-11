@@ -25,6 +25,9 @@ class Evaluator:
         """
         results = []
         for genome in gene_pool:
-            score = self.fitness_function(genome)
-            results.append((score, genome))
+            result = self.fitness_function(genome)
+            if type(result) in [list, tuple]:
+                results.append(result)
+            else:
+                results.append((result, genome))
         return sorted(results, key=lambda x: x[0], reverse=(not self.ascending))

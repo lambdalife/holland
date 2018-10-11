@@ -13,7 +13,12 @@ This page provides information on configuring Holland, specifically initializing
 Fitness Function
 ----------------
 
-The fitness function is a user-written function that maps genomes to fitness scores, which in turn, are used in breeding the next generation. A fitness function must accept a single genome and return an integer or float corresponding to the fitness of the given genome. See :func:`~holland.evolution.Evaluator.evaluate_fitness` for details on how the fitness function is used.
+The fitness function is a user-written function that maps genomes to fitness scores, which in turn, are used in breeding the next generation. A fitness function must accept a single genome and must return either:
+
+    * an integer or float corresponding to the fitness of the given genome (Darwinian Evolution); or 
+    * a tuple/list with the fitness score in the first position and a modified genome in the second (Lamarckian Evolution).
+
+See :func:`~holland.evolution.Evaluator.evaluate_fitness` for details on how the fitness function is used.
 
 Holland is designed to be application-agnostic, so a fitness function can evaluate a genome in any way so long as the input and output match what is expected. A fitness function might simply plug in different values from a genome's genes into a formula or it might create an instance of some class according to the parameters specified in the genome and then run a simulation for that individual.
 
