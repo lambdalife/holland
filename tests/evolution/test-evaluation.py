@@ -16,6 +16,24 @@ class EvaluatorEvaluateFitnessTest(unittest.TestCase):
         expected_calls = [call(genome) for genome in gene_pool]
         fitness_function.assert_has_calls(expected_calls)
 
+    def test_appends_returned_genome_to_results_if_fitness_function_returns_a_genome(
+        self
+    ):
+        """evaluate_fitness appends the score and genome returned by fitness_function to results if fitness_function returns a tuple/list"""
+        gene_pool = ["a", "b", "c", "d", "e", "f"]
+        scores = [10, 20, 30, 40, 50, 60]
+        final_genomes = ["u", "v", "w", "x", "y", "z"]
+        fitness_function = Mock(side_effect=zip(scores, final_genomes))
+        evaluator = Evaluator(fitness_function)
+
+        results = evaluator.evaluate_fitness(gene_pool)
+
+        expected_results = list(zip(scores, final_genomes))
+        self.assertListEqual(
+            sorted(results, key=lambda x: x[0]),
+            sorted(expected_results, key=lambda x: x[0]),
+        )
+
     def test_returns_tuples_of_score_and_genome(self):
         """evaluate_fitness pairs each genome with the score received from calling fitness_function on that genome and returns a list of all tuples"""
         scores = [10, 20, 30, 40, 50, 60]
