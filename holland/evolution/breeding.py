@@ -1,5 +1,3 @@
-import numpy as np
-
 from .selection import Selector
 from .crossover import Crosser
 from .mutation import Mutator

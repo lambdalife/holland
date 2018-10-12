@@ -1,4 +1,3 @@
-import numpy as np
 import unittest
 from unittest.mock import patch
 
@@ -38,93 +37,29 @@ class SelectorSelectBreedingPoolTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             selector.select_breeding_pool(self.fitness_results)
 
-    def test_selects_correctly_with_determininstic_arguments_and_odd_population_small(self):
-        """select_breeding_pool correctly selects individuals from the top, middle, and bottom according to the given arguments when poplutation size is odd"""
-        selector = Selector({"pool": {"top": 1, "mid": 1, "bottom": 1}})
-        selection_pool = selector.select_breeding_pool(self.fitness_results)
+    @patch("holland.evolution.selection.select_from")
+    def test_calls_select_from_with_correct_args(self, mock_select_from):
+        """select_breeding_pool calls select_from with the fitness_results and top, mid, bottom, random"""
+        top = 3
+        mid = 1
+        bottom = 1
+        random = 1
+        selector = Selector({"pool": {"top": top, "mid": mid, "bottom": bottom, "random": random}})
 
-        expected_selection_pool = [(100, "a"), (44, "f"), (7, "k")]
-        self.assertListEqual(sorted(selection_pool), sorted(expected_selection_pool))
-
-    def test_selects_correctly_with_determininstic_arguments_and_odd_population_larger(self):
-        """select_breeding_pool correctly selects individuals from the top, middle, and bottom according to the given arguments when poplutation size is odd"""
-        selector = Selector({"pool": {"top": 3, "mid": 3, "bottom": 3}})
-        selection_pool = selector.select_breeding_pool(self.fitness_results)
-
-        expected_selection_pool = [
-            (100, "a"),
-            (90, "b"),
-            (85, "c"),
-            (45, "e"),
-            (44, "f"),
-            (30, "g"),
-            (9, "i"),
-            (8, "j"),
-            (7, "k"),
-        ]
-        self.assertListEqual(sorted(selection_pool), sorted(expected_selection_pool))
-
-    def test_selects_correctly_with_determininstic_arguments_and_even_population_small(self):
-        """select_breeding_pool correctly selects individuals from the top, middle, and bottom according to the given arguments when poplutation size is even"""
-        fitness_results = self.fitness_results[1:]
-        selector = Selector({"pool": {"top": 1, "mid": 1, "bottom": 1}})
-        selection_pool = selector.select_breeding_pool(fitness_results)
-
-        expected_selection_pool = [(100, "a"), (45, "e"), (8, "j")]
-        self.assertListEqual(sorted(selection_pool), sorted(expected_selection_pool))
-
-    def test_selects_correctly_with_determininstic_arguments_and_even_population_larger(self):
-        """select_breeding_pool correctly selects individuals from the top, middle, and bottom according to the given arguments when poplutation size is even"""
-        fitness_results = self.fitness_results[1:]
-        selector = Selector({"pool": {"top": 3, "mid": 3, "bottom": 3}})
-        selection_pool = selector.select_breeding_pool(fitness_results)
-
-        expected_selection_pool = [
-            (100, "a"),
-            (90, "b"),
-            (85, "c"),
-            (50, "d"),
-            (45, "e"),
-            (44, "f"),
-            (10, "h"),
-            (9, "i"),
-            (8, "j"),
-        ]
-        self.assertListEqual(sorted(selection_pool), sorted(expected_selection_pool))
-
-    @patch("numpy.random.choice")
-    def test_does_not_randomly_select_individuals_that_were_already_selected(self, mock_choice):
-        """narrow_selecetion_pool selects individuals randomly but does not select duplicates"""
-        selector = Selector({"pool": {"top": 1, "mid": 1, "bottom": 1}})
         selector.select_breeding_pool(self.fitness_results)
 
-        self.fitness_results.sort(key=lambda x: x[0])
-        deterministic_selection_pool = [(100, "a"), (44, "f"), (7, "k")]
+        mock_select_from.assert_called_once_with(
+            self.fitness_results, top=top, mid=mid, bottom=bottom, random=random
+        )
 
-        used_random_id_choices = mock_choice.call_args[0][0]
-        expected_random_id_choices = [
-            i
-            for i in range(len(self.fitness_results))
-            if self.fitness_results[i] not in deterministic_selection_pool
-        ]
-        self.assertListEqual(used_random_id_choices, expected_random_id_choices)
+    @patch("holland.evolution.selection.select_from", return_value=[(1, "a"), (2, "b")])
+    def test_returns_return_value_of_select_from(self, mock_select_from):
+        """select_breeding_pool returns the value it receives from select_from"""
+        selector = Selector({"pool": {"top": 3, "mid": 1, "bottom": 1, "random": 1}})
 
-    @patch("numpy.random.choice", return_value=np.array([2, 7]))
-    def test_returns_selected_pool(self, mock_choice):
-        """select_breeding_pool returns the fitness_results that were selected as expected"""
-        selector = Selector({"pool": {"top": 2, "mid": 2, "bottom": 2, "random": 2}})
-        selection_pool = selector.select_breeding_pool(self.fitness_results)
+        breeding_pool = selector.select_breeding_pool(self.fitness_results)
 
-        expected_selection_pool = [
-            (100, "a"),
-            (90, "b"),
-            (45, "e"),
-            (44, "f"),
-            (8, "j"),
-            (7, "k"),
-        ] + [self.fitness_results[i] for i in mock_choice.return_value]
-
-        self.assertListEqual(sorted(selection_pool), sorted(expected_selection_pool))
+        self.assertListEqual(breeding_pool, mock_select_from.return_value)
 
 
 class SelectorSelectParentsTest(unittest.TestCase):
@@ -136,9 +71,9 @@ class SelectorSelectParentsTest(unittest.TestCase):
             "parents": {"weighting_function": lambda x: x * x, "n_parents": 3}
         }
 
-    @patch("numpy.random.choice")
+    @patch("holland.evolution.selection.select_random")
     def test_selects_correct_number_of_parents_according_to_weighted_fitness_scores(
-        self, mock_choice
+        self, mock_select_from
     ):
         """select_parents weights fitness_scores by the given weighting_function and samples the correct number of genomes according to these weighted fitness_scores"""
         selector = Selector(self.selection_strategy)
@@ -152,13 +87,13 @@ class SelectorSelectParentsTest(unittest.TestCase):
         expected_probabilities = [
             weighted_score / weighted_total for weighted_score in weighted_scores
         ]
-        mock_choice.assert_called_with(
-            self.genomes, p=expected_probabilities, size=n_parents, replace=False
+        mock_select_from.assert_called_with(
+            self.genomes, probabilities=expected_probabilities, n=n_parents
         )
 
-    @patch("numpy.random.choice")
-    def test_handles_negative_weighted_scores(self, mock_choice):
-        """select_parents does not pass negative probabilities to np.random.choice if some weighted scores are negative"""
+    @patch("holland.evolution.selection.select_random")
+    def test_handles_negative_weighted_scores(self, mock_select_from):
+        """select_parents does not pass negative probabilities to select_random if some weighted scores are negative"""
         self.fitness_results.append((-10, "e"))
         selection_strategy = {
             "parents": {**self.selection_strategy["parents"], "weighting_function": lambda x: x}
@@ -167,14 +102,14 @@ class SelectorSelectParentsTest(unittest.TestCase):
 
         selector.select_parents(self.fitness_results)
 
-        actual_probabilities = mock_choice.call_args[1]["p"]
+        actual_probabilities = mock_select_from.call_args[1]["probabilities"]
         self.assertTrue(all(p >= 0 for p in actual_probabilities))
 
-    @patch("numpy.random.choice", return_value=["a", "b", "c"])
-    def test_returns_selected_parents(self, mock_choice):
+    @patch("holland.evolution.selection.select_random", return_value=["a", "b", "c"])
+    def test_returns_selected_parents(self, mock_select_from):
         """select_parents returns the genomes it selects"""
         selector = Selector(self.selection_strategy)
         parents = selector.select_parents(self.fitness_results)
 
-        expected_parents = mock_choice.return_value
+        expected_parents = mock_select_from.return_value
         self.assertListEqual(parents, expected_parents)
