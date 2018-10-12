@@ -72,9 +72,7 @@ def select_from(values, top=0, mid=0, bottom=0, random=0):
 
     # use ids because np.random.choice argument must be 1 dimensional
     all_ids = list(range(len(values)))
-    remaining_ids = (
-        all_ids[bottom:middle_start_index] + all_ids[middle_start_index + mid : -top]
-    )
+    remaining_ids = all_ids[bottom:middle_start_index] + all_ids[middle_start_index + mid : -top]
     random_ids = np.random.choice(remaining_ids, replace=False, size=random)
     selected += [values[i] for i in random_ids]
 

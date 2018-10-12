@@ -9,8 +9,6 @@ fitness_scores, genomes = zip(*breeding_pool)
 
 weighted_scores = [weighting_function(fitness) for fitness in fitness_scores]
 weighted_total = sum(weighted_scores)
-selection_probabilities = [
-    weighted_score / weighted_total for weighted_score in weighted_scores
-]
+selection_probabilities = [weighted_score / weighted_total for weighted_score in weighted_scores]
 
 parents = np.random.choice(genomes, p=selection_probabilities, size=2, replace=False)

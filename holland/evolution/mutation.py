@@ -29,9 +29,7 @@ class Mutator:
             * :func:`~holland.evolution.Mutator.mutate_gene`
         """
         return {
-            gene_name: self.mutate_gene(
-                genome[gene_name], self.genome_params[gene_name]
-            )
+            gene_name: self.mutate_gene(genome[gene_name], self.genome_params[gene_name])
             for gene_name in self.genome_params.keys()
         }
 
@@ -52,15 +50,10 @@ class Mutator:
         Dependencies:
             * :func:`~holland.evolution.Mutator.probabilistically_apply_mutation`
         """
-        mutation_level = (
-            "value" if gene_params.get("mutation_level") != "gene" else "gene"
-        )
+        mutation_level = "value" if gene_params.get("mutation_level") != "gene" else "gene"
 
         if is_list_type(gene_params) and mutation_level == "value":
-            return [
-                self.probabilistically_apply_mutation(value, gene_params)
-                for value in gene
-            ]
+            return [self.probabilistically_apply_mutation(value, gene_params) for value in gene]
 
         return self.probabilistically_apply_mutation(gene, gene_params)
 
@@ -93,9 +86,7 @@ class Mutator:
             if should_bound:
                 if isinstance(target, list):
                     mutated_target = [
-                        bound_value(
-                            value, minimum=minimum, maximum=maximum, to_int=to_int
-                        )
+                        bound_value(value, minimum=minimum, maximum=maximum, to_int=to_int)
                         for value in mutated_target
                     ]
                 else:

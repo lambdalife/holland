@@ -36,9 +36,7 @@ def record_genomes_and_fitnesses(generation_num, fitness_results, **storage_opti
     record(formatted_data, **storage_options)
 
 
-def format_genomes_and_fitnesses_for_storage(
-    generation_num, fitness_results, **storage_options
-):
+def format_genomes_and_fitnesses_for_storage(generation_num, fitness_results, **storage_options):
     """
     Formats results of a round of evaluation for storage
 

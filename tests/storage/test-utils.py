@@ -24,9 +24,7 @@ class RecordTest(unittest.TestCase):
         mock_to_csv.assert_called_with(self.data, **storage_options)
 
     @patch("holland.storage.utils.record_to_json")
-    def test_calls_record_to_json_with_correct_args_if_format_is_json(
-        self, mock_to_json
-    ):
+    def test_calls_record_to_json_with_correct_args_if_format_is_json(self, mock_to_json):
         """record passes the given data and storage options to record_to_json if format is 'json'"""
         storage_options = {**self.storage_options, "format": "json"}
 
@@ -91,9 +89,7 @@ class RecordToCsvTest(unittest.TestCase):
             values = f.readlines()[-1]
 
         expected_values = (
-            ",".join(
-                [str(v) for k, v in sorted(list(self.data.items()), key=lambda x: x[0])]
-            )
+            ",".join([str(v) for k, v in sorted(list(self.data.items()), key=lambda x: x[0])])
             + "\n"
         )
         self.assertEqual(values, expected_values)
@@ -117,10 +113,7 @@ class RecordToCsvTest(unittest.TestCase):
         self.assertEqual(lines[0], first_line)
         self.assertEqual(lines[1], second_line)
         third_line = (
-            ",".join(
-                [str(v) for k, v in sorted(list(data.items()), key=lambda x: x[0])]
-            )
-            + "\n"
+            ",".join([str(v) for k, v in sorted(list(data.items()), key=lambda x: x[0])]) + "\n"
         )
         self.assertEqual(lines[2], third_line)
 
@@ -131,10 +124,7 @@ class RecordToCsvTest(unittest.TestCase):
 
 class RecordToJsonTest(unittest.TestCase):
     def setUp(self):
-        self.data = [
-            {"a": [1, 2, 3], "b": [True, False]},
-            {"a": [10, 20, 30], "b": [False, False]},
-        ]
+        self.data = [{"a": [1, 2, 3], "b": [True, False]}, {"a": [10, 20, 30], "b": [False, False]}]
         self.file_name = "test.json"
         self.path = os.path.dirname(os.path.realpath(__file__))
         self.full_path = os.path.join(self.path, self.file_name)

@@ -24,9 +24,7 @@ class Selector:
             raise ValueError("Select Bredding Pool strategy numbers cannot be negative")
 
         parents_strategy = selection_strategy.get("parents", {})
-        self.weighting_function = parents_strategy.get(
-            "weighting_function", lambda x: 1
-        )
+        self.weighting_function = parents_strategy.get("weighting_function", lambda x: 1)
         self.n_parents = parents_strategy.get("n_parents", 2)
 
         if self.n_parents < 1:
@@ -51,16 +49,10 @@ class Selector:
             * :func:`~holland.utils.utils.select_from`
         """
         if self.top + self.mid + self.bottom + self.random > len(fitness_results):
-            raise ValueError(
-                "Select Breeding Pool strategy numbers cannot exceed population size"
-            )
+            raise ValueError("Select Breeding Pool strategy numbers cannot exceed population size")
 
         selection_pool = select_from(
-            fitness_results,
-            top=self.top,
-            mid=self.mid,
-            bottom=self.bottom,
-            random=self.random,
+            fitness_results, top=self.top, mid=self.mid, bottom=self.bottom, random=self.random
         )
 
         return selection_pool
@@ -77,9 +69,7 @@ class Selector:
         """
         fitness_scores, genomes = zip(*fitness_results)
 
-        weighted_scores = [
-            self.weighting_function(fitness) for fitness in fitness_scores
-        ]
+        weighted_scores = [self.weighting_function(fitness) for fitness in fitness_scores]
         min_weighted_score = min(weighted_scores)
         if min_weighted_score < 0:
             max_weighted_score = max(weighted_scores)
