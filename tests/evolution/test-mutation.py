@@ -32,11 +32,7 @@ class MutatorMutateGenomeTest(unittest.TestCase):
     @patch.object(Mutator, "mutate_gene")
     def test_returns_mutated_genome(self, mock_mutate_gene):
         """mutate_genome returns a genome in the same structure as the given genome, but containing the mutated genes"""
-        mutated_genes = [
-            [11, 22, 33, 44, 55],
-            [101, 202, 303, 404, 505],
-            [False, False],
-        ]
+        mutated_genes = [[11, 22, 33, 44, 55], [101, 202, 303, 404, 505], [False, False]]
         mock_mutate_gene.side_effect = mutated_genes
 
         mutated_genome = self.mutator.mutate_genome(self.genome)
@@ -169,11 +165,7 @@ class MutatorProbabilisticallyMutateValueTest(unittest.TestCase):
     def test_calls_mutation_function_according_to_mutation_rate(self):
         """probabilistically_apply_mutation calls the mutation_function according to the given mutation_rate"""
         value = 1
-        gene_params = {
-            "mutation_function": Mock(),
-            "mutation_rate": 0.1,
-            "type": "bool",
-        }
+        gene_params = {"mutation_function": Mock(), "mutation_rate": 0.1, "type": "bool"}
         mutator = Mutator({})
 
         with patch("random.random", return_value=0.001):
@@ -205,9 +197,7 @@ class MutatorProbabilisticallyMutateValueTest(unittest.TestCase):
         mutator.probabilistically_apply_mutation(value, gene_params)
 
         expected_calls = [
-            call(
-                mv, minimum=gene_params["min"], maximum=gene_params["max"], to_int=True
-            )
+            call(mv, minimum=gene_params["min"], maximum=gene_params["max"], to_int=True)
             for mv in gene_params["mutation_function"].return_value
         ]
         mock_bound_value.assert_has_calls(expected_calls)
@@ -232,9 +222,7 @@ class MutatorProbabilisticallyMutateValueTest(unittest.TestCase):
         mutator.probabilistically_apply_mutation(value, gene_params)
 
         expected_calls = [
-            call(
-                mv, minimum=gene_params["min"], maximum=gene_params["max"], to_int=False
-            )
+            call(mv, minimum=gene_params["min"], maximum=gene_params["max"], to_int=False)
             for mv in gene_params["mutation_function"].return_value
         ]
         mock_bound_value.assert_has_calls(expected_calls)
@@ -242,9 +230,7 @@ class MutatorProbabilisticallyMutateValueTest(unittest.TestCase):
 
     @patch("random.random", return_value=0.001)
     @patch("holland.evolution.mutation.bound_value")
-    def test_bounds_mutated_target_if_should_bound_on_type_int(
-        self, mock_bound_value, mock_random
-    ):
+    def test_bounds_mutated_target_if_should_bound_on_type_int(self, mock_bound_value, mock_random):
         """probabilistically_apply_mutation calls bound_value on the mutated target with the correct max, min, and to_int if should_bound is True and target is an int"""
         value = 1
         gene_params = {
@@ -292,9 +278,7 @@ class MutatorProbabilisticallyMutateValueTest(unittest.TestCase):
 
     @patch("random.random", return_value=0.001)
     @patch("holland.evolution.mutation.bound_value")
-    def test_does_not_bound_mutated_target_if_not_should_bound(
-        self, mock_bound_value, mock_random
-    ):
+    def test_does_not_bound_mutated_target_if_not_should_bound(self, mock_bound_value, mock_random):
         """probabilistically_apply_mutation does not call bound_value on the mutated value if should_bound is False"""
         value = 1
         gene_params = {

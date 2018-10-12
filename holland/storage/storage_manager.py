@@ -15,9 +15,7 @@ class StorageManager:
 
     def __init__(self, fitness_storage_options={}, genome_storage_options={}):
         self.fitness_storage_options = fitness_storage_options
-        self.should_record_fitness = fitness_storage_options.get(
-            "should_record_fitness"
-        )
+        self.should_record_fitness = fitness_storage_options.get("should_record_fitness")
         self.fitness_format = fitness_storage_options.get("format")
         self.fitness_history = []
 

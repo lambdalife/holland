@@ -6,16 +6,10 @@ from holland.library.crossover_functions import *
 
 class GetUniformCrossoverFunctionTest(unittest.TestCase):
     @patch("random.choice")
-    def test_returned_function_makes_random_choices_over_correct_options(
-        self, mock_random_choice
-    ):
+    def test_returned_function_makes_random_choices_over_correct_options(self, mock_random_choice):
         """get_uniform_crossover_function returns a function that selects each gene value randomly from each parent"""
         uniform_crossover = get_uniform_crossover_function()
-        parent_genes = [
-            list(range(1, 10)),
-            list(range(10, 100, 10)),
-            list(range(100, 1000, 100)),
-        ]
+        parent_genes = [list(range(1, 10)), list(range(10, 100, 10)), list(range(100, 1000, 100))]
 
         uniform_crossover(parent_genes)
 
@@ -37,9 +31,7 @@ class GetUniformCrossoverFunctionTest(unittest.TestCase):
         expected_length = len(parent_genes[0])
         self.assertEqual(len(output), expected_length)
 
-    def test_returned_function_returns_a_single_value_if_parent_genes_are_values_not_lists(
-        self
-    ):
+    def test_returned_function_returns_a_single_value_if_parent_genes_are_values_not_lists(self):
         """get_uniform_crossover_function returns a function that returns a single value if the given parent_genes are each single values"""
         uniform_crossover = get_uniform_crossover_function()
         parent_genes = list(range(2))
@@ -62,17 +54,13 @@ class GetPointCrossoverFunction(unittest.TestCase):
     ):
         """get_point_crossover_function selects the correct number of crossover points from all indices of elements of parent_genes"""
         n_crossover_points = 3
-        point_crossover = get_point_crossover_function(
-            n_crossover_points=n_crossover_points
-        )
+        point_crossover = get_point_crossover_function(n_crossover_points=n_crossover_points)
         parent_genes = [list(range(1, 10)), list(range(10, 100, 10))]
 
         point_crossover(parent_genes)
 
         expected_point_options = range(1, len(parent_genes[0]))
-        mock_random_choice.assert_called_with(
-            expected_point_options, size=n_crossover_points
-        )
+        mock_random_choice.assert_called_with(expected_point_options, size=n_crossover_points)
 
     @patch("numpy.random.choice", return_value=[5])
     def test_returned_function_slices_genome_of_each_parent_with_2_parents_and_1_point(
@@ -85,9 +73,7 @@ class GetPointCrossoverFunction(unittest.TestCase):
         output = point_crossover(parent_genes)
 
         crossover_point = mock_random_choice.return_value[0]
-        expected_output = (
-            parent_genes[0][:crossover_point] + parent_genes[1][crossover_point:]
-        )
+        expected_output = parent_genes[0][:crossover_point] + parent_genes[1][crossover_point:]
         self.assertEqual(output, expected_output)
         self.assertEqual(len(output), len(parent_genes[0]))
 
@@ -117,11 +103,7 @@ class GetPointCrossoverFunction(unittest.TestCase):
     ):
         """get_point_crossover_function returns a function that picks crossover points and then slices each parent according to those points"""
         point_crossover = get_point_crossover_function(n_crossover_points=1)
-        parent_genes = [
-            list(range(1, 10)),
-            list(range(10, 100, 10)),
-            list(range(100, 1000, 100)),
-        ]
+        parent_genes = [list(range(1, 10)), list(range(10, 100, 10)), list(range(100, 1000, 100))]
 
         output = point_crossover(parent_genes)
 
@@ -140,11 +122,7 @@ class GetAndCrossoverFunctionTest(unittest.TestCase):
     def test_returned_function_works_as_expected_with_value_type_genes(self):
         """get_and_crossover_function returns a function that returns the value of all genes 'and'ed together"""
         and_crossover = get_and_crossover_function()
-        parent_genes_sets = [
-            [True, True, True],
-            [False, True, True],
-            [False, False, False],
-        ]
+        parent_genes_sets = [[True, True, True], [False, True, True], [False, False, False]]
         expected_outputs = [True, False, False]
 
         for parent_genes, expected_output in zip(parent_genes_sets, expected_outputs):
@@ -167,11 +145,7 @@ class GetOrCrossoverFunctionTest(unittest.TestCase):
     def test_returned_function_works_as_expected_with_value_type_genes(self):
         """get_or_crossover_function returns a function that returns the value of all genes 'or'ed together"""
         or_crossover = get_or_crossover_function()
-        parent_genes_sets = [
-            [True, True, True],
-            [False, True, True],
-            [False, False, False],
-        ]
+        parent_genes_sets = [[True, True, True], [False, True, True], [False, False, False]]
         expected_outputs = [True, True, False]
 
         for parent_genes, expected_output in zip(parent_genes_sets, expected_outputs):

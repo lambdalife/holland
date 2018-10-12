@@ -11,10 +11,7 @@ class RecordFitnessTest(unittest.TestCase):
         self.fitness_scores = [1, 2, 3, 4, 5, 6]
         self.base_storage_options = {"file_name": "test", "path": "test/test"}
 
-    @patch(
-        "holland.storage.fitness.format_fitness_statistics",
-        return_value={"a": 1, "b": 2},
-    )
+    @patch("holland.storage.fitness.format_fitness_statistics", return_value={"a": 1, "b": 2})
     @patch("holland.storage.fitness.record")
     def test_calls_record_with_correct_arguments(self, mock_record, mock_format):
         """record_fitness stores the formatted data to a csv if storage format is csv"""
@@ -25,18 +22,13 @@ class RecordFitnessTest(unittest.TestCase):
         expected_data = mock_format.return_value
         mock_record.assert_called_with(expected_data, **storage_options)
 
-    @patch(
-        "holland.storage.fitness.format_fitness_statistics",
-        return_value={"a": 1, "b": 2},
-    )
+    @patch("holland.storage.fitness.format_fitness_statistics", return_value={"a": 1, "b": 2})
     @patch("holland.storage.fitness.record")
     def test_returns_fitness_statistics(self, mock_record, mock_format):
         """record_fitness returns the fitness_statistics returned by format_fitness_statistics"""
         storage_options = {**self.base_storage_options, "format": "csv"}
 
-        output = record_fitness(
-            self.generation_num, self.fitness_scores, **storage_options
-        )
+        output = record_fitness(self.generation_num, self.fitness_scores, **storage_options)
 
         expected_output = mock_format.return_value
         self.assertDictEqual(output, expected_output)

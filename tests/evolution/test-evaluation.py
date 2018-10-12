@@ -16,9 +16,7 @@ class EvaluatorEvaluateFitnessTest(unittest.TestCase):
         expected_calls = [call(genome) for genome in gene_pool]
         fitness_function.assert_has_calls(expected_calls)
 
-    def test_appends_returned_genome_to_results_if_fitness_function_returns_a_genome(
-        self
-    ):
+    def test_appends_returned_genome_to_results_if_fitness_function_returns_a_genome(self):
         """evaluate_fitness appends the score and genome returned by fitness_function to results if fitness_function returns a tuple/list"""
         gene_pool = ["a", "b", "c", "d", "e", "f"]
         scores = [10, 20, 30, 40, 50, 60]
@@ -30,8 +28,7 @@ class EvaluatorEvaluateFitnessTest(unittest.TestCase):
 
         expected_results = list(zip(scores, final_genomes))
         self.assertListEqual(
-            sorted(results, key=lambda x: x[0]),
-            sorted(expected_results, key=lambda x: x[0]),
+            sorted(results, key=lambda x: x[0]), sorted(expected_results, key=lambda x: x[0])
         )
 
     def test_returns_tuples_of_score_and_genome(self):
@@ -45,8 +42,7 @@ class EvaluatorEvaluateFitnessTest(unittest.TestCase):
 
         expected_results = list(zip(scores, gene_pool))
         self.assertListEqual(
-            sorted(results, key=lambda x: x[0]),
-            sorted(expected_results, key=lambda x: x[0]),
+            sorted(results, key=lambda x: x[0]), sorted(expected_results, key=lambda x: x[0])
         )
 
     def test_returns_results_sorted_by_fitness_score_asc(self):
@@ -82,7 +78,5 @@ class EvaluatorEvaluateFitnessTest(unittest.TestCase):
 
         results = evaluator.evaluate_fitness(gene_pool)
 
-        expected_results = sorted(
-            list(zip(scores, gene_pool)), key=lambda x: x[0], reverse=True
-        )
+        expected_results = sorted(list(zip(scores, gene_pool)), key=lambda x: x[0], reverse=True)
         self.assertListEqual(results, expected_results)

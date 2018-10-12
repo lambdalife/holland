@@ -37,10 +37,7 @@ class PopulationGenerator:
                 "Number of random or elite individuals per generation cannot be negative"
             )
 
-        if (
-            self.population_size is not None
-            and self.n_random + self.n_elite > self.population_size
-        ):
+        if self.population_size is not None and self.n_random + self.n_elite > self.population_size:
             raise ValueError(
                 "Number of random and elite individuals must be less than or equal to population size"
             )
@@ -77,9 +74,7 @@ class PopulationGenerator:
         bred_per_generation = self.population_size - self.n_random - self.n_elite
 
         if self.n_elite > 0:
-            elite_genomes = [
-                genome for fitness, genome in fitness_results[-self.n_elite :]
-            ]
+            elite_genomes = [genome for fitness, genome in fitness_results[-self.n_elite :]]
         else:
             elite_genomes = []
 
@@ -153,9 +148,7 @@ class PopulationGenerator:
             * :func:`~holland.utils.utils.bound_value`
         """
         if n_genomes < 0:
-            raise ValueError(
-                "Number of random genomes per generation cannot be negative"
-            )
+            raise ValueError("Number of random genomes per generation cannot be negative")
 
         genomes = []
 

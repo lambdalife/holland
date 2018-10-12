@@ -45,10 +45,7 @@ def record_to_csv(data, **storage_options):
     :raises AssertionError: if storage_options["path"] is not specified
     :raises ValueError: if not all values are of type int or float
     """
-    assert (
-        storage_options.get("file_name") is not None
-        and storage_options.get("path") is not None
-    )
+    assert storage_options.get("file_name") is not None and storage_options.get("path") is not None
 
     if not all(type(value) in [int, float] for value in data.values()):
         raise ValueError("Data values must be of type int or float.")
@@ -86,10 +83,7 @@ def record_to_json(data, **storage_options):
     :raises AssertionError: if storage_options["file_name"] is not specified
     :raises AssertionError: if storage_options["path"] is not specified
     """
-    assert (
-        storage_options.get("file_name") is not None
-        and storage_options.get("path") is not None
-    )
+    assert storage_options.get("file_name") is not None and storage_options.get("path") is not None
 
     file_name = storage_options["file_name"]
     file_path = storage_options["path"]
