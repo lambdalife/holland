@@ -1,7 +1,7 @@
 <h1 align='center'>Holland</h1>
 <h2 align='center'>Genetic Algorithm Library for Python</h1>
 
-> Computer programs that "evolve" in ways that resemble natural selection can solve complex problems even their creators do not fully understand - John H. Holland
+> Computer programs that "evolve" in ways that resemble natural selection can solve complex problems even their creators do not fully understand
 
 <div align='center'>
     <a href="https://github.com/henrywoody/holland/blob/master/LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg"></a>
@@ -14,86 +14,107 @@ This is a package for implementing the Genetic Algorithm in Python. The program 
 
 Holland handles the reproduction step of the Genetic Algorithm and can be configured to work in a variety of ways.
 
-Holland also manages saving genomes for individuals and populations as well as plotting fitness over time.
+Holland also manages saving genomes and fitness statistics for individuals and populations.
 
 ### Usage
 Full documentation on [ReadTheDocs](hollandpy.readthedocs.io).
 
-**Basic Example**
+**Hello World!**
 
 ```python
-from holland import evolve
-from math import cos, pi
+from holland import Evolver
+from holland.library import get_uniform_crossover_function
+from holland.utils import bound_value
+import random
 
-# specify hyper-parameters for genomes
-genome_parameters = {
-    'gene1': {
-        'type': 'float',
-        'min': -pi,
-        'max': pi
-    },
-    'gene2': {
-        'type': 'float',
-        'min': -pi,
-        'max': pi
+
+# Define a fitness function
+def fitness_function(genome):
+    message = genome["message"]
+    target = "Hello World!"
+    score = 0
+    for i in range(len(message)):
+        score += abs(ord(target[i]) - ord(message[i]))
+    return score
+
+def mutation_function(value):
+    mutated_value = ord(value) * random.random() * 2
+    return chr(bound_value(mutated_value, minimum=32, maximum=126, to_int=True))
+
+# Define genome parameters for individuals
+genome_params = {
+    "message": {
+        "type": "[str]",
+        "size": len("Hello World!"),
+        "initial_distribution": lambda: chr(random.randint(32, 126)),
+        "crossover_function": get_uniform_crossover_function(),
+        "mutation_function": mutation_function,
+        "mutation_rate": 0.15
     }
 }
 
-# define a fitness function
-def my_fitness_function(individual):
-    return cos(inidividual.gene1)*cos(individual.gene2)
+# Define how to select individuals for reproduction
+selection_strategy = {"pool": {"top": 10}}
 
-# evolve!
-my_population = holland.evolve(genome_parameters,
-                               fitness_function = my_fitness_function,
-                               show_fitness_plot = True,
-                               num_generations = 100)
+# Run Evolution
+evolver = Evolver(
+    fitness_function,
+    genome_params,
+    selection_strategy,
+    should_maximize_fitness=False
+)
+final_population = evolver.evolve(stop_conditions={"target_fitness": 0})
 ```
 
-A more complex example
+With sample run:
 
-**TSP**
+> Generation: 0; Top Score: 201;	N~flx.JGcu-*
+>
+> Generation: 1; Top Score: 98;	Xljlw);mj]f 
+>
+> Generation: 2; Top Score: 64;	=c}kk SmsYf 
+>
+> Generation: 3; Top Score: 37;	Kcjlk$Vms]f 
+>
+> Generation: 4; Top Score: 24;	Cdjkn Smshf 
+>
+> Generation: 5; Top Score: 16;	Idjln Vmshf 
+>
+> Generation: 6; Top Score: 14;	Idjln Voshf 
+>
+> Generation: 7; Top Score: 11;	Hdjln Vmslf 
+>
+> Generation: 8; Top Score: 9;	Hdjln Voslf 
+>
+> Generation: 9; Top Score: 8;	Hdjln Vosle 
+>
+> Generation: 10; Top Score: 7;	Hdmln Vosle 
+>
+> Generation: 11; Top Score: 6;	Hdlln Vosle 
+>
+> Generation: 12; Top Score: 5;	Hdllo Vosle 
+>
+> Generation: 13; Top Score: 4;	Hdllo Vosle!
+>
+> Generation: 14; Top Score: 3;	Hello Vosle!
+>
+> Generation: 15; Top Score: 2;	Hello Wosle!
+>
+> Generation: 16; Top Score: 2;	Hello Wosle!
+>
+> Generation: 17; Top Score: 1;	Hello Worle!
+>
+> Generation: 18; Top Score: 1;	Hello Worle!
+>
+> Generation: 19; Top Score: 1;	Hello Worle!
+>
+> Generation: 20; Top Score: 0;	Hello World!
+
+Best Genome:
 
 ```python
-from holland import evolve
-from math import sqrt
-
-# list of cities and positions
-cities = {
-    'AZ': (1,2),
-    'CA': (3,4),
-    'NM': (5,6),
-    'TX': (7,8)
+{
+    'message': ['H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd', '!']
 }
-
-# specify hyper-parameters for genomes
-genome_parameters = {
-    'path': {
-        'type': '[string]',
-        'possible_values': cities.keys(),
-        'mutation_function': 'swap'
-    }
-}
-
-def distance(p1, p2):
-	dx = p1[0]-p2[0]
-	dy = p1[1]-p2[1]
-	return sqrt(dx*dx + dy*dy)
-
-# define a fitness function
-# a pythonic way to find the length of a round trip
-def sum_of_distances(individual):
-    cities = [position[city] for city in individual['path']]
-    return sum([
-      distance(city_1, city_2)
-        for (city_1, city_2)
-        in zip(cities, cities[1:]+[cities[0]])
-    ])
-
-# evolve!
-my_population = holland.evolve(genome_parameters,
-                               fitness_function = my_fitness_function,
-                               anneal_mutation_rate = True,
-                               show_fitness_plot = True,
-                               num_generations = 100)
 ```
+
