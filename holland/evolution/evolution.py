@@ -86,7 +86,7 @@ class Evolver:
         Example:
             .. literalinclude:: examples/basic_example.py
                 :linenos:
-                :emphasize-lines: 23-26
+                :emphasize-lines: 16
         """
         n_random_per_generation = generation_params.get("n_random", 0)
         n_elite_per_generation = generation_params.get("n_elite", 0)
