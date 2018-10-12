@@ -141,27 +141,21 @@ class SelectFromTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             select_from(self.values, random=-1)
 
-    def test_selects_correctly_with_determininstic_arguments_and_odd_population_small(
-        self
-    ):
+    def test_selects_correctly_with_determininstic_arguments_and_odd_population_small(self):
         """select_from correctly selects values from the top, middle, and bottom according to the given arguments when length of values is odd"""
         selection_pool = select_from(self.values, top=1, mid=1, bottom=1)
 
         expected_selected_values = [100, 44, 7]
         self.assertListEqual(sorted(selection_pool), sorted(expected_selected_values))
 
-    def test_selects_correctly_with_determininstic_arguments_and_odd_num_values_larger(
-        self
-    ):
+    def test_selects_correctly_with_determininstic_arguments_and_odd_num_values_larger(self):
         """select_from correctly selects values from the top, middle, and bottom according to the given arguments when length of values is odd"""
         selection_pool = select_from(self.values, top=3, mid=3, bottom=3)
 
         expected_selected_values = [100, 90, 85, 45, 44, 30, 9, 8, 7]
         self.assertListEqual(sorted(selection_pool), sorted(expected_selected_values))
 
-    def test_selects_correctly_with_determininstic_arguments_and_even_num_values_small(
-        self
-    ):
+    def test_selects_correctly_with_determininstic_arguments_and_even_num_values_small(self):
         """select_from correctly selects values from the top, middle, and bottom according to the given arguments when length of values is even"""
         values = self.values[1:]
         selection_pool = select_from(values, top=1, mid=1, bottom=1)
@@ -169,9 +163,7 @@ class SelectFromTest(unittest.TestCase):
         expected_selected_values = [100, 45, 8]
         self.assertListEqual(sorted(selection_pool), sorted(expected_selected_values))
 
-    def test_selects_correctly_with_determininstic_arguments_and_even_num_values_larger(
-        self
-    ):
+    def test_selects_correctly_with_determininstic_arguments_and_even_num_values_larger(self):
         """select_from correctly selects values from the top, middle, and bottom according to the given arguments when length of values is even"""
         values = self.values[1:]
         selection_pool = select_from(values, top=3, mid=3, bottom=3)
@@ -180,9 +172,7 @@ class SelectFromTest(unittest.TestCase):
         self.assertListEqual(sorted(selection_pool), sorted(expected_selected_values))
 
     @patch("numpy.random.choice")
-    def test_does_not_randomly_select_values_that_were_already_selected(
-        self, mock_choice
-    ):
+    def test_does_not_randomly_select_values_that_were_already_selected(self, mock_choice):
         """select_from selects values randomly but does not select duplicates"""
         select_from(self.values, top=1, mid=1, bottom=1)
 
@@ -190,9 +180,7 @@ class SelectFromTest(unittest.TestCase):
 
         used_random_id_choices = mock_choice.call_args[0][0]
         expected_random_id_choices = [
-            i
-            for i in range(len(self.values))
-            if self.values[i] not in deterministic_selection_pool
+            i for i in range(len(self.values)) if self.values[i] not in deterministic_selection_pool
         ]
         self.assertListEqual(used_random_id_choices, expected_random_id_choices)
 

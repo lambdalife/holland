@@ -24,11 +24,7 @@ class Evolver:
     """
 
     def __init__(
-        self,
-        fitness_function,
-        genome_params,
-        selection_strategy,
-        should_maximize_fitness=True,
+        self, fitness_function, genome_params, selection_strategy, should_maximize_fitness=True
     ):
         self.fitness_function = fitness_function
         self.genome_params = genome_params
@@ -98,14 +94,11 @@ class Evolver:
         n_generations = stop_conditions.get("n_generations", math.inf)
         target_fitness = stop_conditions.get("target_fitness", math.inf)
         should_stop = (
-            lambda gen_num, max_fit: gen_num == n_generations - 1
-            or max_fit == target_fitness
+            lambda gen_num, max_fit: gen_num == n_generations - 1 or max_fit == target_fitness
         )
 
         if n_random_per_generation < 0 or n_elite_per_generation < 0:
-            raise ValueError(
-                "Number of random and elite genomes per generation cannot be negative"
-            )
+            raise ValueError("Number of random and elite genomes per generation cannot be negative")
         if population_size < 1:
             raise ValueError("Population size must be at least 1")
         if n_generations < 1:
@@ -114,17 +107,13 @@ class Evolver:
         logging.basicConfig(**logging_options)
         logger = logging.getLogger(__name__)
 
-        evaluator = Evaluator(
-            self.fitness_function, ascending=self.should_maximize_fitness
-        )
+        evaluator = Evaluator(self.fitness_function, ascending=self.should_maximize_fitness)
         storage_manager = StorageManager(
             fitness_storage_options=storage_options.get("fitness", {}),
             genome_storage_options=storage_options.get("genomes", {}),
         )
         population_generator = PopulationGenerator(
-            self.genome_params,
-            self.selection_strategy,
-            generation_params=generation_params,
+            self.genome_params, self.selection_strategy, generation_params=generation_params
         )
 
         population = initial_population
@@ -144,9 +133,7 @@ class Evolver:
                 if should_stop(generation_num, best_fitness):
                     break
 
-                population = population_generator.generate_next_generation(
-                    fitness_results
-                )
+                population = population_generator.generate_next_generation(fitness_results)
 
                 generation_num += 1
             except:

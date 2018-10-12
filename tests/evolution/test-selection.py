@@ -38,9 +38,7 @@ class SelectorSelectBreedingPoolTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             selector.select_breeding_pool(self.fitness_results)
 
-    def test_selects_correctly_with_determininstic_arguments_and_odd_population_small(
-        self
-    ):
+    def test_selects_correctly_with_determininstic_arguments_and_odd_population_small(self):
         """select_breeding_pool correctly selects individuals from the top, middle, and bottom according to the given arguments when poplutation size is odd"""
         selector = Selector({"pool": {"top": 1, "mid": 1, "bottom": 1}})
         selection_pool = selector.select_breeding_pool(self.fitness_results)
@@ -48,9 +46,7 @@ class SelectorSelectBreedingPoolTest(unittest.TestCase):
         expected_selection_pool = [(100, "a"), (44, "f"), (7, "k")]
         self.assertListEqual(sorted(selection_pool), sorted(expected_selection_pool))
 
-    def test_selects_correctly_with_determininstic_arguments_and_odd_population_larger(
-        self
-    ):
+    def test_selects_correctly_with_determininstic_arguments_and_odd_population_larger(self):
         """select_breeding_pool correctly selects individuals from the top, middle, and bottom according to the given arguments when poplutation size is odd"""
         selector = Selector({"pool": {"top": 3, "mid": 3, "bottom": 3}})
         selection_pool = selector.select_breeding_pool(self.fitness_results)
@@ -68,9 +64,7 @@ class SelectorSelectBreedingPoolTest(unittest.TestCase):
         ]
         self.assertListEqual(sorted(selection_pool), sorted(expected_selection_pool))
 
-    def test_selects_correctly_with_determininstic_arguments_and_even_population_small(
-        self
-    ):
+    def test_selects_correctly_with_determininstic_arguments_and_even_population_small(self):
         """select_breeding_pool correctly selects individuals from the top, middle, and bottom according to the given arguments when poplutation size is even"""
         fitness_results = self.fitness_results[1:]
         selector = Selector({"pool": {"top": 1, "mid": 1, "bottom": 1}})
@@ -79,9 +73,7 @@ class SelectorSelectBreedingPoolTest(unittest.TestCase):
         expected_selection_pool = [(100, "a"), (45, "e"), (8, "j")]
         self.assertListEqual(sorted(selection_pool), sorted(expected_selection_pool))
 
-    def test_selects_correctly_with_determininstic_arguments_and_even_population_larger(
-        self
-    ):
+    def test_selects_correctly_with_determininstic_arguments_and_even_population_larger(self):
         """select_breeding_pool correctly selects individuals from the top, middle, and bottom according to the given arguments when poplutation size is even"""
         fitness_results = self.fitness_results[1:]
         selector = Selector({"pool": {"top": 3, "mid": 3, "bottom": 3}})
@@ -101,9 +93,7 @@ class SelectorSelectBreedingPoolTest(unittest.TestCase):
         self.assertListEqual(sorted(selection_pool), sorted(expected_selection_pool))
 
     @patch("numpy.random.choice")
-    def test_does_not_randomly_select_individuals_that_were_already_selected(
-        self, mock_choice
-    ):
+    def test_does_not_randomly_select_individuals_that_were_already_selected(self, mock_choice):
         """narrow_selecetion_pool selects individuals randomly but does not select duplicates"""
         selector = Selector({"pool": {"top": 1, "mid": 1, "bottom": 1}})
         selector.select_breeding_pool(self.fitness_results)
@@ -157,9 +147,7 @@ class SelectorSelectParentsTest(unittest.TestCase):
 
         weighting_function = self.selection_strategy["parents"]["weighting_function"]
         n_parents = self.selection_strategy["parents"]["n_parents"]
-        weighted_scores = [
-            weighting_function(fitness) for fitness in self.fitness_scores
-        ]
+        weighted_scores = [weighting_function(fitness) for fitness in self.fitness_scores]
         weighted_total = sum(weighted_scores)
         expected_probabilities = [
             weighted_score / weighted_total for weighted_score in weighted_scores
@@ -173,10 +161,7 @@ class SelectorSelectParentsTest(unittest.TestCase):
         """select_parents does not pass negative probabilities to np.random.choice if some weighted scores are negative"""
         self.fitness_results.append((-10, "e"))
         selection_strategy = {
-            "parents": {
-                **self.selection_strategy["parents"],
-                "weighting_function": lambda x: x,
-            }
+            "parents": {**self.selection_strategy["parents"], "weighting_function": lambda x: x}
         }
         selector = Selector(selection_strategy)
 
