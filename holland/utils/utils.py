@@ -1,6 +1,5 @@
 import re
 import math
-# import numpy as np
 from random import random
 
 
@@ -71,7 +70,9 @@ def select_from(values, top=0, mid=0, bottom=0, random=0):
     selected += values[middle_start_index : middle_start_index + mid]
     selected += values[:bottom]
 
-    remaining_values = values[bottom:middle_start_index] + values[middle_start_index + mid : -top]
+    remaining_values = (
+        values[bottom:middle_start_index] + values[middle_start_index + mid : -top]
+    )
     selected += select_random(remaining_values, n=random)
 
     return selected
@@ -116,13 +117,13 @@ def select_random(choices, probabilities=None, n=1, should_replace=False):
             return [choices[int(random() * num_choices)] for _ in range(n)]
         else:
             # uniform random with no replacement
-            result = [None]*n
+            result = [None] * n
             selected = set()
 
             for i in range(n):
-                j = int(random()*num_choices)
+                j = int(random() * num_choices)
                 while j in selected:
-                    j = int(random()*num_choices)
+                    j = int(random() * num_choices)
                 selected.add(j)
                 result[i] = choices[j]
             return result
@@ -137,53 +138,63 @@ def select_random(choices, probabilities=None, n=1, should_replace=False):
 
         if should_replace:
             # weighted random with replacement
-            cumulative_weights = accumulate(probabilities)
+            cumulative_weights = _accumulate(probabilities)
             total = cumulative_weights[-1]
 
             if n > 4:
                 # it's worth building this dictionary
-                bisect_mapping = get_bisect_mapping(cumulative_weights)
-                return [choices[bisect_mapping[int(random() * total)]] for _ in range(n)]
+                bisect_mapping = _get_bisect_mapping(cumulative_weights)
+                return [
+                    choices[bisect_mapping[int(random() * total)]] for _ in range(n)
+                ]
             else:
-                return [choices[bisect(cumulative_weights, int(random() * total))] for _ in range(n)]
+                return [
+                    choices[_bisect(cumulative_weights, int(random() * total))]
+                    for _ in range(n)
+                ]
         else:
             # weighted random with no replacement
             current_probs = probabilities[:]
             cumulative_weights = None
             total = None
-            indices = [None]*n
+            indices = [None] * n
             chosen_index = None
             for i in range(n):
-                cumulative_weights = accumulate(current_probs)
+                cumulative_weights = _accumulate(current_probs)
                 total = cumulative_weights[-1]
-                chosen_index = bisect(cumulative_weights, random() * total)
+                chosen_index = _bisect(cumulative_weights, random() * total)
                 indices[i] = chosen_index
-                current_probs = current_probs[:chosen_index] + current_probs[chosen_index+1:]
-            
+                current_probs = (
+                    current_probs[:chosen_index] + current_probs[chosen_index + 1 :]
+                )
+
             return [choices[j] for j in indices]
 
+
 # just like itertools.accumulate(arr) but without having to import itertools...
-def accumulate(prob_dist):
+def _accumulate(prob_dist):
     s = 0
-    cumulative = [None]*len(prob_dist)
+    cumulative = [None] * len(prob_dist)
     for i in range(len(prob_dist)):
         s += prob_dist[i]
         cumulative[i] = s
     return cumulative
 
+
 # used for bisect
 # defines what bisect would return for bisect(arr, int(x))
 # useful when bisect would normally be called repeatedly
-def get_bisect_mapping(arr):
+def _get_bisect_mapping(arr):
     mapping = {}
     for i, a in enumerate(arr):
-        mapping[a] = i+1
+        mapping[a] = i + 1
     return mapping
+
 
 # acts like bisect
 # returns first index i to insert x into sorted array arr
 # return -1 if no index exists
-def bisect(arr, x):
+def _bisect(arr, x):
     for i in range(len(arr)):
         if arr[i] > x:
             return i
