@@ -32,7 +32,7 @@ class EvolverEvolveTest(unittest.TestCase):
             evolver.evolve(generation_params={"n_elite": -1})
 
     def test_asserts_population_size_and_n_generations_are_at_least_one(self):
-        """evolve raises a ValueError if generation_params["population_size"] or n_generations is less than 1"""
+        """evolve raises a ValueError if generation_params["population_size"] or stop_conditions["n_generations"] is less than 1"""
         evolver = Evolver(
             self.fitness_function, self.genome_params, self.selection_strategy
         )
@@ -41,7 +41,7 @@ class EvolverEvolveTest(unittest.TestCase):
             evolver.evolve(generation_params={"population_size": 0})
 
         with self.assertRaises(ValueError):
-            evolver.evolve(n_generations=0)
+            evolver.evolve(stop_conditions={"n_generations": 0})
 
     @patch("holland.evolution.evolution.PopulationGenerator")
     @patch("holland.evolution.evolution.Evaluator")
@@ -165,7 +165,7 @@ class EvolverEvolveTest(unittest.TestCase):
 
         evolver.evolve(
             initial_population=initial_population,
-            n_generations=n_generations,
+            stop_conditions={"n_generations": n_generations},
             generation_params=generation_params,
         )
 
@@ -186,6 +186,43 @@ class EvolverEvolveTest(unittest.TestCase):
         )
 
     @patch.object(PopulationGenerator, "generate_random_genomes")
+    @patch.object(Evaluator, "evaluate_fitness")
+    @patch.object(PopulationGenerator, "generate_next_generation")
+    def test_stops_on_reaching_n_generations(
+        self, mock_generate_next_gen, mock_evaluate_fitness, mock_generate_random
+    ):
+        """evolve stops when hitting the specified generation number from stop_conditions["n_generations"]"""
+        n_generations = 15
+        evolver = Evolver(
+            self.fitness_function, self.genome_params, self.selection_strategy
+        )
+
+        evolver.evolve(stop_conditions={"n_generations": n_generations})
+
+        self.assertEqual(mock_evaluate_fitness.call_count, n_generations)
+
+    @patch.object(PopulationGenerator, "generate_random_genomes")
+    @patch.object(Evaluator, "evaluate_fitness")
+    @patch.object(PopulationGenerator, "generate_next_generation")
+    def test_stops_on_reaching_target_fitness(
+        self, mock_generate_next_gen, mock_evaluate_fitness, mock_generate_random
+    ):
+        """evolve stops when the max fitness is equal to the target fitness from stop_conditions["n_generations"]"""
+        target_fitness = 15
+        target_generations = 20
+        mock_evaluate_fitness.side_effect = [
+            [(1, "a")] if i < target_generations - 1 else [(target_fitness, "b")]
+            for i in range(target_generations)
+        ]
+        evolver = Evolver(
+            self.fitness_function, self.genome_params, self.selection_strategy
+        )
+
+        evolver.evolve(stop_conditions={"target_fitness": target_fitness})
+
+        self.assertEqual(mock_evaluate_fitness.call_count, target_generations)
+
+    @patch.object(PopulationGenerator, "generate_random_genomes")
     @patch("holland.evolution.evolution.StorageManager")
     @patch.object(Evaluator, "evaluate_fitness")
     @patch.object(PopulationGenerator, "generate_next_generation")
@@ -204,7 +241,10 @@ class EvolverEvolveTest(unittest.TestCase):
         )
 
         evolver.evolve(
-            storage_options={"fitness": fitness_storage_options, "genomes": genome_storage_options}
+            storage_options={
+                "fitness": fitness_storage_options,
+                "genomes": genome_storage_options,
+            }
         )
 
         MockStorageManager.assert_called_with(
@@ -233,14 +273,14 @@ class EvolverEvolveTest(unittest.TestCase):
             self.fitness_function, self.genome_params, self.selection_strategy
         )
 
-        evolver.evolve(n_generations=n_generations)
+        evolver.evolve(stop_conditions={"n_generations": n_generations})
 
         expected_calls = [call(i, fitness_results[i]) for i in range(n_generations)]
         mock_update_storage.assert_has_calls(expected_calls)
         self.assertEqual(mock_update_storage.call_count, len(expected_calls))
 
     @patch.object(PopulationGenerator, "generate_random_genomes")
-    @patch.object(Evaluator, "evaluate_fitness", return_value=[1, 2, 3])
+    @patch.object(Evaluator, "evaluate_fitness", return_value=[[1], [2], [3]])
     @patch.object(StorageManager, "react_to_interruption")
     @patch.object(PopulationGenerator, "generate_next_generation")
     def test_calls_record_genomes_and_fitnesses_on_interrupt_if_should(
@@ -261,7 +301,7 @@ class EvolverEvolveTest(unittest.TestCase):
         )
 
         with self.assertRaises(Exception):
-            evolver.evolve(n_generations=n_generations)
+            evolver.evolve(stop_conditions={"n_generations": n_generations})
 
         mock_react.assert_called_once_with(
             interrupt_generation, mock_evaluate_fitness.return_value
@@ -275,7 +315,9 @@ class EvolverEvolveTest(unittest.TestCase):
     ):
         """evolve returns the fitness_history of the StorageManager if should_record_fitness storage format is 'memory'"""
         n_generations = 10
-        storage_options = {"fitness": {"should_record_fitness": True, "format": "memory"}}
+        storage_options = {
+            "fitness": {"should_record_fitness": True, "format": "memory"}
+        }
         evolver = Evolver(
             self.fitness_function, self.genome_params, self.selection_strategy
         )
@@ -284,7 +326,7 @@ class EvolverEvolveTest(unittest.TestCase):
             MockStorageManager.return_value.fitness_history = ["a", "b", "c", "d"]
 
             _, fitness_history = evolver.evolve(
-                n_generations=n_generations,
+                stop_conditions={"n_generations": n_generations},
                 storage_options=storage_options,
             )
 
@@ -315,7 +357,8 @@ class EvolverEvolveTest(unittest.TestCase):
         )
 
         final_results = evolver.evolve(
-            initial_population=initial_population, n_generations=n_generations
+            initial_population=initial_population,
+            stop_conditions={"n_generations": n_generations},
         )
 
         expected_final_results = results[-1]
