@@ -1,4 +1,5 @@
 import math
+import logging
 
 from .evaluation import Evaluator
 from .breeding import PopulationGenerator
@@ -40,6 +41,7 @@ class Evolver:
         initial_population=None,
         stop_conditions={"n_generations": 100, "target_fitness": math.inf},
         storage_options={},
+        logging_options={"level": logging.INFO, "format": "%(message)s"},
     ):
         """
         The heart of Holland.
@@ -55,6 +57,9 @@ class Evolver:
     
         :param storage_options: configuration options for storing fitness and genomes (should contain keys ``"fitness"`` and ``"genomes"``); see :ref:`fitness-storage-options` and :ref:`genome-storage-options`
         :type storage_options: dict
+
+        :param logging_options: options for logging passed to `logging.basicConfig <https://docs.python.org/3/library/logging.html#logging.basicConfig>`_ as ``kwargs``
+        :type logging_options: dict
 
         :Stop Conditions:
             * **n_generations** (*int*) -- the number of generations to run evolution over
@@ -106,6 +111,9 @@ class Evolver:
         if n_generations < 1:
             raise ValueError("Number of generations must be at least 1")
 
+        logging.basicConfig(**logging_options)
+        logger = logging.getLogger(__name__)
+
         evaluator = Evaluator(
             self.fitness_function, ascending=self.should_maximize_fitness
         )
@@ -128,10 +136,12 @@ class Evolver:
             try:
                 fitness_results = evaluator.evaluate_fitness(population)
 
+                best_fitness = fitness_results[-1][0]
+                logger.info(f"Generation: {generation_num}; Top Score: {best_fitness}")
+
                 storage_manager.update_storage(generation_num, fitness_results)
 
-                max_fitness = fitness_results[-1][0]
-                if should_stop(generation_num, max_fitness):
+                if should_stop(generation_num, best_fitness):
                     break
 
                 population = population_generator.generate_next_generation(
