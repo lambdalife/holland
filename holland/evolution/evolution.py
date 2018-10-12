@@ -1,3 +1,5 @@
+import math
+
 from .evaluation import Evaluator
 from .breeding import PopulationGenerator
 from ..storage import StorageManager
@@ -36,8 +38,8 @@ class Evolver:
         self,
         generation_params={},
         initial_population=None,
-        n_generations=100,
-        storage_options={}
+        stop_conditions={"n_generations": 100, "target_fitness": math.inf},
+        storage_options={},
     ):
         """
         The heart of Holland.
@@ -48,11 +50,15 @@ class Evolver:
         :param initial_population: an initial population
         :type initial_population: list
 
-        :param n_generations: the number of generations to run evolution over
-        :type n_generations: int
+        :param stop_conditions: conditions for stopping execution; will stop if *any* of the conditions is met; see Stop Conditions below
+        :type stop_conditions: dict
     
         :param storage_options: configuration options for storing fitness and genomes (should contain keys ``"fitness"`` and ``"genomes"``); see :ref:`fitness-storage-options` and :ref:`genome-storage-options`
         :type storage_options: dict
+
+        :Stop Conditions:
+            * **n_generations** (*int*) -- the number of generations to run evolution over
+            * **target_fitness** (*int*) -- the target fitness score, will stop once the fittest individual reaches this score
 
 
         :returns:
@@ -84,6 +90,12 @@ class Evolver:
         n_random_per_generation = generation_params.get("n_random", 0)
         n_elite_per_generation = generation_params.get("n_elite", 0)
         population_size = generation_params.get("population_size", 1000)
+        n_generations = stop_conditions.get("n_generations", math.inf)
+        target_fitness = stop_conditions.get("target_fitness", math.inf)
+        should_stop = (
+            lambda gen_num, max_fit: gen_num == n_generations - 1
+            or max_fit == target_fitness
+        )
 
         if n_random_per_generation < 0 or n_elite_per_generation < 0:
             raise ValueError(
@@ -99,7 +111,7 @@ class Evolver:
         )
         storage_manager = StorageManager(
             fitness_storage_options=storage_options.get("fitness", {}),
-            genome_storage_options=storage_options.get("genomes", {})
+            genome_storage_options=storage_options.get("genomes", {}),
         )
         population_generator = PopulationGenerator(
             self.genome_params,
@@ -111,16 +123,22 @@ class Evolver:
         if population is None:
             population = population_generator.generate_random_genomes(population_size)
 
-        for generation_num in range(n_generations):
+        generation_num = 0
+        while True:
             try:
                 fitness_results = evaluator.evaluate_fitness(population)
 
                 storage_manager.update_storage(generation_num, fitness_results)
 
-                if generation_num < n_generations - 1:
-                    population = population_generator.generate_next_generation(
-                        fitness_results
-                    )
+                max_fitness = fitness_results[-1][0]
+                if should_stop(generation_num, max_fitness):
+                    break
+
+                population = population_generator.generate_next_generation(
+                    fitness_results
+                )
+
+                generation_num += 1
             except:
                 storage_manager.react_to_interruption(generation_num, fitness_results)
                 raise
