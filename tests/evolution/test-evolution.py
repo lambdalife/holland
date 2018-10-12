@@ -1,3 +1,4 @@
+import logging
 import unittest
 from unittest.mock import patch, call
 
@@ -18,6 +19,7 @@ class EvolverEvolveTest(unittest.TestCase):
             "parents": {"weighting_function": lambda x: 1, "number": 2},
         }
         self.generation_params = {"population_size": 100, "n_elite": 5, "n_random": 2}
+        self.logging_options = {"level": logging.CRITICAL}
 
     def test_asserts_n_random_and_n_elites_per_generation_are_nonnegative(self):
         """evolve raises a ValueError if generation_params["n_random"] or generation_params["n_elite"] is negative"""
@@ -43,6 +45,38 @@ class EvolverEvolveTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             evolver.evolve(stop_conditions={"n_generations": 0})
 
+    @patch("logging.basicConfig")
+    @patch("holland.evolution.evolution.PopulationGenerator")
+    @patch("holland.evolution.evolution.Evaluator")
+    def test_configures_logging_correctly(
+        self, MockEvaluator, MockPopulationGenerator, mock_log_config
+    ):
+        """evolve passes the logging_options to logging.basicConfig as keyword arguments"""
+        logging_options = {"filename": "test.out", "level": logging.CRITICAL}
+        evolver = Evolver(
+            self.fitness_function, self.genome_params, self.selection_strategy
+        )
+
+        evolver.evolve(logging_options=logging_options)
+
+        mock_log_config.assert_called_with(**logging_options)
+
+    @patch("logging.getLogger")
+    @patch("holland.evolution.evolution.PopulationGenerator")
+    @patch("holland.evolution.evolution.Evaluator")
+    def test_creates_Logger_instance_correctly(
+        self, MockEvaluator, MockPopulationGenerator, mock_get_logger
+    ):
+        """evolve gets a logger by calling logging.getLogger with name as filename, e.g. holland.evolution.evolution"""
+        evolver = Evolver(
+            self.fitness_function, self.genome_params, self.selection_strategy
+        )
+
+        evolver.evolve(logging_options=self.logging_options)
+
+        expected_name = "holland.evolution.evolution"
+        mock_get_logger.assert_called_with(expected_name)
+
     @patch("holland.evolution.evolution.PopulationGenerator")
     @patch("holland.evolution.evolution.Evaluator")
     def test_creates_PopulationGenerator_instance_correctly(
@@ -53,7 +87,10 @@ class EvolverEvolveTest(unittest.TestCase):
             self.fitness_function, self.genome_params, self.selection_strategy
         )
 
-        evolver.evolve(generation_params=self.generation_params)
+        evolver.evolve(
+            generation_params=self.generation_params,
+            logging_options=self.logging_options,
+        )
 
         MockPopulationGenerator.assert_called_with(
             self.genome_params,
@@ -73,7 +110,10 @@ class EvolverEvolveTest(unittest.TestCase):
         )
         population_size = 100
 
-        evolver.evolve(generation_params={"population_size": population_size})
+        evolver.evolve(
+            generation_params={"population_size": population_size},
+            logging_options=self.logging_options,
+        )
 
         mock_generate_random.assert_called_with(population_size)
 
@@ -93,6 +133,7 @@ class EvolverEvolveTest(unittest.TestCase):
         evolver.evolve(
             generation_params={"population_size": population_size},
             initial_population=initial_population,
+            logging_options=self.logging_options,
         )
 
         mock_generate_random.assert_not_called()
@@ -111,7 +152,7 @@ class EvolverEvolveTest(unittest.TestCase):
             should_maximize_fitness=True,
         )
 
-        evolver.evolve()
+        evolver.evolve(logging_options=self.logging_options)
 
         MockEvaluator.assert_called_with(self.fitness_function, ascending=True)
 
@@ -129,7 +170,7 @@ class EvolverEvolveTest(unittest.TestCase):
             should_maximize_fitness=False,
         )
 
-        evolver.evolve()
+        evolver.evolve(logging_options=self.logging_options)
 
         MockEvaluator.assert_called_with(self.fitness_function, ascending=False)
 
@@ -167,13 +208,14 @@ class EvolverEvolveTest(unittest.TestCase):
             initial_population=initial_population,
             stop_conditions={"n_generations": n_generations},
             generation_params=generation_params,
+            logging_options=self.logging_options,
         )
 
         expected_evaluate_fitness_calls = [call(pop) for pop in all_populations]
         expected_generate_next_gen_calls = [
             call(res)
             for res in results[:-1]
-            # no population is generated for the last go of evaluating fitness
+            # execution stops before generating a new population on the last gen
         ]
 
         mock_evaluate_fitness.assert_has_calls(expected_evaluate_fitness_calls)
@@ -184,6 +226,36 @@ class EvolverEvolveTest(unittest.TestCase):
         self.assertEqual(
             mock_generate_next_gen.call_count, len(expected_generate_next_gen_calls)
         )
+
+    @patch.object(PopulationGenerator, "generate_random_genomes")
+    @patch.object(logging.Logger, "info")
+    @patch.object(Evaluator, "evaluate_fitness")
+    @patch.object(PopulationGenerator, "generate_next_generation")
+    def test_logs_generation_num_and_max_fitness_on_each_generation(
+        self,
+        mock_generate_next_gen,
+        mock_evaluate_fitness,
+        mock_info_log,
+        mock_generate_random,
+    ):
+        """evolve logs the generation number and best fitness score at info level in each generation"""
+        n_generations = 17
+        scores = [[(i * 10, "a")] for i in range(n_generations + 10)]
+        mock_evaluate_fitness.side_effect = scores
+        evolver = Evolver(
+            self.fitness_function, self.genome_params, self.selection_strategy
+        )
+
+        evolver.evolve(
+            stop_conditions={"n_generations": n_generations},
+            logging_options=self.logging_options,
+        )
+
+        expected_calls = [
+            call(f"Generation: {i}; Top Score: {scores[i][-1][0]}")
+            for i in range(n_generations)
+        ]
+        mock_info_log.assert_has_calls(expected_calls)
 
     @patch.object(PopulationGenerator, "generate_random_genomes")
     @patch.object(Evaluator, "evaluate_fitness")
@@ -218,7 +290,10 @@ class EvolverEvolveTest(unittest.TestCase):
             self.fitness_function, self.genome_params, self.selection_strategy
         )
 
-        evolver.evolve(stop_conditions={"target_fitness": target_fitness})
+        evolver.evolve(
+            stop_conditions={"target_fitness": target_fitness},
+            logging_options=self.logging_options,
+        )
 
         self.assertEqual(mock_evaluate_fitness.call_count, target_generations)
 
@@ -244,7 +319,8 @@ class EvolverEvolveTest(unittest.TestCase):
             storage_options={
                 "fitness": fitness_storage_options,
                 "genomes": genome_storage_options,
-            }
+            },
+            logging_options=self.logging_options,
         )
 
         MockStorageManager.assert_called_with(
@@ -273,7 +349,10 @@ class EvolverEvolveTest(unittest.TestCase):
             self.fitness_function, self.genome_params, self.selection_strategy
         )
 
-        evolver.evolve(stop_conditions={"n_generations": n_generations})
+        evolver.evolve(
+            stop_conditions={"n_generations": n_generations},
+            logging_options=self.logging_options,
+        )
 
         expected_calls = [call(i, fitness_results[i]) for i in range(n_generations)]
         mock_update_storage.assert_has_calls(expected_calls)
@@ -301,7 +380,10 @@ class EvolverEvolveTest(unittest.TestCase):
         )
 
         with self.assertRaises(Exception):
-            evolver.evolve(stop_conditions={"n_generations": n_generations})
+            evolver.evolve(
+                stop_conditions={"n_generations": n_generations},
+                logging_options=self.logging_options,
+            )
 
         mock_react.assert_called_once_with(
             interrupt_generation, mock_evaluate_fitness.return_value
@@ -328,6 +410,7 @@ class EvolverEvolveTest(unittest.TestCase):
             _, fitness_history = evolver.evolve(
                 stop_conditions={"n_generations": n_generations},
                 storage_options=storage_options,
+                logging_options=self.logging_options,
             )
 
             self.assertListEqual(
@@ -359,6 +442,7 @@ class EvolverEvolveTest(unittest.TestCase):
         final_results = evolver.evolve(
             initial_population=initial_population,
             stop_conditions={"n_generations": n_generations},
+            logging_options=self.logging_options,
         )
 
         expected_final_results = results[-1]
