@@ -196,6 +196,88 @@ class SelectFromTest(unittest.TestCase):
         self.assertListEqual(sorted(selection_pool), sorted(expected_selected_values))
 
 
+class SelectRandomTest(unittest.TestCase):
+    def test_asserts_choices_and_probabilities_match(self):
+        """select_random throws a ValueError if probabilities is given but len(probabilites) != len(choices)"""
+        choices = [1,2,3]
+        probabilities = [.5, .5]
+
+        with self.assertRaises(ValueError):
+            select_random(choices, probabilities=probabilities)
+
+    def test_asserts_n_leq_len_choices_if_should_not_replace(self):
+        """select_random throws a ValueError if should_replace is False but n > len(choices)"""
+        choices = [1,2,3]
+        n = len(choices) + 1
+
+        with self.assertRaises(ValueError):
+            select_random(choices, n=n, should_replace=False)
+
+    def test_asserts_probabilities_are_nonnegative(self):
+        """select_random throws a ValueError if any element of probabilities is negative"""
+        choices = [1,2,3]
+        probabilities = [.75, .75, -.5]
+
+        with self.assertRaises(ValueError):
+            select_random(choices, probabilities=probabilities)
+
+    def test_asserts_probabilities_are_normalized(self):
+        """select_random throws a ValueError if the sum of the given probabilities is not 1"""
+        choices = [1,2,3]
+        
+        # less than 1
+        with self.assertRaises(ValueError):
+            probabilities = [.1, .1, .1]
+            select_random(choices, probabilities=probabilities)
+
+        # greater than 1
+        with self.assertRaises(ValueError):
+            probabilities = [1,1,1]
+            select_random(choices, probabilities=probabilities)
+
+    def test_returns_a_list_of_length_n(self):
+        """select_random returns a list of size n"""
+        choices = list(range(10))
+
+        for n in range(10):
+            selected = select_random(choices, n=n)
+            self.assertEqual(len(selected), n)
+
+    def test_no_duplicates_if_should_not_replace(self):
+        """select_random returns a list that contains no duplicates if should_replace is False"""
+        choices = list(range(10))
+        n = 5
+
+        for _ in range(100): # 100 times because it could randomly pass
+            selected = select_random(choices, n=n)
+            self.assertEqual(len(selected), len(set(selected)))
+
+    def test_selects_elements_according_to_respective_probabilities(self):
+        """select_random selects elements according to the given probabilities"""
+        choices = list(range(10))
+        n = 1
+        probabilities = [1] + ([0] * (len(choices) - 1))
+
+        selected = select_random(choices, probabilities=probabilities, n=n)
+        
+        expected_selected = [choices[0]]
+        self.assertListEqual(selected, expected_selected)
+
+    def test_handles_nested_structures(self):
+        """select_random does not throw an error if the elements of choices are lists, dicts, or tuples"""
+        choices = [[1], [2], [3]]
+        selected = select_random(choices)
+        self.assertTrue(isinstance(selected[0], list))
+
+        choices = [{'a': 1}, {'b': 2}, {'c': 3}]
+        selected = select_random(choices)
+        self.assertTrue(isinstance(selected[0], dict))
+
+        choices = [(1,), (2,), (3,)]
+        selected = select_random(choices)
+        self.assertTrue(isinstance(selected[0], tuple))
+
+
 class IsNumericTypeTest(unittest.TestCase):
     def test_returns_False_if_is_not_numeric_type(self):
         """is_numeric_type returns False if the type is not int or float"""
