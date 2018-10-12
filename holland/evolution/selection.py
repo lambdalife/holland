@@ -1,6 +1,6 @@
 import math
-import numpy as np
-from ..utils import select_from
+
+from ..utils import select_from, select_random
 
 
 class Selector:
@@ -66,6 +66,10 @@ class Selector:
 
 
         :returns: a list of genomes (of length ``self.n_parents``)
+
+
+        Dependencies:
+            * :func:`~holland.utils.utils.select_random`
         """
         fitness_scores, genomes = zip(*fitness_results)
 
@@ -82,6 +86,4 @@ class Selector:
             weighted_score / weighted_total for weighted_score in weighted_scores
         ]
 
-        return np.random.choice(
-            genomes, p=selection_probabilities, size=self.n_parents, replace=False
-        )
+        return select_random(genomes, probabilities=selection_probabilities, n=self.n_parents)
