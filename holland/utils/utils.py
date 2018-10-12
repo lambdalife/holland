@@ -3,7 +3,7 @@ import math
 import numpy as np
 
 
-def bound_value(value, minimum=-np.inf, maximum=np.inf, to_int=False):
+def bound_value(value, minimum=-math.inf, maximum=math.inf, to_int=False):
     """
     Bounds a value between a minimum and maximum
 
@@ -23,11 +23,11 @@ def bound_value(value, minimum=-np.inf, maximum=np.inf, to_int=False):
     :returns: the bounded value
     """
     if minimum is None:  # in case None is passed in
-        minimum = -np.inf
+        minimum = -math.inf
     if maximum is None:
-        maximum = np.inf
+        maximum = math.inf
     if to_int:
-        if isinstance(minimum, float) and minimum != -np.inf:
+        if isinstance(minimum, float) and minimum != -math.inf:
             return int(min(max(value, math.ceil(minimum)), maximum))
         return int(min(max(value, minimum), maximum))
     return min(max(value, minimum), maximum)
@@ -70,11 +70,8 @@ def select_from(values, top=0, mid=0, bottom=0, random=0):
     selected += values[middle_start_index : middle_start_index + mid]
     selected += values[:bottom]
 
-    # use ids because np.random.choice argument must be 1 dimensional
-    all_ids = list(range(len(values)))
-    remaining_ids = all_ids[bottom:middle_start_index] + all_ids[middle_start_index + mid : -top]
-    random_ids = np.random.choice(remaining_ids, replace=False, size=random)
-    selected += [values[i] for i in random_ids]
+    remaining_values = values[bottom:middle_start_index] + values[middle_start_index + mid : -top]
+    selected += select_random(remaining_values, n=random)
 
     return selected
 
@@ -112,13 +109,17 @@ def select_random(choices, probabilities=None, n=1, should_replace=False):
         if sum(probabilities) != 1:
             raise ValueError("Probabilities must sum to 1")
     if not should_replace and n > len(choices):
-        raise ValueError("Number of elements to select cannot exceed number of choices without replacement")
+        raise ValueError(
+            "Number of elements to select cannot exceed number of choices without replacement"
+        )
 
     # temporary:
     if type(choices[0]) in [list, dict, tuple]:
         index_choices = range(len(choices))
-        selected_indices = list(np.random.choice(index_choices, p=probabilities, size=n, replace=should_replace))
-        return [x for i,x in enumerate(choices) if i in selected_indices]
+        selected_indices = list(
+            np.random.choice(index_choices, p=probabilities, size=n, replace=should_replace)
+        )
+        return [x for i, x in enumerate(choices) if i in selected_indices]
 
     return list(np.random.choice(choices, p=probabilities, size=n, replace=should_replace))
 

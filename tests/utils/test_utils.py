@@ -1,4 +1,4 @@
-import numpy as np
+import math
 import random
 import unittest
 from unittest.mock import patch
@@ -38,12 +38,12 @@ class BoundValueTest(unittest.TestCase):
     @patch("holland.utils.utils.max")
     @patch("holland.utils.utils.min")
     def test_uses_inf_and_negative_inf_as_defaults(self, mock_min, mock_max):
-        """bound_value uses -np.inf as default for minimum and np.inf as default for maximum"""
+        """bound_value uses -inf as default for minimum and inf as default for maximum"""
         value = 5
 
         # No min
         bound_value(value, maximum=self.maximum)
-        mock_max.asset_called_with(value, -np.inf)
+        mock_max.asset_called_with(value, -math.inf)
         mock_min.assert_called_with(mock_max.return_value, self.maximum)
 
         mock_max.reset_mock()
@@ -52,25 +52,25 @@ class BoundValueTest(unittest.TestCase):
         # No max
         bound_value(value, minimum=self.minimum)
         mock_max.assert_called_with(value, self.minimum)
-        mock_min.assert_called_with(mock_max.return_value, np.inf)
+        mock_min.assert_called_with(mock_max.return_value, math.inf)
 
         mock_max.reset_mock()
         mock_min.reset_mock()
 
         # Neither
         bound_value(value)
-        mock_max.assert_called_with(value, -np.inf)
-        mock_min.assert_called_with(mock_max.return_value, np.inf)
+        mock_max.assert_called_with(value, -math.inf)
+        mock_min.assert_called_with(mock_max.return_value, math.inf)
 
     @patch("holland.utils.utils.max")
     @patch("holland.utils.utils.min")
     def test_replaces_None_with_inf_or_negative_inf(self, mock_min, mock_max):
-        """bound_value repalces None with -np.inf for minimum and np.inf for maximum"""
+        """bound_value repalces None with -inf for minimum and inf for maximum"""
         value = 5
 
         # Min is None
         bound_value(value, minimum=None, maximum=self.maximum)
-        mock_max.asset_called_with(value, -np.inf)
+        mock_max.asset_called_with(value, -math.inf)
         mock_min.assert_called_with(mock_max.return_value, self.maximum)
 
         mock_max.reset_mock()
@@ -79,15 +79,15 @@ class BoundValueTest(unittest.TestCase):
         # Max is None
         bound_value(value, minimum=self.minimum, maximum=None)
         mock_max.assert_called_with(value, self.minimum)
-        mock_min.assert_called_with(mock_max.return_value, np.inf)
+        mock_min.assert_called_with(mock_max.return_value, math.inf)
 
         mock_max.reset_mock()
         mock_min.reset_mock()
 
         # Both are None
         bound_value(value, minimum=None, maximum=None)
-        mock_max.assert_called_with(value, -np.inf)
-        mock_min.assert_called_with(mock_max.return_value, np.inf)
+        mock_max.assert_called_with(value, -math.inf)
+        mock_min.assert_called_with(mock_max.return_value, math.inf)
 
     def test_returns_int_if_to_int_is_True(self):
         """bound_value returns an int if to_int is True"""
@@ -171,27 +171,25 @@ class SelectFromTest(unittest.TestCase):
         expected_selected_values = [100, 90, 85, 50, 45, 44, 10, 9, 8]
         self.assertListEqual(sorted(selection_pool), sorted(expected_selected_values))
 
-    @patch("numpy.random.choice")
-    def test_does_not_randomly_select_values_that_were_already_selected(self, mock_choice):
+    @patch("holland.utils.utils.select_random")
+    def test_does_not_randomly_select_values_that_were_already_selected(self, mock_select_random):
         """select_from selects values randomly but does not select duplicates"""
         select_from(self.values, top=1, mid=1, bottom=1)
 
         deterministic_selection_pool = [100, 44, 7]
 
-        used_random_id_choices = mock_choice.call_args[0][0]
-        expected_random_id_choices = [
-            i for i in range(len(self.values)) if self.values[i] not in deterministic_selection_pool
+        used_random_choices = mock_select_random.call_args[0][0]
+        expected_random_choices = [
+            value for value in self.values if value not in deterministic_selection_pool
         ]
-        self.assertListEqual(used_random_id_choices, expected_random_id_choices)
+        self.assertListEqual(used_random_choices, expected_random_choices)
 
-    @patch("numpy.random.choice", return_value=np.array([2, 7]))
-    def test_returns_selected_pool(self, mock_choice):
+    @patch("holland.utils.utils.select_random", return_value=[1000, 2000])
+    def test_returns_selected_pool(self, mock_select_random):
         """select_from returns the values that were selected as expected"""
         selection_pool = select_from(self.values, top=2, mid=2, bottom=2, random=2)
 
-        expected_selected_values = [100, 90, 45, 44, 8, 7] + [
-            self.values[i] for i in mock_choice.return_value
-        ]
+        expected_selected_values = [100, 90, 45, 44, 8, 7] + mock_select_random.return_value
 
         self.assertListEqual(sorted(selection_pool), sorted(expected_selected_values))
 
@@ -199,15 +197,15 @@ class SelectFromTest(unittest.TestCase):
 class SelectRandomTest(unittest.TestCase):
     def test_asserts_choices_and_probabilities_match(self):
         """select_random throws a ValueError if probabilities is given but len(probabilites) != len(choices)"""
-        choices = [1,2,3]
-        probabilities = [.5, .5]
+        choices = [1, 2, 3]
+        probabilities = [0.5, 0.5]
 
         with self.assertRaises(ValueError):
             select_random(choices, probabilities=probabilities)
 
     def test_asserts_n_leq_len_choices_if_should_not_replace(self):
         """select_random throws a ValueError if should_replace is False but n > len(choices)"""
-        choices = [1,2,3]
+        choices = [1, 2, 3]
         n = len(choices) + 1
 
         with self.assertRaises(ValueError):
@@ -215,24 +213,24 @@ class SelectRandomTest(unittest.TestCase):
 
     def test_asserts_probabilities_are_nonnegative(self):
         """select_random throws a ValueError if any element of probabilities is negative"""
-        choices = [1,2,3]
-        probabilities = [.75, .75, -.5]
+        choices = [1, 2, 3]
+        probabilities = [0.75, 0.75, -0.5]
 
         with self.assertRaises(ValueError):
             select_random(choices, probabilities=probabilities)
 
     def test_asserts_probabilities_are_normalized(self):
         """select_random throws a ValueError if the sum of the given probabilities is not 1"""
-        choices = [1,2,3]
-        
+        choices = [1, 2, 3]
+
         # less than 1
         with self.assertRaises(ValueError):
-            probabilities = [.1, .1, .1]
+            probabilities = [0.1, 0.1, 0.1]
             select_random(choices, probabilities=probabilities)
 
         # greater than 1
         with self.assertRaises(ValueError):
-            probabilities = [1,1,1]
+            probabilities = [1, 1, 1]
             select_random(choices, probabilities=probabilities)
 
     def test_returns_a_list_of_length_n(self):
@@ -248,7 +246,7 @@ class SelectRandomTest(unittest.TestCase):
         choices = list(range(10))
         n = 5
 
-        for _ in range(100): # 100 times because it could randomly pass
+        for _ in range(100):  # 100 times because it could randomly pass
             selected = select_random(choices, n=n)
             self.assertEqual(len(selected), len(set(selected)))
 
@@ -259,7 +257,7 @@ class SelectRandomTest(unittest.TestCase):
         probabilities = [1] + ([0] * (len(choices) - 1))
 
         selected = select_random(choices, probabilities=probabilities, n=n)
-        
+
         expected_selected = [choices[0]]
         self.assertListEqual(selected, expected_selected)
 
@@ -269,7 +267,7 @@ class SelectRandomTest(unittest.TestCase):
         selected = select_random(choices)
         self.assertTrue(isinstance(selected[0], list))
 
-        choices = [{'a': 1}, {'b': 2}, {'c': 3}]
+        choices = [{"a": 1}, {"b": 2}, {"c": 3}]
         selected = select_random(choices)
         self.assertTrue(isinstance(selected[0], dict))
 
