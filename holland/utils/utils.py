@@ -1,9 +1,9 @@
 import re
 import math
-import numpy as np
+from random import random
 
 
-def bound_value(value, minimum=-np.inf, maximum=np.inf, to_int=False):
+def bound_value(value, minimum=-math.inf, maximum=math.inf, to_int=False):
     """
     Bounds a value between a minimum and maximum
 
@@ -23,11 +23,11 @@ def bound_value(value, minimum=-np.inf, maximum=np.inf, to_int=False):
     :returns: the bounded value
     """
     if minimum is None:  # in case None is passed in
-        minimum = -np.inf
+        minimum = -math.inf
     if maximum is None:
-        maximum = np.inf
+        maximum = math.inf
     if to_int:
-        if isinstance(minimum, float) and minimum != -np.inf:
+        if isinstance(minimum, float) and minimum != -math.inf:
             return int(min(max(value, math.ceil(minimum)), maximum))
         return int(min(max(value, minimum), maximum))
     return min(max(value, minimum), maximum)
@@ -70,13 +70,134 @@ def select_from(values, top=0, mid=0, bottom=0, random=0):
     selected += values[middle_start_index : middle_start_index + mid]
     selected += values[:bottom]
 
-    # use ids because np.random.choice argument must be 1 dimensional
-    all_ids = list(range(len(values)))
-    remaining_ids = all_ids[bottom:middle_start_index] + all_ids[middle_start_index + mid : -top]
-    random_ids = np.random.choice(remaining_ids, replace=False, size=random)
-    selected += [values[i] for i in random_ids]
+    remaining_values = (
+        values[bottom:middle_start_index] + values[middle_start_index + mid : -top]
+    )
+    selected += select_random(remaining_values, n=random)
 
     return selected
+
+
+def select_random(choices, probabilities=None, n=1, should_replace=False):
+    """
+    Selects random elements from a list
+
+    :param choices: list of elements to select from
+    :type choices: list
+
+    :param probabilities: list of probabilities for selecting each element in ``choices``; if not specified, uniform probability is used
+    :type probabilities: list
+
+    :param n: number of elements to select from ``choices``
+    :type n: int
+
+    :param should_replace: specifies if selection should be done with replacement or not
+    :type should_replace: bool
+
+
+    :returns: a list of length ``n`` of elements selected randomly from ``choices``
+
+    
+    :raises ValueError: if ``probabilities`` is given but ``len(probabilities) != len(choices)``
+    :raises ValueError: if any element of ``probabilities`` is negative
+    :raises ValueError: if ``sum(probabilities) > 1``
+    :raises ValueError: if ``should_replace`` is ``False`` but ``n > len(choices)``
+    """
+    num_choices = len(choices)
+
+    if not should_replace and n > num_choices:
+        raise ValueError(
+            "Number of elements to select cannot exceed number of choices without replacement"
+        )
+
+    # pep 8 recommended way to check empty list
+    if not probabilities:
+        if should_replace:
+            # uniform random with replacement
+            return [choices[int(random() * num_choices)] for _ in range(n)]
+        else:
+            # uniform random with no replacement
+            result = [None] * n
+            selected = set()
+
+            for i in range(n):
+                j = int(random() * num_choices)
+                while j in selected:
+                    j = int(random() * num_choices)
+                selected.add(j)
+                result[i] = choices[j]
+            return result
+    else:
+
+        if len(probabilities) != len(choices):
+            raise ValueError("Number of probabilities must match number of choices")
+        if any(p < 0 for p in probabilities):
+            raise ValueError("Probabilities cannot be negative")
+        if sum(probabilities) != 1:
+            raise ValueError("Probabilities must sum to 1")
+
+        if should_replace:
+            # weighted random with replacement
+            cumulative_weights = _accumulate(probabilities)
+            total = cumulative_weights[-1]
+
+            if n > 4:
+                # it's worth building this dictionary
+                bisect_mapping = _get_bisect_mapping(cumulative_weights)
+                return [
+                    choices[bisect_mapping[int(random() * total)]] for _ in range(n)
+                ]
+            else:
+                return [
+                    choices[_bisect(cumulative_weights, int(random() * total))]
+                    for _ in range(n)
+                ]
+        else:
+            # weighted random with no replacement
+            current_probs = probabilities[:]
+            cumulative_weights = None
+            total = None
+            indices = [None] * n
+            chosen_index = None
+            for i in range(n):
+                cumulative_weights = _accumulate(current_probs)
+                total = cumulative_weights[-1]
+                chosen_index = _bisect(cumulative_weights, random() * total)
+                indices[i] = chosen_index
+                current_probs = (
+                    current_probs[:chosen_index] + current_probs[chosen_index + 1 :]
+                )
+
+            return [choices[j] for j in indices]
+
+
+# just like itertools.accumulate(arr) but without having to import itertools...
+def _accumulate(prob_dist):
+    s = 0
+    cumulative = [None] * len(prob_dist)
+    for i in range(len(prob_dist)):
+        s += prob_dist[i]
+        cumulative[i] = s
+    return cumulative
+
+
+# used for bisect
+# defines what bisect would return for bisect(arr, int(x))
+# useful when bisect would normally be called repeatedly
+def _get_bisect_mapping(arr):
+    mapping = {}
+    for i, a in enumerate(arr):
+        mapping[a] = i + 1
+    return mapping
+
+
+# acts like bisect
+# returns first index i to insert x into sorted array arr
+# return -1 if no index exists
+def _bisect(arr, x):
+    for i in range(len(arr)):
+        if arr[i] > x:
+            return i
 
 
 def is_numeric_type(gene_params):

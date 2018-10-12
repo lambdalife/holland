@@ -1,5 +1,6 @@
 import random
-import numpy as np
+
+from ..utils.utils import select_random
 
 
 def get_uniform_crossover_function():
@@ -36,13 +37,16 @@ def get_point_crossover_function(n_crossover_points=1):
 
 
     :raises ValueError: if ``n_crossover_points`` is negative
+
+    Dependencies:
+        * :func:`~holland.utils.utils.select_random`
     """
     if n_crossover_points < 0:
         raise ValueError("Number of crossover points cannot be negative")
 
     def point_crossover(parent_genes):
         crossover_points = sorted(
-            np.random.choice(range(1, len(parent_genes[0])), size=n_crossover_points)
+            select_random(range(1, len(parent_genes[0])), n=n_crossover_points)
         )
         crossover_points.insert(0, 0)
         crossover_points.append(len(parent_genes[0]))
