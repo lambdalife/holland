@@ -3,10 +3,11 @@ python:
   - "3.6"
 install:
   - pip install coverage
+  - pip install codecov
 script:
   - coverage run -m unittest
 after_success:
-  - bash < (curl -s https://codecov.io/bash)
+  - codecov
 branches:
   only:
     - master
