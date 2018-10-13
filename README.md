@@ -11,7 +11,6 @@
 	<a href='https://codecov.io/gh/lambdalife/holland'><img src='https://codecov.io/gh/lambdalife/holland/branch/master/graph/badge.svg' alt='Coverage'></img></a>
     <a href='https://hollandpy.readthedocs.io/en/latest'><img src='https://readthedocs.org/projects/hollandpy/badge/?version=latest' alt='Documentation Status' /></a>
     <a href="https://github.com/henrywoody/holland/blob/master/LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-purple.svg"></a>
-    <a href="https://github.com/ambv/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
 </div>
 
 
@@ -22,7 +21,7 @@ Holland is a simple, flexible package for implementing the Genetic Algorithm in 
 
 ### Installing
 
-Holland is available via on the Python Package Index (PyPI) and can be installed with:
+Holland is available via the [Python Package Index (PyPI)](https://pypi.org/project/holland/) and can be installed with:
 
 ```shell
 pip install holland
@@ -81,47 +80,47 @@ final_population = evolver.evolve(stop_conditions={"target_fitness": 0})
 
 With sample run:
 
-> Generation: 0; Top Score: 201:     N~flx.JGcu-*
+> Generation: 0; Top Score: 201:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;N~flx.JGcu-*
 >
-> Generation: 1; Top Score: 98:       Xljlw);mj]f 
+> Generation: 1; Top Score: 98:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Xljlw);mj]f 
 >
-> Generation: 2; Top Score: 64:       =c}kk SmsYf 
+> Generation: 2; Top Score: 64:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=c}kk SmsYf 
 >
-> Generation: 3; Top Score: 37:       Kcjlk$Vms]f 
+> Generation: 3; Top Score: 37:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Kcjlk$Vms]f 
 >
-> Generation: 4; Top Score: 24:       Cdjkn Smshf 
+> Generation: 4; Top Score: 24:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Cdjkn Smshf 
 >
-> Generation: 5; Top Score: 16:       Idjln Vmshf 
+> Generation: 5; Top Score: 16:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Idjln Vmshf 
 >
-> Generation: 6; Top Score: 14:       Idjln Voshf 
+> Generation: 6; Top Score: 14:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Idjln Voshf 
 >
-> Generation: 7; Top Score: 11:       Hdjln Vmslf 
+> Generation: 7; Top Score: 11:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hdjln Vmslf 
 >
-> Generation: 8; Top Score: 9:         Hdjln Voslf 
+> Generation: 8; Top Score: 9:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hdjln Voslf 
 >
-> Generation: 9; Top Score: 8:         Hdjln Vosle 
+> Generation: 9; Top Score: 8:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hdjln Vosle 
 >
-> Generation: 10; Top Score: 7:       Hdmln Vosle 
+> Generation: 10; Top Score: 7:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hdmln Vosle 
 >
-> Generation: 11; Top Score: 6:       Hdlln Vosle 
+> Generation: 11; Top Score: 6:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hdlln Vosle 
 >
-> Generation: 12; Top Score: 5:       Hdllo Vosle 
+> Generation: 12; Top Score: 5:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hdllo Vosle 
 >
-> Generation: 13; Top Score: 4:       Hdllo Vosle!
+> Generation: 13; Top Score: 4:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hdllo Vosle!
 >
-> Generation: 14; Top Score: 3:       Hello Vosle!
+> Generation: 14; Top Score: 3:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hello Vosle!
 >
-> Generation: 15; Top Score: 2:       Hello Wosle!
+> Generation: 15; Top Score: 2:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hello Wosle!
 >
-> Generation: 16; Top Score: 2:       Hello Wosle!
+> Generation: 16; Top Score: 2:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hello Wosle!
 >
-> Generation: 17; Top Score: 1:       Hello Worle!
+> Generation: 17; Top Score: 1:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hello Worle!
 >
-> Generation: 18; Top Score: 1:       Hello Worle!
+> Generation: 18; Top Score: 1:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hello Worle!
 >
-> Generation: 19; Top Score: 1:       Hello Worle!
+> Generation: 19; Top Score: 1:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hello Worle!
 >
-> Generation: 20; Top Score: 0:       Hello World!
+> Generation: 20; Top Score: 0:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hello World!
 
 Best Genome:
 
