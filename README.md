@@ -22,6 +22,7 @@ Holland is a simple, flexible package for implementing the Genetic Algorithm in 
 
 ### Installing
 
+
 Holland is available via the [Python Package Index (PyPI)](https://pypi.org/project/holland/) and can be installed with:
 
 ```shell
