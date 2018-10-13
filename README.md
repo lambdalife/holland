@@ -15,7 +15,6 @@
 
 
 
-
 ### Description
 
 Holland is a simple, flexible package for implementing the Genetic Algorithm in Python. The program is designed to act on an arbitrary evaluation function with arbitrary encoding of individuals within a population, both of which are provided by the user.
