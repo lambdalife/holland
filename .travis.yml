@@ -3,6 +3,8 @@ python:
   - "3.6"
 script:
   - python -m unittest
+after_success:
+  - bash < (curl -s https://codecov.io/bash)
 branches:
   only:
     - master
