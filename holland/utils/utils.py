@@ -1,6 +1,6 @@
 import re
 import math
-from random import random
+import random
 
 
 def bound_value(value, minimum=-math.inf, maximum=math.inf, to_int=False):
@@ -70,9 +70,7 @@ def select_from(values, top=0, mid=0, bottom=0, random=0):
     selected += values[middle_start_index : middle_start_index + mid]
     selected += values[:bottom]
 
-    remaining_values = (
-        values[bottom:middle_start_index] + values[middle_start_index + mid : -top]
-    )
+    remaining_values = values[bottom:middle_start_index] + values[middle_start_index + mid : -top]
     selected += select_random(remaining_values, n=random)
 
     return selected
@@ -110,30 +108,28 @@ def select_random(choices, probabilities=None, n=1, should_replace=False):
             "Number of elements to select cannot exceed number of choices without replacement"
         )
 
-    # pep 8 recommended way to check empty list
     if not probabilities:
         if should_replace:
             # uniform random with replacement
-            return [choices[int(random() * num_choices)] for _ in range(n)]
+            return [choices[int(random.random() * num_choices)] for _ in range(n)]
         else:
             # uniform random with no replacement
             result = [None] * n
             selected = set()
 
             for i in range(n):
-                j = int(random() * num_choices)
+                j = int(random.random() * num_choices)
                 while j in selected:
-                    j = int(random() * num_choices)
+                    j = int(random.random() * num_choices)
                 selected.add(j)
                 result[i] = choices[j]
             return result
     else:
-
-        if len(probabilities) != len(choices):
+        if len(probabilities) != num_choices:
             raise ValueError("Number of probabilities must match number of choices")
         if any(p < 0 for p in probabilities):
             raise ValueError("Probabilities cannot be negative")
-        if sum(probabilities) != 1:
+        if round(sum(probabilities), 15) != 1:
             raise ValueError("Probabilities must sum to 1")
 
         if should_replace:
@@ -144,12 +140,10 @@ def select_random(choices, probabilities=None, n=1, should_replace=False):
             if n > 4:
                 # it's worth building this dictionary
                 bisect_mapping = _get_bisect_mapping(cumulative_weights)
-                return [
-                    choices[bisect_mapping[int(random() * total)]] for _ in range(n)
-                ]
+                return [choices[bisect_mapping[int(random.random() * total)]] for _ in range(n)]
             else:
                 return [
-                    choices[_bisect(cumulative_weights, int(random() * total))]
+                    choices[_bisect(cumulative_weights, int(random.random() * total))]
                     for _ in range(n)
                 ]
         else:
@@ -162,11 +156,9 @@ def select_random(choices, probabilities=None, n=1, should_replace=False):
             for i in range(n):
                 cumulative_weights = _accumulate(current_probs)
                 total = cumulative_weights[-1]
-                chosen_index = _bisect(cumulative_weights, random() * total)
+                chosen_index = _bisect(cumulative_weights, random.random() * total)
                 indices[i] = chosen_index
-                current_probs = (
-                    current_probs[:chosen_index] + current_probs[chosen_index + 1 :]
-                )
+                current_probs = current_probs[:chosen_index] + current_probs[chosen_index + 1 :]
 
             return [choices[j] for j in indices]
 
