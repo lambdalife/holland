@@ -3,21 +3,34 @@
 
 > Computer programs that "evolve" in ways that resemble natural selection can solve complex problems even their creators do not fully understand
 
+
+
 <div align='center'>
-    <a href="https://github.com/henrywoody/holland/blob/master/LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg"></a>
+    <a href='https://pypi.org/project/holland/'><img src='https://img.shields.io/pypi/v/holland.svg' alt='PyPI'></img></a>
+    <a href='https://travis-ci.com/lambdalife/holland'><img src='https://travis-ci.com/lambdalife/holland.svg?branch=master' alt='Build'></img></a>
+	<a href='https://codecov.io/gh/lambdalife/holland'><img src='https://codecov.io/gh/lambdalife/holland/branch/master/graph/badge.svg' alt='Coverage'></img></a>
+    <a href='https://hollandpy.readthedocs.io/en/latest'><img src='https://readthedocs.org/projects/hollandpy/badge/?version=latest' alt='Documentation Status' /></a>
+    <a href="https://github.com/henrywoody/holland/blob/master/LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-purple.svg"></a>
     <a href="https://github.com/ambv/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
 </div>
 
+
+
 ### Description
 
-This is a package for implementing the Genetic Algorithm in Python. The program is designed to act on an arbitrary evaluation function with arbitrary encoding of individuals within a population, both of which are provided by the user.
+Holland is a simple, flexible package for implementing the Genetic Algorithm in Python. The program is designed to act on an arbitrary evaluation function with arbitrary encoding of individuals within a population, both of which are provided by the user.
 
-Holland handles the reproduction step of the Genetic Algorithm and can be configured to work in a variety of ways.
+### Installing
 
-Holland also manages saving genomes and fitness statistics for individuals and populations.
+Holland is available via on the Python Package Index (PyPI) and can be installed with:
+
+```shell
+pip install holland
+```
 
 ### Usage
-Full documentation on [ReadTheDocs](hollandpy.readthedocs.io).
+
+[Full Documentation](https://hollandpy.readthedocs.io/en/latest/)
 
 **Hello World!**
 
@@ -68,47 +81,47 @@ final_population = evolver.evolve(stop_conditions={"target_fitness": 0})
 
 With sample run:
 
-> Generation: 0; Top Score: 201;	N~flx.JGcu-*
+> Generation: 0; Top Score: 201:     N~flx.JGcu-*
 >
-> Generation: 1; Top Score: 98;	Xljlw);mj]f 
+> Generation: 1; Top Score: 98:       Xljlw);mj]f 
 >
-> Generation: 2; Top Score: 64;	=c}kk SmsYf 
+> Generation: 2; Top Score: 64:       =c}kk SmsYf 
 >
-> Generation: 3; Top Score: 37;	Kcjlk$Vms]f 
+> Generation: 3; Top Score: 37:       Kcjlk$Vms]f 
 >
-> Generation: 4; Top Score: 24;	Cdjkn Smshf 
+> Generation: 4; Top Score: 24:       Cdjkn Smshf 
 >
-> Generation: 5; Top Score: 16;	Idjln Vmshf 
+> Generation: 5; Top Score: 16:       Idjln Vmshf 
 >
-> Generation: 6; Top Score: 14;	Idjln Voshf 
+> Generation: 6; Top Score: 14:       Idjln Voshf 
 >
-> Generation: 7; Top Score: 11;	Hdjln Vmslf 
+> Generation: 7; Top Score: 11:       Hdjln Vmslf 
 >
-> Generation: 8; Top Score: 9;	Hdjln Voslf 
+> Generation: 8; Top Score: 9:         Hdjln Voslf 
 >
-> Generation: 9; Top Score: 8;	Hdjln Vosle 
+> Generation: 9; Top Score: 8:         Hdjln Vosle 
 >
-> Generation: 10; Top Score: 7;	Hdmln Vosle 
+> Generation: 10; Top Score: 7:       Hdmln Vosle 
 >
-> Generation: 11; Top Score: 6;	Hdlln Vosle 
+> Generation: 11; Top Score: 6:       Hdlln Vosle 
 >
-> Generation: 12; Top Score: 5;	Hdllo Vosle 
+> Generation: 12; Top Score: 5:       Hdllo Vosle 
 >
-> Generation: 13; Top Score: 4;	Hdllo Vosle!
+> Generation: 13; Top Score: 4:       Hdllo Vosle!
 >
-> Generation: 14; Top Score: 3;	Hello Vosle!
+> Generation: 14; Top Score: 3:       Hello Vosle!
 >
-> Generation: 15; Top Score: 2;	Hello Wosle!
+> Generation: 15; Top Score: 2:       Hello Wosle!
 >
-> Generation: 16; Top Score: 2;	Hello Wosle!
+> Generation: 16; Top Score: 2:       Hello Wosle!
 >
-> Generation: 17; Top Score: 1;	Hello Worle!
+> Generation: 17; Top Score: 1:       Hello Worle!
 >
-> Generation: 18; Top Score: 1;	Hello Worle!
+> Generation: 18; Top Score: 1:       Hello Worle!
 >
-> Generation: 19; Top Score: 1;	Hello Worle!
+> Generation: 19; Top Score: 1:       Hello Worle!
 >
-> Generation: 20; Top Score: 0;	Hello World!
+> Generation: 20; Top Score: 0:       Hello World!
 
 Best Genome:
 
@@ -117,4 +130,3 @@ Best Genome:
     'message': ['H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd', '!']
 }
 ```
-
