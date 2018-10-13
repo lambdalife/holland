@@ -11,8 +11,8 @@
 	<a href='https://codecov.io/gh/lambdalife/holland'><img src='https://codecov.io/gh/lambdalife/holland/branch/master/graph/badge.svg' alt='Coverage'></img></a>
     <a href='https://hollandpy.readthedocs.io/en/latest'><img src='https://readthedocs.org/projects/hollandpy/badge/?version=latest' alt='Documentation Status' /></a>
     <a href="https://github.com/henrywoody/holland/blob/master/LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-purple.svg"></a>
-    <a href="https://github.com/ambv/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
 </div>
+
 
 
 
@@ -22,7 +22,7 @@ Holland is a simple, flexible package for implementing the Genetic Algorithm in 
 
 ### Installing
 
-Holland is available via on the Python Package Index (PyPI) and can be installed with:
+Holland is available via the [Python Package Index (PyPI)](https://pypi.org/project/holland/) and can be installed with:
 
 ```shell
 pip install holland
