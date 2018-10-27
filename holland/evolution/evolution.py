@@ -93,9 +93,14 @@ class Evolver:
         population_size = generation_params.get("population_size", 1000)
         n_generations = stop_conditions.get("n_generations", math.inf)
         target_fitness = stop_conditions.get("target_fitness", math.inf)
-        should_stop = (
-            lambda gen_num, max_fit: gen_num == n_generations - 1 or max_fit == target_fitness
-        )
+
+        def should_stop(gen_num, best_fitness):
+            generation_limit = gen_num == n_generations - 1
+            if self.should_maximize_fitness:
+                fitness_limit = best_fitness >= target_fitness
+            else:
+                fitness_limit = best_fitness <= target_fitness
+            return generation_limit or fitness_limit
 
         if n_random_per_generation < 0 or n_elite_per_generation < 0:
             raise ValueError("Number of random and elite genomes per generation cannot be negative")
