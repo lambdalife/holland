@@ -47,7 +47,13 @@ def record_to_csv(data, **storage_options):
     """
     assert storage_options.get("file_name") is not None and storage_options.get("path") is not None
 
-    if not all(type(value) in [int, float] for value in data.values()):
+    allowed_types = [
+        "<class 'int'>",
+        "<class 'float'>",
+        "<class 'numpy.float64'>",
+        "<class 'numpy.float32'>",
+    ]
+    if not all(str(type(value)) in allowed_types for value in data.values()):
         raise ValueError("Data values must be of type int or float.")
 
     file_name = storage_options["file_name"]

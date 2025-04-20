@@ -5,7 +5,7 @@ with open("README.md", "r") as file:
 
 setuptools.setup(
 	name="holland",
-	version="0.0.2",
+	version="0.0.3",
 	author="Lambda Life",
 	author_email="lambdalife@henrywoody.com",
 	description="Genetic Algorithm Library",

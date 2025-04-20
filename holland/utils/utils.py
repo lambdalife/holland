@@ -129,7 +129,7 @@ def select_random(choices, probabilities=None, n=1, should_replace=False):
             raise ValueError("Number of probabilities must match number of choices")
         if any(p < 0 for p in probabilities):
             raise ValueError("Probabilities cannot be negative")
-        if round(sum(probabilities), 15) != 1:
+        if round(sum(probabilities), 2) != 1:
             raise ValueError("Probabilities must sum to 1")
 
         if should_replace:
@@ -137,15 +137,9 @@ def select_random(choices, probabilities=None, n=1, should_replace=False):
             cumulative_weights = _accumulate(probabilities)
             total = cumulative_weights[-1]
 
-            if n > 4:
-                # it's worth building this dictionary
-                bisect_mapping = _get_bisect_mapping(cumulative_weights)
-                return [choices[bisect_mapping[int(random.random() * total)]] for _ in range(n)]
-            else:
-                return [
-                    choices[_bisect(cumulative_weights, int(random.random() * total))]
-                    for _ in range(n)
-                ]
+            return [
+                choices[_bisect(cumulative_weights, int(random.random() * total))] for _ in range(n)
+            ]
         else:
             # weighted random with no replacement
             current_probs = probabilities[:]
@@ -173,16 +167,6 @@ def _accumulate(prob_dist):
     return cumulative
 
 
-# used for bisect
-# defines what bisect would return for bisect(arr, int(x))
-# useful when bisect would normally be called repeatedly
-def _get_bisect_mapping(arr):
-    mapping = {}
-    for i, a in enumerate(arr):
-        mapping[a] = i + 1
-    return mapping
-
-
 # acts like bisect
 # returns first index i to insert x into sorted array arr
 # return -1 if no index exists
@@ -190,6 +174,7 @@ def _bisect(arr, x):
     for i in range(len(arr)):
         if arr[i] > x:
             return i
+    return len(arr)
 
 
 def is_numeric_type(gene_params):

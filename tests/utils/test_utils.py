@@ -4,6 +4,7 @@ import unittest
 from unittest.mock import patch
 
 from holland.utils.utils import *
+from holland.utils.utils import _accumulate, _bisect
 
 
 class BoundValueTest(unittest.TestCase):
@@ -274,6 +275,64 @@ class SelectRandomTest(unittest.TestCase):
         choices = [(1,), (2,), (3,)]
         selected = select_random(choices)
         self.assertTrue(isinstance(selected[0], tuple))
+
+    def test_selects_from_weighted_choices_with_replacement(self):
+        choices = [1, 2, 3, 4]
+        probabilities = [1, 0, 0, 0]
+        n = 6
+        output = [1, 1, 1, 1, 1, 1]
+
+        selected = select_random(choices, probabilities=probabilities, n=n, should_replace=True)
+        self.assertListEqual(selected, output)
+
+    @patch("random.random", side_effect=[0.1, 0.8, 0.3])
+    def test_selects_uniformly_when_no_probabilities_are_given(self, mock_random):
+        choices = [1, 2, 3, 4, 5, 6, 7]
+        n = 3
+        # 0.1 * 7 -> 0
+        # 0.8 * 7 -> 5
+        # 0.3 * 7 -> 2
+        output = [1, 6, 3]
+
+        selected = select_random(choices, n=n, should_replace=True)
+        self.assertListEqual(selected, output)
+
+
+class HelperMethodsTest(unittest.TestCase):
+    def test_returns_correct_partial_sums_from_accumulate(self):
+        initial = [0, 0, 0]
+        output = [0, 0, 0]
+        self.assertListEqual(_accumulate(initial), output)
+
+        initial = [1, 1, 1, 1, 1]
+        output = [1, 2, 3, 4, 5]
+        self.assertListEqual(_accumulate(initial), output)
+
+        initial = [1, 2, 3, 4, 5]
+        output = [1, 3, 6, 10, 15]
+        self.assertListEqual(_accumulate(initial), output)
+
+        initial = [0.1, 0.3, 0.5, 0.1]
+        output = [0.1, 0.4, 0.9, 1.0]
+        self.assertListEqual(_accumulate(initial), output)
+
+    def test_bisect_returns_correct_index(self):
+        # bisect expects ordered list,
+        # since input is always from _accumulate,
+        # this is guaranteed
+        sequence = [1, 2, 3, 3, 3, 4, 5]
+
+        x = 3.4
+        expected_index = 5
+        self.assertEqual(_bisect(sequence, x), expected_index)
+
+        x = 0.5
+        expected_index = 0
+        self.assertEqual(_bisect(sequence, x), expected_index)
+
+        x = 5.5
+        expected_index = 7
+        self.assertEqual(_bisect(sequence, x), expected_index)
 
 
 class IsNumericTypeTest(unittest.TestCase):

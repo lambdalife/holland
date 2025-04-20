@@ -28,7 +28,7 @@ author = 'Jesse Jenks and Henry Woody'
 # The short X.Y version
 version = ''
 # The full version, including alpha/beta/rc tags
-release = '0.0.1'
+release = '0.0.3'
 
 autodoc_member_order = 'bysource'
 
@@ -86,7 +86,7 @@ pygments_style = None
 html_theme = 'sphinx_rtd_theme'
 # 'classic'
 # 'alabaster'
-# 
+#
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the

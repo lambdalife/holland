@@ -1,6 +1,6 @@
 import logging
 import unittest
-from unittest.mock import patch, call
+from unittest.mock import patch, call, Mock
 
 from holland.evolution.evolution import *
 from holland.evolution.breeding import PopulationGenerator
@@ -43,9 +43,9 @@ class EvolverEvolveTest(unittest.TestCase):
 
     @patch("logging.basicConfig")
     @patch("holland.evolution.evolution.PopulationGenerator")
-    @patch("holland.evolution.evolution.Evaluator")
+    @patch.object(Evaluator, "evaluate_fitness", return_value=[(10, {})])
     def test_configures_logging_correctly(
-        self, MockEvaluator, MockPopulationGenerator, mock_log_config
+        self, mock_evaluate_fitness, MockPopulationGenerator, mock_log_config
     ):
         """evolve passes the logging_options to logging.basicConfig as keyword arguments"""
         logging_options = {"filename": "test.out", "level": logging.CRITICAL}
@@ -57,9 +57,9 @@ class EvolverEvolveTest(unittest.TestCase):
 
     @patch("logging.getLogger")
     @patch("holland.evolution.evolution.PopulationGenerator")
-    @patch("holland.evolution.evolution.Evaluator")
+    @patch.object(Evaluator, "evaluate_fitness", return_value=[(10, {})])
     def test_creates_Logger_instance_correctly(
-        self, MockEvaluator, MockPopulationGenerator, mock_get_logger
+        self, mock_evaluate_fitness, MockPopulationGenerator, mock_get_logger
     ):
         """evolve gets a logger by calling logging.getLogger with name as filename, e.g. holland.evolution.evolution"""
         evolver = Evolver(self.fitness_function, self.genome_params, self.selection_strategy)
@@ -70,9 +70,9 @@ class EvolverEvolveTest(unittest.TestCase):
         mock_get_logger.assert_called_with(expected_name)
 
     @patch("holland.evolution.evolution.PopulationGenerator")
-    @patch("holland.evolution.evolution.Evaluator")
+    @patch.object(Evaluator, "evaluate_fitness", return_value=[(10, {})])
     def test_creates_PopulationGenerator_instance_correctly(
-        self, MockEvaluator, MockPopulationGenerator
+        self, mock_evaluate_fitness, MockPopulationGenerator
     ):
         """evolve creates an instance of the PopulationGenerator class and passes the genome_params, selection_strategy, and generation_params to the constructor"""
         evolver = Evolver(self.fitness_function, self.genome_params, self.selection_strategy)
@@ -86,10 +86,10 @@ class EvolverEvolveTest(unittest.TestCase):
         )
 
     @patch.object(PopulationGenerator, "generate_random_genomes")
-    @patch("holland.evolution.evolution.Evaluator")
+    @patch.object(Evaluator, "evaluate_fitness", return_value=[(10, {})])
     @patch.object(PopulationGenerator, "generate_next_generation")
     def test_generates_random_init_pop_if_not_given_init_pop(
-        self, mock_generate_next_gen, MockEvaluator, mock_generate_random
+        self, mock_generate_next_gen, mock_evaluate_fitness, mock_generate_random
     ):
         """evolve generates a random initial population if one is not passed as an argument"""
         evolver = Evolver(self.fitness_function, self.genome_params, self.selection_strategy)
@@ -103,10 +103,10 @@ class EvolverEvolveTest(unittest.TestCase):
         mock_generate_random.assert_called_with(population_size)
 
     @patch.object(PopulationGenerator, "generate_random_genomes")
-    @patch("holland.evolution.evolution.Evaluator")
+    @patch.object(Evaluator, "evaluate_fitness", return_value=[(10, {})])
     @patch.object(PopulationGenerator, "generate_next_generation")
     def test_does_not_generate_random_init_pop_if_given_init_pop(
-        self, mock_generate_next_gen, MockEvaluator, mock_generate_random
+        self, mock_generate_next_gen, mock_evaluate_fitness, mock_generate_random
     ):
         """evolve does not generate a random initial population if one is passed as an argument"""
         population_size = 100
@@ -128,6 +128,7 @@ class EvolverEvolveTest(unittest.TestCase):
         self, mock_generate_next_gen, MockEvaluator, mock_generate_random
     ):
         """evolve creates an instance of the Evaluator class and passes the fitness function and asc=True to the constructor if should_maximize_fitness is True"""
+        MockEvaluator().evaluate_fitness = Mock(return_value=[(10, {})])
         evolver = Evolver(
             self.fitness_function,
             self.genome_params,
@@ -146,6 +147,7 @@ class EvolverEvolveTest(unittest.TestCase):
         self, mock_generate_next_gen, MockEvaluator, mock_generate_random
     ):
         """evolve creates an instance of the Evaluator class and passes the fitness function and asc=False to the constructor if should_maximize_fitness is False"""
+        MockEvaluator().evaluate_fitness = Mock(return_value=[(10, {})])
         evolver = Evolver(
             self.fitness_function,
             self.genome_params,
@@ -227,7 +229,7 @@ class EvolverEvolveTest(unittest.TestCase):
         mock_info_log.assert_has_calls(expected_calls)
 
     @patch.object(PopulationGenerator, "generate_random_genomes")
-    @patch.object(Evaluator, "evaluate_fitness")
+    @patch.object(Evaluator, "evaluate_fitness", return_value=[(10, {})])
     @patch.object(PopulationGenerator, "generate_next_generation")
     def test_stops_on_reaching_n_generations(
         self, mock_generate_next_gen, mock_evaluate_fitness, mock_generate_random
@@ -262,8 +264,55 @@ class EvolverEvolveTest(unittest.TestCase):
         self.assertEqual(mock_evaluate_fitness.call_count, target_generations)
 
     @patch.object(PopulationGenerator, "generate_random_genomes")
-    @patch("holland.evolution.evolution.StorageManager")
     @patch.object(Evaluator, "evaluate_fitness")
+    @patch.object(PopulationGenerator, "generate_next_generation")
+    def test_stops_if_passes_target_fitness_if_maximize(
+        self, mock_generate_next_gen, mock_evaluate_fitness, mock_generate_random
+    ):
+        """evolve stops when the best fitness score is greater than or equal to the target fitness from stop_conditions["n_generations"]"""
+        target_fitness = 15
+        target_generations = 20
+        mock_evaluate_fitness.side_effect = [
+            [(1, "a")] if i < target_generations - 1 else [(target_fitness + 1, "b")]
+            for i in range(target_generations)
+        ]
+        evolver = Evolver(self.fitness_function, self.genome_params, self.selection_strategy)
+
+        evolver.evolve(
+            stop_conditions={"target_fitness": target_fitness}, logging_options=self.logging_options
+        )
+
+        self.assertEqual(mock_evaluate_fitness.call_count, target_generations)
+
+    @patch.object(PopulationGenerator, "generate_random_genomes")
+    @patch.object(Evaluator, "evaluate_fitness")
+    @patch.object(PopulationGenerator, "generate_next_generation")
+    def test_stops_if_passes_target_fitness_if_minimize(
+        self, mock_generate_next_gen, mock_evaluate_fitness, mock_generate_random
+    ):
+        """evolve stops when the best fitness score is less than or equal to the target fitness from stop_conditions["n_generations"]"""
+        target_fitness = 15
+        target_generations = 20
+        mock_evaluate_fitness.side_effect = [
+            [(100, "a")] if i < target_generations - 1 else [(target_fitness - 1, "b")]
+            for i in range(target_generations)
+        ]
+        evolver = Evolver(
+            self.fitness_function,
+            self.genome_params,
+            self.selection_strategy,
+            should_maximize_fitness=False,
+        )
+
+        evolver.evolve(
+            stop_conditions={"target_fitness": target_fitness}, logging_options=self.logging_options
+        )
+
+        self.assertEqual(mock_evaluate_fitness.call_count, target_generations)
+
+    @patch.object(PopulationGenerator, "generate_random_genomes")
+    @patch("holland.evolution.evolution.StorageManager")
+    @patch.object(Evaluator, "evaluate_fitness", return_value=[(10, {})])
     @patch.object(PopulationGenerator, "generate_next_generation")
     def test_constructs_a_storage_manager_with_the_correct_args(
         self,
@@ -338,7 +387,7 @@ class EvolverEvolveTest(unittest.TestCase):
         mock_react.assert_called_once_with(interrupt_generation, mock_evaluate_fitness.return_value)
 
     @patch.object(PopulationGenerator, "generate_random_genomes")
-    @patch.object(Evaluator, "evaluate_fitness")
+    @patch.object(Evaluator, "evaluate_fitness", return_value=[(10, {})])
     @patch.object(PopulationGenerator, "generate_next_generation")
     def test_stores_and_returns_fitness_statistics_if_storage_format_is_memory(
         self, mock_generate_next_gen, mock_evaluate_fitness, mock_generate_random
